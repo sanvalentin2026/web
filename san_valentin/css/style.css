@@ -1,0 +1,407 @@
+/* ===== Reset básico ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #FFC1E3; 
+  min-height: 100vh;
+  padding: 20px;
+  color: #333;
+}
+
+/* ===== Evitar zoom en inputs móviles ===== */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* ===== Mensaje "no hay pedidos" ===== */
+#pedidosBody .no-pedidos {
+  display: block;
+  text-align: center;
+  padding: 16px;
+  font-weight: 600;
+  color: #E63946;
+}
+/* Botón Reiniciar Token */
+#reiniciarToken {  
+  background-color: white;   /* rojo alerta */
+  color: black;                 /* texto blanco */
+  border: none;
+  border-radius: 8px;          /* esquinas redondeadas */         /* tamaño cómodo */
+  font-size: 16px;             /* legible */
+  font-weight: 400;          /* negrita ligera */
+}
+/* ===== Contenedor general ===== */
+body > h1,
+form,
+table {
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== Títulos ===== */
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #E63946;
+  font-size: 45px;
+  font-family: 'Dancing Script', cursive;
+}
+
+
+/* ===== Formulario ===== */
+form {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+form input[type="text"],
+form select,
+form textarea {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+  outline: none;
+  border-color: #e91e63;
+}
+
+form button {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #E63946;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+form button:hover {
+  background: #E63946;
+}
+
+/* ===== Controles ===== */
+.controls {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#buscador,
+#filtroSeccion,
+#reiniciarToken {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  color: black;
+  font-size: 16px;
+  width: 100%;             /* ocupa todo el ancho disponible del contenedor */
+  max-width: 400px;        /* no se haga demasiado grande en pantallas grandes */
+  box-sizing: border-box;  /* incluye padding y border dentro del width */
+}
+
+#buscador:focus,
+#filtroSeccion:focus {
+  outline: none;
+  border-color: #ddd;
+}
+
+/* ===== Ordenar ===== */
+.ordenar-container {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+}
+
+#btnOrdenar {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  background-color: #ff4081;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#btnOrdenar:hover {
+  background-color: #e91e63;
+}
+
+#menuOrdenar {
+  list-style: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+#menuOrdenar li {
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+#menuOrdenar li:hover {
+  background-color: #fce4ec;
+}
+
+.menu-oculto {
+  display: none;
+}
+
+/* ===== Tabla ===== */
+table {
+  width: 100%;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+thead {
+  background: #E63946;
+  color: white;
+}
+
+th,
+td {
+  padding: 12px;
+  padding-right: 20px;
+  padding-left: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* ===== Detalles / Notas ===== */
+td.detalles {
+  text-align: left;
+  font-size: 13px;
+  color: #555;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ===== Botones tabla ===== */
+table button {
+  background-color: #E63946;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+table button:hover {
+  background-color: #E63946;
+}
+
+table td button {
+  display: block;
+  width: 100%;
+}
+
+table td button + button {
+  margin-top: 8px;
+}
+
+
+  table {
+    border: none; /* quitamos borde general */
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  }
+
+  th, td {
+    border-bottom: 1px solid black; /* línea suave rosa claro */
+    border-right: 1px solid black;  /* línea suave rosa claro */
+  }
+
+  th:last-child,
+  td:last-child {
+    border-right: none; /* último elemento no tiene borde derecho */
+  }
+
+  tr:last-child td {
+    border-bottom: none; /* última fila no tiene borde inferior */
+  }
+
+  thead th {
+    border-bottom: 2px solid #e91e63; /* línea más fuerte en el header */
+    color: white;
+  }
+table {
+  table-layout: auto; /* permite que las columnas se expandan según contenido */
+}
+
+/* ================================================= */
+/* =================== MÓVIL ======================= */
+/* ================================================= */
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+
+  /* convertir tabla en cards */
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border: 1px solid #555;
+  }
+
+  tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 14px;
+    text-align: left;
+    border: none;
+  }
+
+  td::before {
+    font-weight: 600;
+    color: #e91e63;
+  }
+
+  td:nth-child(1)::before { content: "ID de pedido:"; }
+  td:nth-child(2)::before { content: "De:"; }
+  td:nth-child(3)::before { content: "Para:"; }
+  td:nth-child(4)::before { content: "Producto:"; }
+  td:nth-child(5)::before { content: "Detalles:"; }
+  td:nth-child(6)::before { content: "Estado de pago:"; }
+  td:nth-child(7)::before { content: "Fecha y hora:"; }
+
+  td:last-child {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  td:last-child button {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #buscador,
+  #filtroSeccion,
+  #btnOrdenar {
+    width: 100%;
+  }
+
+  /* 🔧 FIX: no mostrar labels en "no hay pedidos" */
+  .no-pedidos::before {
+    content: none !important;
+  }
+}
+
+/* ================================================= */
+/* ============== FIX DESKTOP TABLA ================= */
+/* ================================================= */
+
+@media (min-width: 601px) {
+
+  table {
+    display: table;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tbody {
+    display: table-row-group;
+  }
+
+  tr {
+    display: table-row;
+  }
+
+  th,
+  td {
+    display: table-cell;
+  }
+
+  .no-pedidos {
+    display: table-cell;
+    text-align: center;
+  }
+    td.detalles,
+  td:nth-child(4) {           /* columna producto */
+    white-space: normal;      /* estas sí pueden romper */
+  }
+}
