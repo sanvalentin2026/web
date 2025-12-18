@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos San Valentin</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/changelog.css">
+<link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <text y='0.9em' font-size='90'>❤️</text>
+</svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<h1>Pedidos San Valentin</h1> <!-- Botón para reiniciar token -->
+
+<form id="pedidoForm">
+  <input type="text" id="nombre" placeholder="Nombre del comprador" required>
+  <select id="seccion" required></select>
+  <input type="text" id="receptor" placeholder="Nombre del receptor" required>
+  <select id="seccion_receptor" required></select>
+  <input type="text" id="producto" placeholder="Producto" required>
+  <textarea
+  id="detalles"
+  placeholder="Detalles o notas del pedido (opcional)"
+  rows="3"
+></textarea>
+  <button type="submit">Registrar el pedido</button>
+</form>
+
+<div class="controls">
+  <div class="orden-container">
+    <ul id="menuOrdenar" class="menu-oculto">
+      <li data-orden="created_at_desc">Fecha descendente</li>
+      <li data-orden="seccion_asc">Sección ascendente</li>
+      <li data-orden="seccion_desc">Sección descendente</li>
+      <li data-orden="seccion_custom">Secciones personalizadas</li>
+      <li data-orden="id_asc">ID ascendente</li>
+      <li data-orden="id_desc">ID descendente</li>
+    </ul>
+  </div>
+  <input type="text" id="buscador" placeholder="Buscar por ID, nombre, seccion, producto, detalles...">
+  <select id="filtroSeccion">
+    <option value="">Filtrar busqueda por secciones</option>
+    <option value="7-1">7-1</option>
+    <option value="7-2">7-2</option>
+    <option value="7-3">7-3</option>
+    <option value="7-4">7-4</option>
+    <option value="8-1">8-1</option>
+    <option value="8-2">8-2</option>
+    <option value="8-3">8-3</option>
+    <option value="8-4">8-4</option>
+    <option value="9-1">9-1</option>
+    <option value="9-2">9-2</option>
+    <option value="9-3">9-3</option>
+    <option value="9-4">9-4</option>
+    <option value="10-1">10-1</option>
+    <option value="10-2">10-2</option>
+    <option value="10-3">10-3</option>
+    <option value="10-4">10-4</option>
+    <option value="11-1">11-1</option>
+    <option value="11-2">11-2</option>
+    <option value="11-3">11-3</option>
+    <option value="11-4">11-4</option>
+  </select>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID del pedido:</th>
+      <th>De:</th>
+      <th>Para:</th>
+      <th>Producto (Que cosa es):</th>
+      <th>Detalles o notas:</th>
+      <th>Estado de pago:</th>
+      <th>Fecha y hora:</th>
+      <th>Acciones:</th>
+    </tr>
+  </thead>
+  <tbody id="pedidosBody"></tbody>
+</table>
+
+<script src="js/changelog.js" defer></script>
+<script type="module" src="js/connection_db.js"></script>
+</body>
+</html>
