@@ -25,12 +25,10 @@ async function solicitarPermisoAdmin() {
     p_password: password
   });
 
-  if (error || !data) {
+  if (error || typeof data !== "string" || data.length < 10) {
     alert("❌ No autorizado.");
     return null;
   }
-
-  if (typeof data !== "string" || data.length < 10) return null;
 
   localStorage.setItem("admin_token", data);
   return data;
@@ -69,14 +67,13 @@ const filtroSeccion = document.getElementById("filtroSeccion");
 const detallesInput = document.getElementById("detalles");
 const paginacionDiv = document.getElementById("paginacion");
 
-let pedidosCache = [];
-
 /* =========================
    📄 PAGINACIÓN
 ========================= */
 const PEDIDOS_POR_PAGINA = 10;
-let paginaActual = 1;
+let paginaActual = Number(sessionStorage.getItem("paginaActual")) || 1;
 let paginaAnterior = paginaActual;
+let pedidosCache = [];
 let pedidosFiltrados = [];
 
 /* =========================
@@ -107,15 +104,13 @@ function formatFechaMobile(fechaStr) {
 }
 
 /* =========================
-   🖥️ RENDER
+   🖥️ RENDER PEDIDOS
 ========================= */
 function renderPedidos(pedidos) {
   pedidosBody.innerHTML = "";
 
   if (!pedidos.length) {
-    pedidosBody.innerHTML = `
-      <tr><td colspan="8">Sin pedidos</td></tr>
-    `;
+    pedidosBody.innerHTML = `<tr><td colspan="8">Sin pedidos</td></tr>`;
     return;
   }
 
@@ -144,34 +139,34 @@ function renderPedidos(pedidos) {
 }
 
 /* =========================
-   📄 PAGINAR
+   📄 RENDER PÁGINA
 ========================= */
-
-
 function renderPagina() {
   const inicio = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
   const fin = inicio + PEDIDOS_POR_PAGINA;
 
-  // 🔼 Scroll solo si avanza de página
   if (paginaActual > paginaAnterior) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // 🎬 Animación ligera solo móvil
-  pedidosBody.classList.remove("animar-cambio");
-  void pedidosBody.offsetWidth; // reflow mínimo
-  pedidosBody.classList.add("animar-cambio");
+  if (window.innerWidth <= 900) {
+    pedidosBody.classList.remove("animar-cambio");
+    void pedidosBody.offsetWidth;
+    pedidosBody.classList.add("animar-cambio");
+  }
 
   renderPedidos(pedidosFiltrados.slice(inicio, fin));
   renderPaginacion();
 
   paginaAnterior = paginaActual;
+  sessionStorage.setItem("paginaActual", paginaActual);
 }
 
-
+/* =========================
+   🔢 PAGINACIÓN
+========================= */
 function renderPaginacion() {
   paginacionDiv.innerHTML = "";
-
   const totalPaginas = Math.ceil(pedidosFiltrados.length / PEDIDOS_POR_PAGINA);
   if (totalPaginas <= 1) return;
 
@@ -179,28 +174,17 @@ function renderPaginacion() {
     const btn = document.createElement("button");
     btn.textContent = i;
 
-    if (i === paginaActual) {
-      btn.classList.add("activa");
-    }
+    if (i === paginaActual) btn.classList.add("activa");
 
     btn.onclick = () => {
       if (i === paginaActual) return;
-
-      const paginaAnterior = paginaActual;
       paginaActual = i;
-
-      // ⬆️ Solo subir al top si avanza
-      if (paginaActual > paginaAnterior) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
       renderPagina();
     };
 
     paginacionDiv.appendChild(btn);
   }
 }
-
 
 /* =========================
    🔍 FILTROS
@@ -246,6 +230,7 @@ async function cargarPedidos() {
 ========================= */
 form.addEventListener("submit", async e => {
   e.preventDefault();
+
   await supabase.from("pedidos").insert({
     nombre_comprador: nombre.value,
     seccion_comprador: seccionSelect.value,
@@ -255,6 +240,7 @@ form.addEventListener("submit", async e => {
     detalles: detallesInput.value || null,
     pagado: false
   });
+
   form.reset();
   cargarPedidos();
 });

@@ -289,59 +289,54 @@ table {
   text-decoration: none;
 }
 
+/* =========================
+   📄 PAGINACIÓN
+========================= */
 .paginacion {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin: 20px 0;
-}
-
-.paginacion button {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid #F3C1D9;
-  background: white;
-  cursor: pointer;
-}
-
-.paginacion button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-/* ===== PAGINACIÓN ===== */
-.paginacion {
-  display: flex;
   gap: 8px;
-  justify-content: center;
-  margin: 20px 0;
+  margin: 20px auto 30px;
+  flex-wrap: wrap;
 }
 
 .paginacion button {
   min-width: 36px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  border: 1px solid #F3C1D9;
-  background: #fff;
-  color: #E91E63;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f3c1d9;
+  color: #7a1f4b;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.paginacion button.activa {
+  background: #e91e63;
+  color: white;
 }
 
 .paginacion button:hover {
-  background: #FCE4EC;
+  background: #ec407a;
+  color: white;
 }
 
-/* 👇 PÁGINA ACTIVA */
-.paginacion button.activa {
-  background: linear-gradient(135deg, #FF4D8D, #FF8FB1);
-  color: white;
-  border-color: #FF4D8D;
-  box-shadow: 0 4px 10px rgba(255, 77, 141, 0.35);
-  transform: scale(1.05);
-  cursor: default;
+/* ===== MOBILE / TABLET ===== */
+@media (max-width: 900px) {
+  .paginacion {
+    margin-top: 12px;
+    gap: 6px;
+  }
+
+  .paginacion button {
+    min-width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
 }
+
+
 
 /* ================================================= */
 /* =================== MÓVIL ======================= */
