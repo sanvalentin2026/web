@@ -154,7 +154,7 @@ function renderPedidos(pedidos) {
       <td>${p.pagado ? "✅" : "❌"}</td>
       <td>${fecha}</td>
       <td>
-        <button onclick="togglePagado(${p.id}, ${p.pagado})">Cambiar estado de pago</button>
+        <button onclick="togglePagado(${p.id}, ${p.pagado})">Cambiar estado del pago</button>
         <button onclick="editarDetalles(${p.id}, \`${p.detalles || ""}\`)">Editar detalles</button>
         <button onclick="entregarPedido(${p.id})">Eliminar pedido</button>
       </td>

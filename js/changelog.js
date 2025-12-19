@@ -289,6 +289,25 @@ const changelogData = [
     "Se corrigieron errores de la consola",
     "Mejoras estéticas menores",
     ]
+},
+{
+    version: "1.2.5",
+    title: "Hotfix visual menor",
+    date: "18/12/2025 · 4:53 PM",
+    changes: [
+    "Se rediseñaron los colores de toda la web, haciendola mas agradable para la vista"
+    ]
+},
+{
+    version: "1.2.6",
+    title: "Hotfixes | Functions",
+    date: "18/12/2025 · 10:40 PM",
+    changes: [
+    "Pequeños cambios en interfaz",   
+    "Se aplicaron algunos colores faltantes",
+    "Se creo la funcionn de reportar errore",
+    "Mejoras de estabilidad"
+    ]
 }
 ];
 

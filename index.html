@@ -18,15 +18,19 @@
 
 <h1>Pedidos San Valentin</h1> <!-- Botón para reiniciar token -->
 
+<a href="reportar.html" class="btn-reportar">
+  ¿Algo no funciona bien o nesesitas soporte? | Reportar error o comportamiento extraño
+</a>
+
 <form id="pedidoForm">
-  <input type="text" id="nombre" placeholder="Nombre del comprador" required>
+  <input type="text" id="nombre" placeholder="Nombre del comprador:" required>
   <select id="seccion" required></select>
-  <input type="text" id="receptor" placeholder="Nombre del receptor" required>
+  <input type="text" id="receptor" placeholder="Nombre del receptor:" required>
   <select id="seccion_receptor" required></select>
-  <input type="text" id="producto" placeholder="Producto" required>
+  <input type="text" id="producto" placeholder="Producto (Que cosa es):" required>
   <textarea
   id="detalles"
-  placeholder="Detalles o notas del pedido (opcional)"
+  placeholder="Detalles o notas del pedido (opcional):"
   rows="3"
 ></textarea>
   <button type="submit">Registrar el pedido</button>

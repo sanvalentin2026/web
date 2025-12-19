@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reportar un problema</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <text y='0.9em' font-size='90'>❤️</text>
+</svg>">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #ffe4f1, #fff);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+      color: #e63946;
+    }
+
+    .sub {
+      text-align: center;
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    form {
+      background: #fff;
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #444;
+    }
+
+    input, textarea, select {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #e63946;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: #e63946;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .info {
+      font-size: 13px;
+      color: #777;
+      text-align: center;
+      margin-top: 8px;
+    }
+    /* ===== Botón Volver ===== */
+.btn-volver {
+  display: inline-block;
+  margin-bottom: 14px;
+  background: none;
+  border: none;
+  color: #ff4d6d;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-volver:hover {
+  text-decoration: underline;
+}
+
+    @media (max-width: 600px) {
+
+    body {
+    padding: 14px;
+    }
+
+    .report-container {
+    padding: 16px;
+    border-radius: 14px;
+    }
+
+    .report-container h2 {
+    font-size: 19px;
+    }
+}
+
+  </style>
+</head>
+<body>
+<button class="btn-volver" onclick="history.back()">
+  ← Volver atras
+</button>
+  <div class="container">
+    <h1>Reportar un problema</h1>
+    <p class="sub">
+      Si algo no funciona o se comporta extraño, repórtalo aquí.
+    </p>
+
+    <form id="formReporte">
+      <label>Tipo de reporte</label>
+      <select id="tipo" required>
+        <option value="soporte">Soporte</option>
+        <option value="error">Error / No funciona</option>
+        <option value="visual">Problema visual</option>
+        <option value="lento">Lentitud</option>
+        <option value="otro">Otro</option>
+      </select>
+
+      <label>¿Qué ocurrió?</label>
+      <textarea id="descripcion" placeholder="Describe lo que pasó..." required></textarea>
+
+      <label>Versión de la web</label>
+      <input id="version" placeholder="Ej: v1.2.5" required>
+
+      <label>Dispositivo y navegador</label>
+      <input id="entorno" placeholder="Ej: Android · Chrome" required>
+
+      <button type="submit">Enviar reporte</button>
+
+      <div class="info">
+        Gracias por reportar! tus comentarios mejoran la experiencia.
+      </div>
+    </form>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabase = createClient(
+      "https://yujwifmejokfbxndhtnf.supabase.co",
+      "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno"
+    );
+
+    const form = document.getElementById("formReporte");
+    const btn = form.querySelector("button");
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+
+      const { error } = await supabase.from("reportes_web").insert({
+        tipo: tipo.value,
+        descripcion: descripcion.value.trim(),
+        version: version.value.trim(),
+        entorno: entorno.value.trim(),
+        user_agent: navigator.userAgent
+      });
+
+      if (error) {
+        alert("Error al enviar el reporte");
+        console.error(error);
+      } else {
+        alert("Reporte enviado. ¡Gracias!");
+        form.reset();
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Enviar reporte";
+    });
+  </script>
+
+</body>
+</html>

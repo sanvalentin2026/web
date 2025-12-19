@@ -115,7 +115,7 @@ form button:hover {
 #reiniciarToken {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #F3C1D9;
   color: black;
   font-size: 16px;
   width: 100%;             /* ocupa todo el ancho disponible del contenedor */
@@ -269,6 +269,23 @@ table {
   table-layout: auto; /* permite que las columnas se expandan según contenido */
 }
 
+/* ===== Botón Reportar Error (debajo del h1) ===== */
+.btn-reportar {
+  display: block;
+  width: fit-content;
+  gap: 8px;
+  margin: 14px auto 22px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgba(255, 77, 109, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
 /* ================================================= */
 /* =================== MÓVIL ======================= */
 /* ================================================= */
@@ -305,7 +322,7 @@ table {
     padding: 12px 16px;
     margin-bottom: 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    border: 1px solid #E11D48;
+    border: 1px solid #F3C1D9;
   }
 
   tbody tr:last-child {
