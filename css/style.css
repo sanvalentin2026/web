@@ -276,14 +276,13 @@ table {
   gap: 8px;
   margin: 14px auto 22px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #ff4d6d, #ff8fa3);
+  background-color: #E11D48;
   color: #fff;
   font-weight: 600;
   font-size: 15px;
   border-radius: 999px;
   text-decoration: none;
-  box-shadow: 0 6px 14px rgba(255, 77, 109, 0.25);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
 }
 
 /* ================================================= */

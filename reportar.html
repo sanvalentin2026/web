@@ -57,7 +57,7 @@
     input, textarea, select {
       padding: 12px;
       border-radius: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid #F3C1D9;
       font-size: 16px;
       width: 100%;
     }
@@ -127,6 +127,9 @@
     .report-container h2 {
     font-size: 19px;
     }
+    .info {
+      font-size: 11px;
+    }
 }
 
   </style>
@@ -152,10 +155,10 @@
       </select>
 
       <label>¿Qué ocurrió?</label>
-      <textarea id="descripcion" placeholder="Describe lo que pasó..." required></textarea>
+      <textarea id="descripcion" placeholder="Describa lo que paso previo, durante y despues del error" required></textarea>
 
       <label>Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.2.5" required>
+      <input id="version" placeholder="Ej: v1.2.7" required>
 
       <label>Dispositivo y navegador</label>
       <input id="entorno" placeholder="Ej: Android · Chrome" required>
@@ -194,7 +197,7 @@
       });
 
       if (error) {
-        alert("Error al enviar el reporte");
+        alert("Error al enviar el reporte, revise su internet o informe");
         console.error(error);
       } else {
         alert("Reporte enviado. ¡Gracias!");

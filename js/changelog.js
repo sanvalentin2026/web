@@ -308,6 +308,15 @@ const changelogData = [
     "Se creo la funcionn de reportar errore",
     "Mejoras de estabilidad"
     ]
+},
+{
+    version: "1.2.7",
+    title: "Hotfixes",
+    date: "18/12/2025 · 11:12 PM",
+    changes: [
+    "Pequeños cambios en interfaz",   
+    "Cambios en la intefaz de celulares"
+    ]
 }
 ];
 
