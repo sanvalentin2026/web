@@ -26,7 +26,7 @@ async function solicitarPermisoAdmin() {
   });
 
   if (error || !data) {
-    alert("❌ No autorizado.");
+    alert("❌ No autorizado, revise su conexion a internet o reporte del problema.");
     console.error(error);
     return null;
   }
@@ -154,9 +154,9 @@ function renderPedidos(pedidos) {
       <td>${p.pagado ? "✅" : "❌"}</td>
       <td>${fecha}</td>
       <td>
-        <button onclick="togglePagado(${p.id}, ${p.pagado})">Cambiar estado del pago</button>
-        <button onclick="editarDetalles(${p.id}, \`${p.detalles || ""}\`)">Editar detalles</button>
-        <button onclick="entregarPedido(${p.id})">Eliminar pedido</button>
+        <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
+        <button onclick="editarDetalles(${p.id}, \`${p.detalles || ""}\`)">Detalles</button>
+        <button onclick="entregarPedido(${p.id})">Eliminar</button>
       </td>
     `;
 

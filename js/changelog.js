@@ -326,6 +326,14 @@ const changelogData = [
     "Mejoras en la interfaz de celulares y tablets",
     "Correccion de errores menores"
     ]
+},
+{
+    version: "1.2.9",
+    title: "Hotfixes",
+    date: "19/12/2025 · 10:10 AM",
+    changes: [
+    "Correccion de overflow en la version de tablet"
+    ]
 }
 ];
 
