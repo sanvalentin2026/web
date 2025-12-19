@@ -287,7 +287,60 @@ table {
   font-size: 15px;
   border-radius: 999px;
   text-decoration: none;
+}
 
+.paginacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.paginacion button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #F3C1D9;
+  background: white;
+  cursor: pointer;
+}
+
+.paginacion button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+/* ===== PAGINACIÓN ===== */
+.paginacion {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.paginacion button {
+  min-width: 36px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid #F3C1D9;
+  background: #fff;
+  color: #E91E63;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.paginacion button:hover {
+  background: #FCE4EC;
+}
+
+/* 👇 PÁGINA ACTIVA */
+.paginacion button.activa {
+  background: linear-gradient(135deg, #FF4D8D, #FF8FB1);
+  color: white;
+  border-color: #FF4D8D;
+  box-shadow: 0 4px 10px rgba(255, 77, 141, 0.35);
+  transform: scale(1.05);
+  cursor: default;
 }
 
 /* ================================================= */
@@ -426,5 +479,22 @@ table {
     td.detalles,
   td:nth-child(4) {           /* columna producto */
     white-space: normal;      /* estas sí pueden romper */
+  }
+}
+/* ===== Animación ligera de cambio de página (mobile) ===== */
+@media (max-width: 900px) {
+  tbody.animar-cambio {
+    animation: fadeSlide 0.22s ease-out;
+  }
+
+  @keyframes fadeSlide {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
