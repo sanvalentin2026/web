@@ -108,25 +108,30 @@ form button:hover {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  flex-wrap: nowrap;
 }
 
 #buscador,
 #filtroSeccion,
-#reiniciarToken {
+#btn-reportar{
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #F3C1D9;
   color: black;
   font-size: 16px;
-  width: 100%;             /* ocupa todo el ancho disponible del contenedor */
-  max-width: 400px;        /* no se haga demasiado grande en pantallas grandes */
+         /* ocupa todo el ancho disponible del contenedor */      /* no se haga demasiado grande en pantallas grandes */
   box-sizing: border-box;  /* incluye padding y border dentro del width */
 }
 
 #buscador:focus,
-#filtroSeccion:focus {
+#filtroSeccion:focus
+#btn-reportar
+ {
   outline: none;
   border-color: #ddd;
+}
+#buscador{
+  width: 327px;
 }
 
 /* ===== Ordenar ===== */
@@ -289,7 +294,7 @@ table {
 /* =================== MÓVIL ======================= */
 /* ================================================= */
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
 
   body {
     padding: 12px;
@@ -373,9 +378,11 @@ table {
 
   #buscador,
   #filtroSeccion,
-  #btnOrdenar {
+  #btnOrdenar,
+  #btn-reportar{
     width: 100%;
   }
+
 
   /* 🔧 FIX: no mostrar labels en "no hay pedidos" */
   .no-pedidos::before {
@@ -387,7 +394,7 @@ table {
 /* ============== FIX DESKTOP TABLA ================= */
 /* ================================================= */
 
-@media (min-width: 601px) {
+@media (min-width: 901px) {
 
   table {
     display: table;

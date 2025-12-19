@@ -317,6 +317,15 @@ const changelogData = [
     "Pequeños cambios en interfaz",   
     "Cambios en la intefaz de celulares"
     ]
+},
+{
+    version: "1.2.8",
+    title: "Hotfixes",
+    date: "19/12/2025 · 09:44 AM",
+    changes: [
+    "Mejoras en la interfaz de celulares y tablets",
+    "Correccion de errores menores"
+    ]
 }
 ];
 
