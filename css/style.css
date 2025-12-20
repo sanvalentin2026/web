@@ -331,7 +331,325 @@ table {
 }
 
 
-/* ===== MOBILE / TABLET ===== */
+
+/* Modos de estilos */
+
+/* Modo claro */
+.modo-claro{
+  body{
+    background-color: #FFF0F6;
+    color: #374151;
+  }
+  #pedidosBody .no-pedidos{
+  color: #E11D48;
+  }
+  h1{
+    color: #D11D48;
+  }
+  select{
+    color: #050505;
+  }
+  form {
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+ }
+
+ form input[type="text"],
+ form select,
+ form textarea {
+  border: 1px solid #F3C1D9;
+ }
+ form input:focus,
+ form select:focus,
+ form textarea:focus {
+  border-color: #e91e63;
+ }
+
+ form button {
+  background: #E11D48;
+  color: white;
+ }
+
+ form button:hover {
+  background: #E11D48;
+ }
+ #buscador,
+ #filtroSeccion,
+ #btn-reportar{
+  border: 1px solid #F3C1D9;
+  color: black;
+ }
+
+ #buscador:focus,
+ #filtroSeccion:focus
+ #btn-reportar
+ {
+  border-color: #ddd;
+ }
+ #btnOrdenar {
+  background-color: #ff4081;
+  color: white;
+
+ }
+
+ #btnOrdenar:hover {
+  background-color: #e91e63;
+}
+
+ #menuOrdenar {
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+ }
+ #menuOrdenar li:hover {
+  background-color: #fce4ec;
+}
+
+.menu-oculto {
+  display: none;
+}
+
+/* ===== Tabla ===== */
+table {
+  width: 100%;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+thead {
+  background: #E11D48;
+  color: white;
+}
+
+tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* ===== Detalles / Notas ===== */
+td.detalles {
+  color: #555;
+}
+
+/* ===== Botones tabla ===== */
+table button {
+  background-color: #E11D48;
+  color: white;
+}
+
+table button:hover {
+  background-color: #E11D48;
+}
+
+  table {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  }
+
+
+  thead th {
+    border-bottom: 2px solid #e91e63; /* línea más fuerte en el header */
+    color: white;
+  }
+
+/* ===== Botón Reportar Error (debajo del h1) ===== */
+.btn-reportar {
+  background-color: #E11D48;
+  color: #fff;
+}
+
+.paginacion button {
+  border: none;
+  background: #f3c1d9;
+  color: #7a1f4b;
+}
+
+.paginacion button.activa {
+  background: #e91e63;
+  color: white;
+}
+
+.paginacion button:hover {
+  background: #ec407a;
+  color: white;
+}
+/* 📅 Fecha solo visible en cards */
+.fecha-mobile {
+  color: #E11D48;
+}
+}
+
+/* ===== MODO OSCURO (Liquid Glass Black) ===== */
+.modo-oscuro {
+  background-color: #050505; /* Negro profundo de fondo */
+  color: #f5f5f7;
+
+  /* Fondo dinámico para que el vidrio resalte */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(225, 29, 72, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(0, 113, 227, 0.1) 0px, transparent 50%);
+  background-attachment: fixed;
+
+  h1 {
+    color: #ff375f; /* Rosa/Rojo brillante de Apple */
+    text-shadow: 0 0 20px rgba(255, 55, 95, 0.3);
+  }
+  option{
+    color: black;
+  }
+  /* El Formulario estilo Vidrio Ahumado */
+  form {
+    background: rgba(28, 28, 30, 0.7) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* Inputs estilo "Field" de iOS */
+  form input[type="text"],
+  form select,
+  form textarea,
+  #buscador,
+  #filtroSeccion {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    backdrop-filter: blur(5px);
+  }
+
+  form input:focus,
+  form select:focus,
+  form textarea:focus,
+  #buscador:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ff375f;
+    outline: none;
+  }
+
+  /* Botones principales */
+  form button, 
+  #btnOrdenar,
+  .btn-reportar {
+    background: linear-gradient(135deg, #ff375f 0%, #e11d48 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
+    transition: 0.3s;
+  }
+
+  form button:hover, #btnOrdenar:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+  }
+
+  /* Tabla estilo Vidrio Oscuro */
+  table {
+    background: rgba(28, 28, 30, 0.6) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #f5f5f7;
+  }
+
+  thead {
+    background: rgba(255, 55, 95, 0.2) !important;
+    backdrop-filter: blur(10px);
+  }
+
+  th {
+    color: white;
+    border-bottom: 2px solid rgba(255, 55, 95, 0.3) !important;
+  }
+
+  td {
+    border-bottom: 1px solid white !important;
+    border-right: 1px solid white !important;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  td.detalles {
+    color: #a1a1a6;
+  }
+
+  /* Menú desplegable Glass */
+  #menuOrdenar {
+    background: rgba(44, 44, 46, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  #menuOrdenar li:hover {
+    background: rgba(255, 55, 95, 0.2);
+  }
+
+  /* Paginación */
+  .paginacion button {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .paginacion button.activa {
+    background: #ff375f;
+    border-color: #ff375f;
+  }
+
+  /* Mensajes de error */
+  #pedidosBody .no-pedidos, .fecha-mobile {
+    color: #ff375f;
+  }
+}
+th,
+td{
+  border: none;
+}
+
+@media (max-width: 900px) {
+  /* Aplicamos el efecto de cristal a la tarjeta (el tr) */
+  .modo-oscuro tbody tr {
+    background: rgba(28, 28, 30, 0.6) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px; /* Para que parezca una burbuja */
+    margin-bottom: 16px;
+    padding: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  form input[type="text"],
+  form select,
+  form textarea,
+  #buscador,
+  #filtroSeccion {
+    color: white;
+  }
+
+  /* Estilo para las etiquetas de la izquierda (ej: "ID del pedido:") */
+  .modo-oscuro td::before {
+    color: #ff375f !important; /* El color rosa neón para los títulos */
+    font-weight: 600;
+  }
+
+  /* Estilo para los datos de la derecha */
+  .modo-oscuro td {
+    color: #f5f5f7;
+    border: none !important; /* Quitamos bordes de tabla vieja */
+    background: transparent !important;
+  }
+
+  /* Botones dentro de la tarjeta en móvil */
+  .modo-oscuro td button {
+    background: #ff375f !important;
+    box-shadow: 0 4px 12px rgba(255, 55, 95, 0.2);
+  }
+}
+
+
+/* ==== MOBILE / TABLET ===== */
 @media (max-width: 900px) {
   .paginacion {
     margin-top: 12px;
@@ -345,8 +663,6 @@ table {
   }
 }
 
-
-
 /* ================================================= */
 /* =================== MÓVIL ======================= */
 /* ================================================= */
@@ -358,6 +674,12 @@ table {
   font-weight: 600;
   color: #E11D48;
   text-align: center;
+}
+td,
+th,
+tr{
+  border-right: none;
+  border-left: none;
 }
 
   body {
@@ -618,6 +940,7 @@ table {
     word-break: break-word;
     overflow-wrap: anywhere;
     font-size: 13px;
+    border: none;
   }
 
   /* 🧠 Columna detalles controlada */
@@ -641,6 +964,7 @@ table {
 /* ============ FIX CARDS MOBILE ALIGN ============= */
 /* ================================================= */
 @media (max-width: 900px) {
+
 
   td {
     align-items: flex-start;   /* 🔑 clave */
@@ -668,4 +992,168 @@ table {
   td:nth-child(5)::before {
     margin-bottom: 4px;
   }
+}
+table {
+        border-collapse: separate; /* Cambiar a separate ayuda a que los bordes redondeados se vean mejor */
+        border-spacing: 0;
+        border: 1px solid #F3C1D9 !important; /* El borde exterior de la tabla */
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    /* Quitamos la línea vertical de la última columna para que no se vea doble borde */
+    th:last-child, 
+    td:last-child {
+        border-right: none !important;
+    }
+
+    /* Quitamos la línea horizontal de la última fila */
+    tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    thead th {
+        background-color: #E11D48;
+        color: white;
+        border-bottom: 2px solid #e91e63 !important;
+    }
+    /* Contenedor alineado a la derecha */
+.header-top-controls {
+  padding-right: 30px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    width: 100%;
+}
+
+/* Botón de reporte minimalista */
+.btn-reportar-simple {
+    text-decoration: underline;
+    font-size: 14px;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.modo-claro .btn-reportar-simple { color: #E11D48; }
+.modo-oscuro .btn-reportar-simple { color: #ff375f; opacity: 0.8; }
+.btn-reportar-simple:hover { opacity: 1; text-decoration: none; }
+
+/* Botón circular de cambio de modo (Glass) */
+.btn-toggle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+/* Colores según el modo */
+.modo-claro .btn-toggle {
+    background: rgba(255, 255, 255, 0.5);
+    color: #ff375f;
+}
+
+.modo-oscuro .btn-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff375f;
+    backdrop-filter: blur(10px);
+}
+
+.btn-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive para celular */
+@media (max-width: 600px) {
+    .header-top-controls {
+        justify-content: space-between; /* En móvil se separan para pulsar mejor */
+        padding: 10px;
+    }
+}
+.header-top-controls {
+    display: flex;
+    justify-content: flex-end; /* Alinea los elementos internos a la derecha */
+    align-items: center;
+    gap: 20px;
+    
+    /* ESTO ES LO IMPORTANTE PARA ALINEAR CON EL FORM */
+    max-width: 1320px; /* <--- Pon aquí el mismo max-width que tenga tu form */
+    margin: 0 auto 10px; /* Centra el contenedor y da espacio abajo */
+    padding: 0 10px; /* Pequeño margen para que no toque los bordes en tablet */
+    width: 100%;
+}
+
+/* Ajuste opcional para que el h1 no se mueva */
+h1 {
+    margin-top: 10px;
+}
+
+
+
+/* ===== MODO CLARO DESKTOP ===== */
+.modo-claro table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #F3C1D9 !important; /* Borde exterior */
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.modo-claro th, 
+.modo-claro td {
+    border-bottom: 1px solid #F3C1D9 !important;
+    border-right: 1px solid #F3C1D9 !important;
+}
+
+/* Limpieza de bordes extremos para que no se vea doble línea */
+.modo-claro th:last-child, 
+.modo-claro td:last-child {
+    border-right: none !important;
+}
+
+.modo-claro tr:last-child td {
+    border-bottom: none !important;
+}
+
+
+
+@media (max-width: 900px) {
+    /* Quitamos TODOS los bordes de tabla cuando son cards */
+    .modo-claro table,
+    .modo-claro thead,
+    .modo-claro tbody,
+    .modo-claro tr,
+    .modo-claro th,
+    .modo-claro td {
+        border: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    /* Opcional: Si quieres que la "card" tenga su propio borde sutil de cristal */
+    .modo-claro tbody tr {
+        background: #ffffff;
+        border-radius: 16px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid rgba(243, 193, 217, 0.5) !important; /* Borde muy suave solo para la card */
+    }
+    
+    /* Para que los datos dentro de la card respiren */
+    .modo-claro td {
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
 }

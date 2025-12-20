@@ -12,12 +12,18 @@
 </svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <h1>Pedidos San Valentin</h1> <!-- Botón para reiniciar token -->
-
+<div class="header-top-controls">
+    <a href="reportar.html" class="btn-reportar-simple">¿Algo no funciona bien? Reportar aquí</a>
+    <button id="boton-clima" class="btn-toggle">
+        <i id="icono-clima" class="fa-solid fa-moon"></i>
+    </button>
+</div>
 
 
 <form id="pedidoForm">
@@ -69,9 +75,6 @@
     <option value="11-3">11-3</option>
     <option value="11-4">11-4</option>
   </select>
-  <a href="reportar.html" class="btn-reportar">
- ⚠ ¿Algo no funciona bien? | Reportar aqui
-</a>
 </div>
 
 <table>
@@ -96,6 +99,7 @@
 
 
 <script src="js/changelog.js" defer></script>
+<script  src="js/themes.js"></script>
 <script type="module" src="js/connection_db.js"></script>
 </body>
 </html>

@@ -240,6 +240,8 @@ function aplicarFiltros() {
       p.id.toString() === q ||
       p.nombre_comprador.toLowerCase().includes(q) ||
       p.nombre_receptor.toLowerCase().includes(q) ||
+      p.seccion_comprador.toLowerCase().includes(q) ||
+      p.seccion_receptor.toLowerCase().includes(q) ||
       p.producto.toLowerCase().includes(q) ||
       p.detalles?.toLowerCase().includes(q)
     );
@@ -309,6 +311,8 @@ window.entregarPedido = async id => {
   await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
   cargarPedidos();
 };
+
+window.p
 
 /* =========================
    🎧 EVENTOS

@@ -130,6 +130,78 @@
     .info {
       font-size: 11px;
     }
+
+
+    /* ===== MODO OSCURO (Liquid Glass Black) ===== */
+.modo-oscuro {
+  /* Fondo oscuro con gradiente sutil para resaltar el vidrio */
+  background: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%) !important;
+  color: #f5f5f7;
+
+  /* Títulos con brillo neón */
+  h1 {
+    color: #ff375f;
+    text-shadow: 0 0 15px rgba(255, 55, 95, 0.4);
+  }
+
+  .sub, .info {
+    color: #a1a1a6;
+  }
+
+  /* Formulario tipo Vidrio Ahumado */
+  form {
+    background: rgba(28, 28, 30, 0.75);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  label {
+    color: #e5e5e7;
+  }
+
+  /* Inputs y Selects oscuros */
+  input, textarea, select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    transition: all 0.3s ease;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #ff375f;
+    box-shadow: 0 0 0 4px rgba(255, 55, 95, 0.1);
+  }
+
+  /* Botón Principal */
+  button {
+    background: linear-gradient(135deg, #ff375f 0%, #e11d48 100%);
+  }
+
+  button:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+  }
+
+  button:disabled {
+    background: #444;
+    color: #888;
+  }
+
+  /* Botón Volver minimalista */
+  .btn-volver {
+    color: white;
+    background:none;
+  }
+}
+
+/* Ajuste específico para que el select se vea bien en oscuro */
+.modo-oscuro select option {
+  background-color: #1c1c1e;
+  color: white;
+}
 }
 
   </style>
@@ -158,10 +230,10 @@
       <textarea id="descripcion" placeholder="Describa lo que paso previo, durante y despues del error" required></textarea>
 
       <label>Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.2.7" required>
+      <input id="version" placeholder="Ej: v1.2.15 (Actual)" required>
 
       <label>Dispositivo y navegador</label>
-      <input id="entorno" placeholder="Ej: Android · Chrome" required>
+      <input id="entorno" placeholder="Ej: Android · Chrome  |  iPhone - iOS" required>
 
       <button type="submit">Enviar reporte</button>
 
@@ -208,6 +280,6 @@
       btn.textContent = "Enviar reporte";
     });
   </script>
-
+<script src="js/themes.js"></script>
 </body>
 </html>
