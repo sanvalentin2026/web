@@ -493,3 +493,31 @@ table {
     }
   }
 }
+/* =========================
+   🧨 FIX DEFINITIVO NO-PEDIDOS
+========================= */
+@media (max-width: 900px) {
+
+  /* Forzar fila independiente */
+  tbody tr:has(td.no-pedidos) {
+    display: block;
+  }
+
+  /* Neutralizar COMPLETAMENTE pseudo-labels */
+  tbody tr:has(td.no-pedidos) td::before,
+  tbody tr:has(td.no-pedidos) td::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Estilo limpio */
+  td.no-pedidos {
+    display: block !important;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #E11D48;
+    padding: 16px 0;
+  }
+}

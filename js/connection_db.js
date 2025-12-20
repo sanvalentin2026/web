@@ -110,7 +110,9 @@ function renderPedidos(pedidos) {
   pedidosBody.innerHTML = "";
 
   if (!pedidos.length) {
-    pedidosBody.innerHTML = `<tr><td colspan="8">Sin pedidos</td></tr>`;
+    pedidosBody.innerHTML = `<tr>
+    <td colspan="8" class="no-pedidos">Sin pedidos para mostrar</td>
+    </tr>`;
     return;
   }
 
