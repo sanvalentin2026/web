@@ -67,6 +67,26 @@ const filtroSeccion = document.getElementById("filtroSeccion");
 const detallesInput = document.getElementById("detalles");
 const paginacionDiv = document.getElementById("paginacion");
 
+//FIXES DE CARGADO
+let realtimeTimeout = null;
+
+supabase
+  .channel("pedidos-realtime")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "pedidos" },
+    () => {
+      if (realtimeTimeout) return;
+
+      realtimeTimeout = setTimeout(() => {
+        realtimeTimeout = null;
+        cargarPedidos();
+      }, 400); // 🔒 agrupa eventos
+    }
+  )
+  .subscribe();
+
+
 /* =========================
    📄 PAGINACIÓN
 ========================= */
@@ -74,6 +94,7 @@ const PEDIDOS_POR_PAGINA = 10;
 let paginaActual = Number(sessionStorage.getItem("paginaActual")) || 1;
 let paginaAnterior = paginaActual;
 let pedidosCache = [];
+let cargandoPedidos = false;
 let pedidosFiltrados = [];
 
 /* =========================
@@ -107,6 +128,8 @@ function formatFechaMobile(fechaStr) {
    🖥️ RENDER PEDIDOS
 ========================= */
 function renderPedidos(pedidos) {
+  if (cargandoPedidos) return;
+
   pedidosBody.innerHTML = "";
 
   if (!pedidos.length) {
@@ -163,11 +186,11 @@ function renderPagina() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  if (window.innerWidth <= 900) {
-    pedidosBody.classList.remove("animar-cambio");
-    void pedidosBody.offsetWidth;
-    pedidosBody.classList.add("animar-cambio");
-  }
+if (window.innerWidth <= 900 && pedidosFiltrados.length) {
+  pedidosBody.classList.remove("animar-cambio");
+  void pedidosBody.offsetWidth;
+  pedidosBody.classList.add("animar-cambio");
+}
 
   renderPedidos(pedidosFiltrados.slice(inicio, fin));
   renderPaginacion();
@@ -230,12 +253,15 @@ function aplicarFiltros() {
    🔄 CARGAR
 ========================= */
 async function cargarPedidos() {
+  cargandoPedidos = true;
+
   const { data } = await supabase
     .from("pedidos")
     .select("*")
     .order("created_at", { ascending: false });
 
   pedidosCache = data || [];
+  cargandoPedidos = false;
   aplicarFiltros();
 }
 
