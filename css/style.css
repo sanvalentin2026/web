@@ -321,6 +321,15 @@ table {
   background: #ec407a;
   color: white;
 }
+/* 📅 Fecha solo visible en cards */
+.fecha-mobile {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #E11D48;
+  text-align: center;
+}
+
 
 /* ===== MOBILE / TABLET ===== */
 @media (max-width: 900px) {
@@ -343,6 +352,13 @@ table {
 /* ================================================= */
 
 @media (max-width: 900px) {
+  .fecha-mobile {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #E11D48;
+  text-align: center;
+}
 
   body {
     padding: 12px;
@@ -446,7 +462,6 @@ table {
 
   table {
     display: table;
-    white-space: nowrap;
     vertical-align: middle;
   }
 
@@ -519,5 +534,138 @@ table {
     font-weight: 600;
     color: #E11D48;
     padding: 16px 0;
+  }
+}
+/* ================================================= */
+/* ============== FIX TABLET LANDSCAPE ============== */
+/* ================================================= */
+
+@media (min-width: 901px) and (max-width: 1100px) {
+
+  /* 📱 Evitar overflow horizontal */
+  body {
+    overflow-x: hidden;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ❌ quitar nowrap solo en tablet */
+  table {
+    white-space: normal;
+  }
+
+  th, td {
+    white-space: normal;
+    font-size: 13px;
+  }
+
+  /* botones más compactos */
+  table td button {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+@media (max-width: 1100px) {
+
+  table {
+    table-layout: fixed; /* 🔑 CLAVE */
+    width: 100%;
+  }
+
+  th,
+  td {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+@media (max-width: 1100px) {
+
+  /* Contenedor seguro */
+  .tabla-wrapper,
+  table {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  table {
+    table-layout: fixed;
+  }
+
+}
+/* ================================================= */
+/* ========== FIX REAL TABLET LANDSCAPE ============= */
+/* ================================================= */
+
+/* Tablets horizontales */
+@media (min-width: 901px) and (max-width: 1180px) {
+
+  /* ⛔ matar nowrap */
+  table {
+    table-layout: fixed;       /* 🔑 CLAVE */
+    width: 100%;
+    white-space: normal;
+  }
+
+  th,
+  td {
+    white-space: normal;       /* permitir saltos */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+  }
+
+  /* 🧠 Columna detalles controlada */
+  td:nth-child(5) {
+    max-width: 220px;
+  }
+
+  /* 🧠 Columna nombres */
+  td:nth-child(2),
+  td:nth-child(3) {
+    max-width: 180px;
+  }
+
+  /* 🧠 Botones compactos */
+  table td button {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+/* ================================================= */
+/* ============ FIX CARDS MOBILE ALIGN ============= */
+/* ================================================= */
+@media (max-width: 900px) {
+
+  td {
+    align-items: flex-start;   /* 🔑 clave */
+    gap: 8px;
+  }
+
+  td::before {
+    min-width: 110px;          /* ancho fijo del label */
+    flex-shrink: 0;
+    text-align: left;
+  }
+
+  td span,
+  td:not(:has(button)) {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* Detalles especialmente largos */
+  td:nth-child(5) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  td:nth-child(5)::before {
+    margin-bottom: 4px;
   }
 }

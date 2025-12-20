@@ -110,16 +110,26 @@ function renderPedidos(pedidos) {
   pedidosBody.innerHTML = "";
 
   if (!pedidos.length) {
-    pedidosBody.innerHTML = `<tr>
-    <td colspan="8" class="no-pedidos">Sin pedidos para mostrar</td>
-    </tr>`;
+    pedidosBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="no-pedidos">Sin pedidos para mostrar</td>
+      </tr>
+    `;
     return;
   }
 
+  const esMobile = window.innerWidth <= 900;
+
   pedidos.forEach(p => {
-    const fecha = window.innerWidth <= 600
-      ? formatFechaMobile(p.created_at)
-      : new Date(p.created_at).toLocaleString();
+
+    const fechaMobile = esMobile
+  ? `
+    <div class="campo">
+      <span class="valor">${formatFechaMobile(p.created_at)}</span>
+    </div>
+  `
+  : "";
+
 
     pedidosBody.innerHTML += `
       <tr>
@@ -129,8 +139,9 @@ function renderPedidos(pedidos) {
         <td>${p.producto}</td>
         <td>${p.detalles || "<em>Sin detalles</em>"}</td>
         <td>${p.pagado ? "✅" : "❌"}</td>
-        <td>${fecha}</td>
+
         <td>
+          ${fechaMobile}
           <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
           <button onclick="editarDetalles(${p.id}, \`${p.detalles || ""}\`)">Detalles</button>
           <button onclick="entregarPedido(${p.id})">Eliminar</button>
@@ -139,6 +150,7 @@ function renderPedidos(pedidos) {
     `;
   });
 }
+
 
 /* =========================
    📄 RENDER PÁGINA
