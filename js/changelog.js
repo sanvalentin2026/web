@@ -334,6 +334,16 @@ const changelogData = [
     changes: [
     "Correccion de overflow en la version de tablet"
     ]
+},
+{
+    version: "1.2.16 - Final",
+    title: "Styles rewrite",
+    date: "20/12/2025 · 6:05 PM",
+    changes: [
+    "Se creo el modo oscuro y una funcion para cambiarlo, esto para hacer la web mas agradable a la vista",
+    "Se creo una seccion pare reportar errores",
+    "Se reindexaron algunas cosas"
+    ]
 }
 ];
 

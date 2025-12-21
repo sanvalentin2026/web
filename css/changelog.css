@@ -12,7 +12,7 @@
 }
 
 .changelog-box {
-    background: #FFC1E3;
+    background: black;
     color: #fff;
     width: 100%;
     max-width: 420px;
@@ -46,7 +46,7 @@
     text-align: center;
     margin-top: 4px;
     font-size: 14px;
-    color: #E63946;
+    color: white;
     font-weight: 600;
 }
 
@@ -78,10 +78,8 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .changelog-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(255, 0, 110, 0.4);
 }
