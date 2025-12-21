@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Reportar un problema</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:image/svg+xml,
+<link rel="icon" href="data:image/svg+xml,
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
   <text y='0.9em' font-size='90'>❤️</text>
 </svg>">
@@ -196,15 +196,25 @@
     .report-container h2 {
     font-size: 19px;
     }
+    }
     .info {
       font-size: 11px;
     }
-}}
+}
 
 
   </style>
 </head>
 <body>
+
+<body>
+  <script>
+    (function() {
+      const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+      document.body.classList.add(tema);
+    })();
+  </script>
+
 <button class="btn-volver" onclick="history.back()">
   ← Volver atras
 </button>
@@ -228,15 +238,15 @@
       <textarea id="descripcion" placeholder="Describa lo que paso previo, durante y despues del error" required></textarea>
 
       <label>Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.2.15 (Actual)" required>
+      <input id="version" placeholder="Ej: v1.2.18 (Actual)" required>
 
       <label>Dispositivo y navegador</label>
-      <input id="entorno" placeholder="Ej: Android · Google  |  iPhone · Safari" required>
+      <input id="entorno" placeholder="Ej: Android · Google | iPhone · Safari" required>
 
       <button type="submit">Enviar reporte</button>
 
       <div class="info">
-        Gracias por reportar! tus comentarios mejoran la experiencia.
+        Gracias por reportar! su problema sera solucionado muy pronto.
       </div>
     </form>
   </div>
