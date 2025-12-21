@@ -1157,3 +1157,24 @@ h1 {
         justify-content: space-between;
     }
 }
+/* Esto asegura que el formulario de reportes también sea Vidrio */
+.modo-oscuro form {
+    background: rgba(28, 28, 30, 0.75) !important;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Estilo para el botón volver que pusimos arriba a la izquierda */
+.btn-volver-link {
+    background: none;
+    border: none;
+    color: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 14px;
+}
+
+.modo-oscuro .btn-volver-link { color: #ff375f; }
+.modo-claro .btn-volver-link { color: #e11d48; }
