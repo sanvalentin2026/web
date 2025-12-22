@@ -358,7 +358,7 @@ window.togglePagado = async (id, estado) => {
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         cancelButtonColor: '#6e7881',
-        confirmButtonText: 'Sí, cambiar',
+        confirmButtonText: 'Cambiar',
         cancelButtonText: 'Cancelar',
         background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
@@ -375,8 +375,8 @@ window.togglePagado = async (id, estado) => {
             icon: 'success',
             title: 'Estado actualizado',
             showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
+            timer: 800,
+            timerProgressBar: false,
             background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
             color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
         });
@@ -391,7 +391,7 @@ window.editarDetalles = async (id, actuales) => {
         inputPlaceholder: 'Escriba los nuevos detalles aquí...',
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
-        confirmButtonText: 'Guardar cambios',
+        confirmButtonText: 'Guardar',
         cancelButtonText: 'Cancelar',
         background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
@@ -414,7 +414,7 @@ window.entregarPedido = async id => {
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         cancelButtonColor: '#6e7881',
-        confirmButtonText: 'Sí, eliminar',
+        confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
         background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
@@ -434,7 +434,7 @@ window.editarDetalles = async (id, actuales) => {
         inputPlaceholder: 'Escriba los nuevos detalles aquí...',
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
-        confirmButtonText: 'Guardar cambios',
+        confirmButtonText: 'Guardar',
         cancelButtonText: 'Cancelar',
         background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
@@ -457,7 +457,7 @@ window.entregarPedido = async id => {
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         cancelButtonColor: '#6e7881',
-        confirmButtonText: 'Sí, eliminar',
+        confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
         background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
