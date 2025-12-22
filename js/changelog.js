@@ -344,7 +344,18 @@ const changelogData = [
     "Se creo una seccion pare reportar errores",
     "Se reindexaron algunas cosas"
     ]
-}
+},
+{
+    version: "1.2.21",
+    title: "Optimización de Feedback",
+    date: "22/12/2025 · 3:15 PM",
+    changes: [
+        "Se integró SweetAlert2 para todas las confirmaciones y alertas del sistema.",
+        "Se rediseñó el Changelog para que coincida con el estilo Liquid Glass.",
+        "Se mejoró la validación de contraseñas de administrador con una interfaz más moderna.",
+        "Corrección de espaciados en el modo oscuro para mejorar la legibilidad."
+    ]
+},
 ];
 
 const lastVersion = changelogData[changelogData.length - 1].version;
@@ -354,32 +365,34 @@ function shouldShowChangelog() {
 }
 
 function showChangelog() {
-    const data = changelogData[changelogData.length - 1];1
+    const data = changelogData[changelogData.length - 1];
 
-    const overlay = document.createElement("div");
-    overlay.className = "changelog-overlay";
+    // Generamos la lista de cambios con estilo
+    const listHtml = data.changes
+        .map(c => `<li style="text-align: left; margin-bottom: 10px; font-size: 14px; display: flex; gap: 10px;">
+                    <span style="color: #E11D48;">•</span> <span>${c}</span>
+                   </li>`)
+        .join("");
 
-    const box = document.createElement("div");
-    box.className = "changelog-box";
-
-    box.innerHTML = `
-        <h2>Actualizacion | v${data.version}</h2>
-        <span class="changelog-title">${data.title}</span>
-        <p class="changelog-date">${data.date}</p>
-
-        <ul class="changelog-list">
-            ${data.changes.map(c => `<li>${c}</li>`).join("")}
-        </ul>
-
-        <button class="changelog-btn">Continuar</button>
-    `;
-
-    box.querySelector("button").addEventListener("click", () => {
-        overlay.remove();
+    Swal.fire({
+        title: `<small style="font-size: 12px; opacity: 0.6; text-transform: uppercase;">Nueva Actualización</small><br>
+                <span style="color: #E11D48;">v${data.version} - ${data.title}</span>`,
+        html: `
+            <p style="font-size: 12px; margin-bottom: 15px; opacity: 0.7;">${data.date}</p>
+            <ul style="list-style: none; padding: 15px 0; margin: 0; border-top: 1px solid rgba(225,29,72,0.1);">
+                ${listHtml}
+            </ul>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Entendido, continuar',
+        confirmButtonColor: '#E11D48',
+        // Adaptación automática al tema oscuro
+        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+        showClass: {
+            popup: 'animate__animated animate__fadeInUp' // Si usas Animate.css
+        }
     });
-
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
 }
 
 window.addEventListener("load", () => {

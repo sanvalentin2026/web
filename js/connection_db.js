@@ -18,19 +18,57 @@ async function solicitarPermisoAdmin() {
   const token = localStorage.getItem("admin_token");
   if (token) return token;
 
-  const password = prompt("Contraseña de ediciones:");
+  // 1. Pedir contraseña con SweetAlert (Mucho más lindo)
+  const { value: password } = await Swal.fire({
+    title: 'Accion restringida',
+    input: 'password',
+    inputLabel: 'Introduzca la contraseña para editar',
+    inputPlaceholder: 'Escriba la contraseña aqui...',
+    confirmButtonColor: '#E11D48',
+    confirmButtonText: 'Confirmar',
+    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+    inputAttributes: {
+      autocapitalize: 'off',
+      autocorrect: 'off'
+    }
+  });
+
   if (!password) return null;
+
+  // Mostramos un pequeño "Cargando..."
+  Swal.showLoading();
 
   const { data, error } = await supabase.rpc("admin_login", {
     p_password: password
   });
 
+  // 2. Manejo de Error
   if (error || typeof data !== "string" || data.length < 10) {
-    alert("❌ No autorizado.");
+    Swal.fire({
+      icon: "error",
+      title: "Acceso Denegado",
+      text: "La contraseña es incorrecta o hubo un fallo de conexión.",
+      footer: '<a href="reportar.html" style="color: #E11D48; font-weight: bold;">Reportar un problema aquí</a>',
+      confirmButtonColor: '#E11D48',
+      background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+      color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+    });
     return null;
   }
 
+  // 3. Éxito
   localStorage.setItem("admin_token", data);
+  
+  Swal.fire({
+    icon: 'success',
+    title: 'Acceso permitido',
+    timer: 1000,
+    showConfirmButton: false,
+    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+  });
+
   return data;
 }
 
@@ -291,28 +329,78 @@ form.addEventListener("submit", async e => {
    ⚙️ ACCIONES
 ========================= */
 window.togglePagado = async (id, estado) => {
-  await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
-  cargarPedidos();
+    // Añadimos una confirmación rápida para evitar clics accidentales
+    const result = await Swal.fire({
+        title: estado ? '¿Marcar como NO pagado?' : '¿Confirmar pago?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#6e7881',
+        confirmButtonText: 'Sí, cambiar',
+        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+    });
+
+    if (result.isConfirmed) {
+        await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
+        cargarPedidos();
+        // Notificación pequeña de éxito (Toast)
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Estado actualizado',
+            showConfirmButton: false,
+            timer: 2000,
+            background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+        });
+    }
 };
 
 window.editarDetalles = async (id, actuales) => {
-  const nuevo = prompt("Editar detalles:", actuales);
-  if (nuevo !== null) {
-    await ejecutarAdminRPC("admin_update_detalles", {
-      p_pedido_id: id,
-      p_detalles: nuevo
+    const { value: nuevo } = await Swal.fire({
+        title: 'Editar detalles del pedido',
+        input: 'textarea',
+        inputValue: actuales,
+        inputPlaceholder: 'Escriba los nuevos detalles aquí...',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        confirmButtonText: 'Guardar cambios',
+        cancelButtonText: 'Cancelar',
+        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
     });
-    cargarPedidos();
-  }
+
+    if (nuevo !== undefined) { // Swal devuelve undefined si se cancela
+        await ejecutarAdminRPC("admin_update_detalles", {
+            p_pedido_id: id,
+            p_detalles: nuevo.trim()
+        });
+        cargarPedidos();
+    }
 };
 
 window.entregarPedido = async id => {
-  if (!confirm("¿Eliminar pedido?")) return;
-  await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
-  cargarPedidos();
+    const result = await Swal.fire({
+        title: '¿Eliminar pedido?',
+        text: "Esta acción borrara el pedido de la base de datos y lista principal.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#6e7881',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+    });
+
+    if (result.isConfirmed) {
+        await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
+        cargarPedidos();
+    }
 };
 
-window.p
 
 /* =========================
    🎧 EVENTOS

@@ -83,3 +83,45 @@
 .changelog-btn:hover {
     transform: translateY(-1px);
 }
+
+/* Esto hace que el fondo de SweetAlert sea tipo vidrio */
+.swal2-backdrop-show {
+    backdrop-filter: blur(8px) !important;
+}
+
+.swal2-popup {
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+}
+
+.swal2-confirm {
+    border-radius: 12px !important;
+    padding: 12px 30px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+}
+/* Ajustes para SweetAlert en Móviles */
+@media (max-width: 600px) {
+    .swal2-popup {
+        width: 90% !important; /* Que no toque los bordes del celular */
+        padding: 10px !important;
+        border-radius: 20px !important;
+    }
+
+    .swal2-title {
+        font-size: 1.1rem !important; /* Título un poco más pequeño */
+    }
+
+    /* Reducir el tamaño de los cambios para que quepan más */
+    .swal2-html-container li {
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+        margin-bottom: 6px !important;
+    }
+
+    .swal2-confirm {
+        width: 100% !important; /* Botón a todo lo ancho para fácil click */
+        margin-top: 15px !important;
+    }
+}
