@@ -329,9 +329,29 @@ form.addEventListener("submit", async e => {
    ⚙️ ACCIONES
 ========================= */
 // ======== FUNCIONES DE GESTIÓN DE PEDIDOS ========
+// 1. Inyección de Estilos Críticos (Para eliminar el desenfoque de los Toasts)
+const style = document.createElement('style');
+style.innerHTML = `
+    .swal2-container.swal2-toast-shown {
+        background-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    body.swal2-toast-shown {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .swal2-container.swal2-toast-shown {
+        pointer-events: none !important;
+    }
+    .swal2-toast {
+        pointer-events: auto !important;
+    }
+`;
+document.head.appendChild(style);
 
+// 2. Funciones de Gestión
 window.togglePagado = async (id, estado) => {
-    // 1. Confirmación estética
     const result = await Swal.fire({
         title: estado ? '¿Marcar como NO pagado?' : '¿Confirmar pago?',
         icon: 'question',
@@ -348,26 +368,61 @@ window.togglePagado = async (id, estado) => {
         await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
         cargarPedidos();
 
-        // 2. Notificación Toast mejorada (Sin desenfoque de fondo)
+        // Notificación Toast Limpia
         Swal.fire({
-            toast: true,
-            position: 'top', 
+            toast: false,
+            position: 'top',
             icon: 'success',
             title: 'Estado actualizado',
             showConfirmButton: false,
-            timer: 1500,
+            timer: 2000,
             timerProgressBar: true,
-            backdrop: 'transparent', // Fondo invisible
             background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
-            didOpen: () => {
-                const container = Swal.getContainer();
-                if (container) {
-                    container.style.pointerEvents = 'none'; // Permite clics en la web mientras sale
-                    container.style.backdropFilter = 'none'; // Quita el borroso
-                }
-            }
+            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
         });
+    }
+};
+
+window.editarDetalles = async (id, actuales) => {
+    const { value: nuevo } = await Swal.fire({
+        title: 'Editar detalles del pedido',
+        input: 'textarea',
+        inputValue: actuales,
+        inputPlaceholder: 'Escriba los nuevos detalles aquí...',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        confirmButtonText: 'Guardar cambios',
+        cancelButtonText: 'Cancelar',
+        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+    });
+
+    if (nuevo !== undefined && nuevo !== null) {
+        await ejecutarAdminRPC("admin_update_detalles", {
+            p_pedido_id: id,
+            p_detalles: nuevo.trim()
+        });
+        cargarPedidos();
+    }
+};
+
+window.entregarPedido = async id => {
+    const result = await Swal.fire({
+        title: '¿Eliminar pedido?',
+        text: "Esta acción borrará el pedido de la base de datos y lista principal.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#6e7881',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+    });
+
+    if (result.isConfirmed) {
+        await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
+        cargarPedidos();
     }
 };
 
