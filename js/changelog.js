@@ -346,7 +346,7 @@ const changelogData = [
     ]
 },
 {
-    version: "1.2.21",
+    version: "1.2.19",
     title: "Optimización de Feedback",
     date: "22/12/2025 · 3:15 PM",
     changes: [

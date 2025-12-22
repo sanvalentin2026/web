@@ -328,8 +328,10 @@ form.addEventListener("submit", async e => {
 /* =========================
    ⚙️ ACCIONES
 ========================= */
+// ======== FUNCIONES DE GESTIÓN DE PEDIDOS ========
+
 window.togglePagado = async (id, estado) => {
-    // Añadimos una confirmación rápida para evitar clics accidentales
+    // 1. Confirmación estética
     const result = await Swal.fire({
         title: estado ? '¿Marcar como NO pagado?' : '¿Confirmar pago?',
         icon: 'question',
@@ -337,6 +339,7 @@ window.togglePagado = async (id, estado) => {
         confirmButtonColor: '#E11D48',
         cancelButtonColor: '#6e7881',
         confirmButtonText: 'Sí, cambiar',
+        cancelButtonText: 'Cancelar',
         background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
     });
@@ -344,16 +347,26 @@ window.togglePagado = async (id, estado) => {
     if (result.isConfirmed) {
         await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
         cargarPedidos();
-        // Notificación pequeña de éxito (Toast)
+
+        // 2. Notificación Toast mejorada (Sin desenfoque de fondo)
         Swal.fire({
             toast: true,
-            position: 'top-end',
+            position: 'top', 
             icon: 'success',
             title: 'Estado actualizado',
             showConfirmButton: false,
-            timer: 2000,
+            timer: 1500,
+            timerProgressBar: true,
+            backdrop: 'transparent', // Fondo invisible
             background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+            didOpen: () => {
+                const container = Swal.getContainer();
+                if (container) {
+                    container.style.pointerEvents = 'none'; // Permite clics en la web mientras sale
+                    container.style.backdropFilter = 'none'; // Quita el borroso
+                }
+            }
         });
     }
 };
@@ -372,7 +385,7 @@ window.editarDetalles = async (id, actuales) => {
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
     });
 
-    if (nuevo !== undefined) { // Swal devuelve undefined si se cancela
+    if (nuevo !== undefined && nuevo !== null) {
         await ejecutarAdminRPC("admin_update_detalles", {
             p_pedido_id: id,
             p_detalles: nuevo.trim()
@@ -384,7 +397,7 @@ window.editarDetalles = async (id, actuales) => {
 window.entregarPedido = async id => {
     const result = await Swal.fire({
         title: '¿Eliminar pedido?',
-        text: "Esta acción borrara el pedido de la base de datos y lista principal.",
+        text: "Esta acción borrará el pedido de la base de datos y lista principal.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
@@ -400,7 +413,6 @@ window.entregarPedido = async id => {
         cargarPedidos();
     }
 };
-
 
 /* =========================
    🎧 EVENTOS
