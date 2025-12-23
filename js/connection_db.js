@@ -37,6 +37,14 @@ function limpiarTokenAdmin() {
   localStorage.removeItem("admin_token");
 }
 
+// Esto quita el bloqueo de audio tras el primer clic del usuario
+const desbloquearAudio = () => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContext.resume();
+    window.removeEventListener('click', desbloquearAudio);
+};
+window.addEventListener('click', desbloquearAudio);
+
 async function solicitarPermisoAdmin() {
   const token = localStorage.getItem("admin_token");
   if (token) return token;
