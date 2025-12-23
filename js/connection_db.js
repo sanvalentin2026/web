@@ -90,16 +90,19 @@ async function chequearEstadoWeb() {
                     .label { font-size: 0.7rem; color: #E11D48; margin-top: 5px; font-weight: bold; text-transform: uppercase; }
                     .btn-back { margin-top: 40px; padding: 12px 25px; border-radius: 50px; border: 1px solid #E11D48; background: transparent; color: ${colTexto}; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
                     .btn-back:hover { background: #E11D48; color: white; }
+                    .btn-back {text-decoration:none;}
                 </style>
             </head>
             <body>
-                <h1 class="neon-title">Apertura del Sistema</h1>
+                <h1 class="neon-title">En mantenimiento</h1>
                 <div class="countdown">
                     <div class="time-box"><span id="hours">00</span><div class="label">Horas</div></div>
                     <div class="time-box"><span id="minutes">00</span><div class="label">Minutos</div></div>
                     <div class="time-box"><span id="seconds">00</span><div class="label">Segundos</div></div>
                 </div>
-                <button class="btn-back" onclick="window.history.back()">← Volver atrás</button>
+                <a href="https://www.google.com/"
+                <button class="btn-back">← Salir</button>
+              
             </body>
         `;
 
