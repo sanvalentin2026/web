@@ -7,6 +7,24 @@ const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+function playNotification(tipo) {
+    const sonidos = {
+        success: '/si.mp3', // Ruta a tu archivo
+        pago: '/applepay.mp3',       // Ruta a tu archivo
+        delete: '/si.mp3',    // Ruta a tu archivo
+        create: '/pedido.mp3',
+        error: '/error.mp3'
+    };
+    
+    const audio = new Audio(sonidos[tipo]);
+    audio.volume = 0.9;
+    // El .catch evita que el código se rompa si el navegador bloquea el audio
+    audio.play().catch(() => console.log("Audio bloqueado temporalmente"));
+}
+
+
+
 /* =========================
    🧠 TOKEN SAFE LAYER
 ========================= */
@@ -37,7 +55,15 @@ async function solicitarPermisoAdmin() {
   if (!password) return null;
 
   // Mostramos un pequeño "Cargando..."
-  Swal.showLoading();
+  Swal.fire({
+    title: 'Cargando...',
+    allowOutsideClick: false,
+    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+    didOpen: () => {
+        Swal.showLoading();
+    }
+});
 
   const { data, error } = await supabase.rpc("admin_login", {
     p_password: password
@@ -45,6 +71,7 @@ async function solicitarPermisoAdmin() {
 
   // 2. Manejo de Error
   if (error || typeof data !== "string" || data.length < 10) {
+    playNotification('error');
     Swal.fire({
       icon: "error",
       title: "Acceso Denegado",
@@ -63,7 +90,7 @@ async function solicitarPermisoAdmin() {
   Swal.fire({
     icon: 'success',
     title: 'Acceso permitido',
-    timer: 1000,
+    timer: 900,
     showConfirmButton: false,
     background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
     color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
@@ -105,8 +132,8 @@ const filtroSeccion = document.getElementById("filtroSeccion");
 const detallesInput = document.getElementById("detalles");
 const paginacionDiv = document.getElementById("paginacion");
 
+
 //FIXES DE CARGADO
-let realtimeTimeout = null;
 
 supabase
   .channel("pedidos-realtime")
@@ -292,17 +319,57 @@ function aplicarFiltros() {
 /* =========================
    🔄 CARGAR
 ========================= */
-async function cargarPedidos() {
-  cargandoPedidos = true;
+async function cargarPedidos(silencioso = false, tipoSonido = null) {
+    cargandoPedidos = true;
 
-  const { data } = await supabase
-    .from("pedidos")
-    .select("*")
-    .order("created_at", { ascending: false });
+    // A: Solo mostramos el Loading si NO es silencioso (acciones tuyas)
+if (!silencioso) {
+        Swal.fire({
+            title: 'Cargando...',
+            // Esto evita que se vea blanco antes de tiempo:
+            background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+            allowOutsideClick: false,
+            showConfirmButton: false, // Oculta el botón para que solo se vea el spinner
+            didOpen: () => {
+                Swal.showLoading(); // El spinner se activa dentro de la ventana ya coloreada
+            }
+        });
+    }
 
-  pedidosCache = data || [];
-  cargandoPedidos = false;
-  aplicarFiltros();
+    const { data } = await supabase
+        .from("pedidos")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    pedidosCache = data || [];
+    cargandoPedidos = false;
+    aplicarFiltros(); // Esto renderiza la tabla
+
+    // B: Si no es silencioso, cerramos el loading y disparamos sonido + toast
+// B: Si no es silencioso, manejamos el cierre y el sonido
+    if (!silencioso) {
+        // 1. Si hay un sonido, lo lanzamos PRIMERO
+        if (tipoSonido) playNotification(tipoSonido);
+
+        // 2. Esperamos un momento (300ms) para que el sonido empiece fuerte
+        // y el usuario note que algo terminó antes de que desaparezca el cargando
+        setTimeout(() => {
+            Swal.close(); 
+
+            // 3. Mostramos la confirmación final
+            const esOscuro = document.body.classList.contains('modo-oscuro');
+            Swal.fire({
+                icon: 'success',
+                title: '¡Listo!',
+                timer: 1200, // Un poco más de tiempo para que se aprecie
+                showConfirmButton: false,
+                background: esOscuro ? '#1c1c1e' : '#fff',
+                color: esOscuro ? '#f5f5f7' : '#374151',
+                iconColor: 'green'
+            });
+        }, 300); // Este pequeño retraso es la clave
+    }
 }
 
 /* =========================
@@ -322,7 +389,7 @@ form.addEventListener("submit", async e => {
   });
 
   form.reset();
-  cargarPedidos();
+  cargarPedidos(false, 'success');
 });
 
 /* =========================
@@ -366,20 +433,9 @@ window.togglePagado = async (id, estado) => {
 
     if (result.isConfirmed) {
         await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
-        cargarPedidos();
+        cargarPedidos(false, 'success');
 
         // Notificación Toast Limpia
-        Swal.fire({
-            toast: false,
-            position: 'top',
-            icon: 'success',
-            title: 'Estado actualizado',
-            showConfirmButton: false,
-            timer: 800,
-            timerProgressBar: false,
-            background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-        });
     }
 };
 
@@ -402,7 +458,7 @@ window.editarDetalles = async (id, actuales) => {
             p_pedido_id: id,
             p_detalles: nuevo.trim()
         });
-        cargarPedidos();
+        cargarPedidos(false, 'success');
     }
 };
 
@@ -422,50 +478,7 @@ window.entregarPedido = async id => {
 
     if (result.isConfirmed) {
         await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
-        cargarPedidos();
-    }
-};
-
-window.editarDetalles = async (id, actuales) => {
-    const { value: nuevo } = await Swal.fire({
-        title: 'Editar detalles del pedido',
-        input: 'textarea',
-        inputValue: actuales,
-        inputPlaceholder: 'Escriba los nuevos detalles aquí...',
-        showCancelButton: true,
-        confirmButtonColor: '#E11D48',
-        confirmButtonText: 'Guardar',
-        cancelButtonText: 'Cancelar',
-        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-    });
-
-    if (nuevo !== undefined && nuevo !== null) {
-        await ejecutarAdminRPC("admin_update_detalles", {
-            p_pedido_id: id,
-            p_detalles: nuevo.trim()
-        });
-        cargarPedidos();
-    }
-};
-
-window.entregarPedido = async id => {
-    const result = await Swal.fire({
-        title: '¿Eliminar pedido?',
-        text: "Esta acción borrará el pedido de la base de datos y lista principal.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#E11D48',
-        cancelButtonColor: '#6e7881',
-        confirmButtonText: 'Eliminar',
-        cancelButtonText: 'Cancelar',
-        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-    });
-
-    if (result.isConfirmed) {
-        await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
-        cargarPedidos();
+        cargarPedidos(false, 'success');
     }
 };
 
@@ -481,12 +494,29 @@ filtroSeccion.addEventListener("change", () => {
 /* =========================
    🔴 REALTIME
 ========================= */
+let realtimeTimeout = null;
+
 supabase
   .channel("pedidos-realtime")
-  .on("postgres_changes", { event: "*", schema: "public", table: "pedidos" }, cargarPedidos)
-  .subscribe();
+  .on(
+    "postgres_changes", 
+    { event: "*", schema: "public", table: "pedidos" }, 
+    () => {
+      // Si ya hay un temporizador corriendo, no hagas nada
+      if (realtimeTimeout) return;
 
+      // Espera 400ms antes de actualizar para no saturar
+      realtimeTimeout = setTimeout(() => {
+        realtimeTimeout = null;
+        
+        // LLAMADA CLAVE: 'true' significa silencioso
+        // Actualiza la lista pero NO muestra el Loading ni suena
+        cargarPedidos(true); 
+      }, 400); 
+    }
+  )
+  .subscribe();
 /* =========================
    🚀 INIT
 ========================= */
-cargarPedidos();
+cargarPedidos(true);
