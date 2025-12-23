@@ -8,6 +8,7 @@
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
   <text y='0.9em' font-size='90'>❤️</text>
 </svg>">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -276,17 +277,46 @@
         user_agent: navigator.userAgent
       });
 
-      if (error) {
-        alert("Error al enviar el reporte, revise su internet o informe");
-        console.error(error);
-      } else {
-        alert("Reporte enviado. ¡Gracias!");
-        form.reset();
-      }
+// 1. Detectamos el tema justo antes de mostrar la alerta
+const esOscuro = document.body.classList.contains('modo-oscuro');
+const temaConfig = {
+    background: esOscuro ? '#1c1c1e' : '#fff',
+    color: esOscuro ? '#f5f5f7' : '#374151'
+};
 
-      btn.disabled = false;
-      btn.textContent = "Enviar reporte";
+if (error) {
+    // Sonido de error (si tienes la función playNotification en esta hoja)
+    if (typeof playNotification === "function") playNotification('error');
+
+    Swal.fire({
+        icon: 'error',
+        title: 'No se pudo enviar',
+        text: 'Revise su conexión a internet',
+        timer: 2500,
+        showConfirmButton: false,
+        ...temaConfig, // Aplica fondo y color dinámico
+        iconColor: 'red' // Rojo de tu marca
     });
+    console.error(error);
+} else {
+    // Sonido de éxito
+    if (typeof playNotification === "function") playNotification('success');
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Reporte enviado',
+        text: '¡Muchas gracias!',
+        timer: 2000,
+        showConfirmButton: false,
+        ...temaConfig, // Aplica fondo y color dinámico
+        iconColor: 'green' // Mantenemos coherencia con el rojo o usa 'green' si prefieres
+    });
+    form.reset();
+}
+
+btn.disabled = false;
+btn.textContent = "Enviar reporte";
+});
   </script>
 <script src="js/themes.js"></script>
 </body>
