@@ -10,11 +10,11 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function playNotification(tipo) {
     const sonidos = {
-        success: '/si.mp3', // Ruta a tu archivo
-        pago: '/applepay.mp3',       // Ruta a tu archivo
-        delete: '/si.mp3',    // Ruta a tu archivo
-        create: '/pedido.mp3',
-        error: '/error.mp3'
+        success: 'si.mp3', // Ruta a tu archivo
+        pago: 'applepay.mp3',       // Ruta a tu archivo
+        delete: 'si.mp3',    // Ruta a tu archivo
+        create: 'pedido.mp3',
+        error: 'error.mp3'
     };
     
     const audio = new Audio(sonidos[tipo]);
@@ -23,6 +23,11 @@ function playNotification(tipo) {
     audio.play().catch(() => console.log("Audio bloqueado temporalmente"));
 }
 
+/*    TEMAS    */
+const obtenerTema = () => ({
+    bg: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+    txt: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+});
 
 
 /* =========================
