@@ -49,66 +49,44 @@ async function solicitarPermisoAdmin() {
   const token = localStorage.getItem("admin_token");
   if (token) return token;
 
-  // 1. Pedir contraseña con SweetAlert (Mucho más lindo)
+  const tema = obtenerTema();
+
+  // 1. Pedir contraseña con Bloqueo de clic externo
   const { value: password } = await Swal.fire({
-    title: 'Accion restringida',
+    title: 'Acción restringida',
     input: 'password',
-    inputLabel: 'Introduzca la contraseña para editar',
-    inputPlaceholder: 'Escriba la contraseña aqui...',
-    confirmButtonColor: '#E11D48',
+    inputLabel: 'Contraseña de administrador',
+    showCancelButton: true,
     confirmButtonText: 'Confirmar',
-    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
-    inputAttributes: {
-      autocapitalize: 'off',
-      autocorrect: 'off'
-    }
+    confirmButtonColor: '#E11D48',
+    background: tema.bg,
+    color: tema.txt,
+    allowOutsideClick: false, // <--- ESTO EVITA SALTAR EL LOGEO
+    allowEscapeKey: false    // <--- EVITA SALIR CON LA TECLA ESC
   });
 
+  // Si cancela, devolvemos null explícitamente
   if (!password) return null;
 
-  // Mostramos un pequeño "Cargando..."
-  Swal.fire({
-    title: 'Cargando...',
-    allowOutsideClick: false,
-    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
-    didOpen: () => {
-        Swal.showLoading();
-    }
-});
-
+  // 2. Verificación Directa (Sin Spinner intermedio)
   const { data, error } = await supabase.rpc("admin_login", {
     p_password: password
   });
 
-  // 2. Manejo de Error
   if (error || typeof data !== "string" || data.length < 10) {
     playNotification('error');
-    Swal.fire({
+    await Swal.fire({
       icon: "error",
       title: "Acceso Denegado",
-      text: "La contraseña es incorrecta o hubo un fallo de conexión.",
-      footer: '<a href="reportar.html" style="color: #E11D48; font-weight: bold;">Reportar un problema aquí</a>',
+      text: "Contraseña incorrecta.",
       confirmButtonColor: '#E11D48',
-      background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-      color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+      background: tema.bg,
+      color: tema.txt,
     });
     return null;
   }
 
-  // 3. Éxito
   localStorage.setItem("admin_token", data);
-  
-  Swal.fire({
-    icon: 'success',
-    title: 'Acceso permitido',
-    timer: 900,
-    showConfirmButton: false,
-    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-  });
-
   return data;
 }
 
@@ -117,7 +95,8 @@ async function ejecutarAdminRPC(nombreRPC, params, reintento = true) {
 
   if (!token) {
     token = await solicitarPermisoAdmin();
-    if (!token) return { error: true };
+    // Si el usuario canceló el login, cortamos la ejecución aquí
+    if (!token) return { error: "cancelado" }; 
   }
 
   const res = await supabase.rpc(nombreRPC, {
@@ -329,24 +308,44 @@ function aplicarFiltros() {
   renderPagina();
 }
 
+
+// Inyectar estilos para igualar botones de SweetAlert
+// Inyectar estilos para igualar ancho y redondez de los botones
+const styleSwal = document.createElement('style');
+styleSwal.innerHTML = `
+  .swal2-actions {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 15px !important;
+    width: 100% !important;
+  }
+  .swal2-confirm, .swal2-cancel {
+    flex: 1 !important;
+    max-width: 150px !important;
+    margin: 0 !important;
+    padding: 12px 0 !important;
+    /* Forzar la misma redondez en ambos botones */
+    border-radius: 8px !important; 
+    font-size: 1rem !important;
+  }
+`;
+document.head.appendChild(styleSwal);
+
+
 /* =========================
    🔄 CARGAR
 ========================= */
 async function cargarPedidos(silencioso = false, tipoSonido = null) {
     cargandoPedidos = true;
+const tema = obtenerTema(); // <--- Usamos tu helper de temas
 
-    // A: Solo mostramos el Loading si NO es silencioso (acciones tuyas)
-if (!silencioso) {
+    if (!silencioso) {
         Swal.fire({
             title: 'Cargando...',
-            // Esto evita que se vea blanco antes de tiempo:
-            background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-            color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+            background: tema.bg,
+            color: tema.txt,
             allowOutsideClick: false,
-            showConfirmButton: false, // Oculta el botón para que solo se vea el spinner
-            didOpen: () => {
-                Swal.showLoading(); // El spinner se activa dentro de la ventana ya coloreada
-            }
+            didOpen: () => { Swal.showLoading(); }
         });
     }
 
@@ -375,7 +374,7 @@ if (!silencioso) {
             Swal.fire({
                 icon: 'success',
                 title: '¡Listo!',
-                timer: 1200, // Un poco más de tiempo para que se aprecie
+                timer: 1300, // Un poco más de tiempo para que se aprecie
                 showConfirmButton: false,
                 background: esOscuro ? '#1c1c1e' : '#fff',
                 color: esOscuro ? '#f5f5f7' : '#374151',
@@ -444,50 +443,74 @@ window.togglePagado = async (id, estado) => {
         color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
     });
 
-    if (result.isConfirmed) {
-        await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
-        cargarPedidos(false, 'success');
-
-        // Notificación Toast Limpia
-    }
+if (result.isConfirmed) {
+    await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
+    await cargarPedidos(true); // Actualiza tabla sin cartel
+    playNotification('success');
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Estado de pago actualizado',
+        showConfirmButton: false,
+        timer: 1300,
+        background: obtenerTema().bg,
+        color: obtenerTema().txt
+    });
+  }
 };
 
 window.editarDetalles = async (id, actuales) => {
+    const tema = obtenerTema();
     const { value: nuevo } = await Swal.fire({
-        title: 'Editar detalles del pedido',
+        title: 'Editar detalles:',
         input: 'textarea',
         inputValue: actuales,
-        inputPlaceholder: 'Escriba los nuevos detalles aquí...',
-        showCancelButton: true,
         confirmButtonColor: '#E11D48',
-        confirmButtonText: 'Guardar',
+        background: tema.bg,
+        color: tema.txt,
+        confirmButtonText: 'Guardar', // Texto del botón principal
         cancelButtonText: 'Cancelar',
-        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+        showCancelButton: true,
+        allowOutsideClick: false
     });
 
-    if (nuevo !== undefined && nuevo !== null) {
-        await ejecutarAdminRPC("admin_update_detalles", {
+if (nuevo !== undefined && nuevo !== null) {
+        // Ejecutamos y guardamos el resultado
+        const resultado = await ejecutarAdminRPC("admin_update_detalles", {
             p_pedido_id: id,
             p_detalles: nuevo.trim()
         });
-        cargarPedidos(false, 'success');
+
+        // SI EL RESULTADO TIENE ERROR O FUE CANCELADO, NO MOSTRAMOS ÉXITO
+        if (resultado.error) return; 
+
+        await cargarPedidos(true); 
+        playNotification('success');
+        Swal.fire({
+            icon: 'success',
+            title: '¡Detalles guardados!',
+            timer: 1300,
+            showConfirmButton: false,
+            background: tema.bg,
+            color: tema.txt
+        });
     }
 };
 
 window.entregarPedido = async id => {
-    const result = await Swal.fire({
-        title: '¿Eliminar pedido?',
-        text: "Esta acción borrará el pedido de la base de datos y lista principal.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#E11D48',
-        cancelButtonColor: '#6e7881',
-        confirmButtonText: 'Eliminar',
-        cancelButtonText: 'Cancelar',
-        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-    });
+const result = await Swal.fire({
+    title: '¿Eliminar pedido?',
+    text: "Esta acción borrará el pedido por completo.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#E11D48',
+    cancelButtonColor: '#6e7881',
+    confirmButtonText: 'Eliminar',
+    cancelButtonText: 'Cancelar',
+    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+    allowOutsideClick: false // Recomendado para evitar cierres accidentales
+});
 
     if (result.isConfirmed) {
         await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });

@@ -525,10 +525,9 @@ table button:hover {
   form button, 
   #btnOrdenar,
   .btn-reportar {
-    background: linear-gradient(135deg, #ff375f 0%, #e11d48 100%);
+    background-color: #ff375f;
     color: white;
     border: none;
-    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
     transition: 0.3s;
   }
 
@@ -1189,4 +1188,8 @@ h1 {
         border: none !important;
         box-shadow: none !important;
     }
+}
+
+.modo-oscuro form button{
+  background-color: #ff375f;
 }
