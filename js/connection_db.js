@@ -31,145 +31,130 @@ const obtenerTema = () => ({
 
 
 /* =========================================
-   🚀 CONTROL DE ACCESO PROFESIONAL (v2.1.0)
+   🚀 CONTROL DE ACCESO (v2.1.5 - Con Spinner)
    ========================================= */
 
+// 1. Bloqueo inicial
+const blocker = document.createElement('style');
+blocker.id = 'blocker-style';
+blocker.innerHTML = "body { display: none !important; background: #000; }";
+document.head.appendChild(blocker);
+
 async function chequearEstadoWeb() {
-    // 1. Detectar el tema del usuario desde localStorage
-    const temaActual = localStorage.getItem('theme') || 'dark'; // Ajusta 'theme' al nombre que uses
+    const temaActual = localStorage.getItem('theme') || 'dark';
     const esOscuro = temaActual === 'dark';
-    
-    // Configuración de colores según el tema
-    const colBanda = esOscuro ? '#1a1a1a' : '#f0f0f0';
     const colFondo = esOscuro ? '#000000' : '#ffffff';
     const colTexto = esOscuro ? '#ffffff' : '#333333';
-    const colSub   = esOscuro ? '#888888' : '#666666';
 
-    // Realtime para cambios inmediatos
-    supabase.channel('config-live')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'configuracion' }, 
-        () => location.reload()).subscribe();
+    try {
+        supabase.channel('config-live')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'configuracion' }, 
+            () => location.reload()).subscribe();
 
-    const { data } = await supabase.from('configuracion').select('*').single();
+        const { data, error } = await supabase.from('configuracion').select('*').single();
 
-    if (data && data.mantenimiento) {
-        const target = new Date(data.fecha_apertura).getTime();
-        const now = new Date().getTime();
-
-        if (target <= now) {
-            mostrarSpinnerYCargar(esOscuro);
+        // Si no hay mantenimiento, liberar la web directamente
+        if (error || !data || !data.mantenimiento) {
+            finalizarBloqueo();
             return;
         }
 
-        // --- PANTALLA MANTENIMIENTO TEMATIZADA ---
+        const target = new Date(data.fecha_apertura).getTime();
+        const now = new Date().getTime();
+
+        // Si la fecha ya pasó, activar el proceso de carga con Spinner
+        if (target <= now) {
+            await ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto);
+            return;
+        }
+
+        // --- PANTALLA MANTENIMIENTO ---
         document.documentElement.innerHTML = `
             <head>
-                <title>Próximamente | San Valentín</title>
+                <title>Mantenimiento | San Valentín</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
                     body { 
                         margin: 0; background: ${colFondo} !important; color: ${colTexto} !important; 
                         display: flex !important; flex-direction: column; align-items: center; 
-                        justify-content: center; min-height: 100vh; font-family: 'Segoe UI', sans-serif;
-                        transition: background 0.5s ease;
+                        justify-content: center; min-height: 100vh; font-family: sans-serif; padding: 20px;
                     }
-                    .neon-title { 
-                        text-shadow: 0 0 15px #E11D48; font-size: 1.8rem; 
-                        text-transform: uppercase; margin-bottom: 30px; text-align: center; 
-                    }
-                    .countdown { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+                    .neon-title { text-shadow: 0 0 15px #E11D48; font-size: clamp(1.2rem, 5vw, 2.2rem); text-transform: uppercase; margin-bottom: 30px; text-align: center; font-weight: bold; }
+                    .countdown { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; width: 100%; }
                     .time-box { 
-                        text-align: center; border: 2px solid #E11D48; padding: 18px; 
-                        border-radius: 15px; min-width: 85px;
-                        background: ${esOscuro ? 'rgba(225, 29, 72, 0.1)' : 'rgba(225, 29, 72, 0.05)'}; 
+                        text-align: center; border: 2px solid #E11D48; padding: clamp(10px, 4vw, 20px); border-radius: 15px; 
+                        flex: 1 1 80px; max-width: 110px; background: ${esOscuro ? 'rgba(225, 29, 72, 0.1)' : 'rgba(225, 29, 72, 0.05)'}; 
                         box-shadow: 0 0 20px rgba(225, 29, 72, 0.2);
                     }
-                    .time-box span { display: block; font-size: 2.5rem; font-weight: bold; color: ${colTexto} !important; }
+                    .time-box span { display: block; font-size: clamp(1.8rem, 8vw, 2.5rem); font-weight: bold; color: ${colTexto} !important; }
                     .label { font-size: 0.7rem; color: #E11D48; margin-top: 5px; font-weight: bold; text-transform: uppercase; }
-                    .sub-msg { margin-top: 30px; color: ${colSub}; font-size: 0.9rem; letter-spacing: 1px; }
+                    .btn-back { margin-top: 40px; padding: 12px 25px; border-radius: 50px; border: 1px solid #E11D48; background: transparent; color: ${colTexto}; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
+                    .btn-back:hover { background: #E11D48; color: white; }
                 </style>
             </head>
             <body>
-                <h1 class="neon-title">MANTENIMIENTO FINALIZA EN:</h1>
+                <h1 class="neon-title">Apertura del Sistema</h1>
                 <div class="countdown">
-                    <div class="time-box"><span id="days">00</span><div class="label">Días</div></div>
-                    <div class="time-box"><span id="hours">00</span><div class="label">Hs</div></div>
-                    <div class="time-box"><span id="minutes">00</span><div class="label">Min</div></div>
-                    <div class="time-box"><span id="seconds">00</span><div class="label">Seg</div></div>
+                    <div class="time-box"><span id="hours">00</span><div class="label">Horas</div></div>
+                    <div class="time-box"><span id="minutes">00</span><div class="label">Minutos</div></div>
+                    <div class="time-box"><span id="seconds">00</span><div class="label">Segundos</div></div>
                 </div>
-                <p class="sub-msg">Trabajando en la web...</p>
+                <button class="btn-back" onclick="window.history.back()">← Volver atrás</button>
             </body>
         `;
 
         const timer = setInterval(() => {
             const diff = target - new Date().getTime();
-            if (diff <= 0) { clearInterval(timer); mostrarSpinnerYCargar(esOscuro); return; }
-            document.getElementById('days').innerText = Math.floor(diff / (1000*60*60*24)).toString().padStart(2,'0');
-            document.getElementById('hours').innerText = Math.floor((diff % (1000*60*60*24)) / (1000*60*60)).toString().padStart(2,'0');
-            document.getElementById('minutes').innerText = Math.floor((diff % (1000*60*60)) / (1000*60)).toString().padStart(2,'0');
-            document.getElementById('seconds').innerText = Math.floor((diff % (1000*60)) / 1000).toString().padStart(2,'0');
+            if (diff <= 0) {
+                clearInterval(timer);
+                ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto);
+                return;
+            }
+            document.getElementById('hours').innerText = Math.floor(diff / 3600000).toString().padStart(2,'0');
+            document.getElementById('minutes').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
+            document.getElementById('seconds').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
         }, 1000);
 
-        throw new Error("Mantenimiento Activo");
-    } else {
+    } catch (err) {
         finalizarBloqueo();
     }
 }
 
-async function mostrarSpinnerYCargar(esOscuro) {
-    const colFondo = esOscuro ? '#000000' : '#ffffff';
-    const colTexto = esOscuro ? '#ffffff' : '#333333';
-
+async function ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto) {
+    // 1. Desactivar mantenimiento en DB
     await supabase.from('configuracion').update({ mantenimiento: false }).eq('id', 1);
 
+    // 2. Inyectar Spinner Premium
     document.documentElement.innerHTML = `
         <style>
-            body { 
-                background: ${colFondo}; margin: 0; height: 100vh; 
-                display: flex; flex-direction: column; justify-content: center; align-items: center; 
-                font-family: sans-serif; overflow: hidden;
-            }
+            body { background: ${colFondo}; margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; overflow: hidden; }
             .loader-wrap { position: relative; width: 80px; height: 80px; }
             .ring {
                 position: absolute; width: 100%; height: 100%;
                 border: 4px solid transparent; border-top: 4px solid #E11D48;
-                border-radius: 50%; animation: spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-                box-shadow: 0 0 15px rgba(225, 29, 72, 0.5);
+                border-radius: 50%; animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
             }
-            .ring:nth-child(2) { border-top: 4px solid #fff; animation-delay: 0.3s; width: 60px; height: 60px; top: 10px; left: 10px; }
+            .ring:nth-child(2) { border-top: 4px solid ${colTexto}; animation-delay: 0.2s; scale: 0.7; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            .loading-text { 
-                color: ${colTexto}; margin-top: 30px; letter-spacing: 4px; 
-                text-transform: uppercase; font-size: 0.7rem; font-weight: bold;
-                animation: pulse 1.5s infinite;
-            }
-            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+            .loading-text { color: ${colTexto}; margin-top: 30px; letter-spacing: 3px; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; animation: pulse 1.5s infinite; }
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         </style>
-        <div class="loader-wrap">
-            <div class="ring"></div>
-            <div class="ring"></div>
-        </div>
-        <div class="loading-text">Iniciando Sistema</div>
+        <div class="loader-wrap"><div class="ring"></div><div class="ring"></div></div>
+        <div class="loading-text">Cargando contenido...</div>
     `;
 
-    // Duración de 4 segundos para que se aprecie bien el spinner
-    setTimeout(() => { location.reload(); }, 4000);
+    // 3. Recarga final después de 5 segundos
+    setTimeout(() => { location.reload(); }, 5000);
 }
 
 function finalizarBloqueo() {
-    const blocker = document.getElementById('blocker-style');
-    if (blocker) blocker.remove();
+    const el = document.getElementById('blocker-style');
+    if (el) el.remove();
     document.body.style.display = 'block';
     document.body.style.opacity = '1';
 }
 
-const block = document.createElement('style'); 
-block.id = 'blocker-style';
-block.innerHTML = "body { display: none !important; }";
-document.head.appendChild(block);
-
 chequearEstadoWeb();
-
 
 
 /* =========================
