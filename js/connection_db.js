@@ -30,9 +30,9 @@ const obtenerTema = () => ({
 });
 
 
-/* =========================================
-   🚀 CONTROL DE ACCESO (v2.1.5 - Con Spinner)
-   ========================================= */
+/* =================================================
+   🚀 CONTROL DE ACCESO (v2.2.0 - Developer Mode)
+   ================================================= */
 
 // 1. Bloqueo inicial
 const blocker = document.createElement('style');
@@ -41,29 +41,38 @@ blocker.innerHTML = "body { display: none !important; background: #000; }";
 document.head.appendChild(blocker);
 
 async function chequearEstadoWeb() {
+    // --- LLAVE MAESTRA PARA TI ---
+    const urlParams = new URLSearchParams(window.location.search);
+    // Si entras con ?dev=123 (puedes cambiar 123 por tu clave secreta)
+    if (urlParams.get('dev') === '123' || localStorage.getItem('modo_dev') === 'activo') {
+        localStorage.setItem('modo_dev', 'activo'); // Guarda la sesión para que no tengas que poner la URL siempre
+        finalizarBloqueo();
+        console.log("🛠️ Modo Desarrollador Activo");
+        return; 
+    }
+
     const temaActual = localStorage.getItem('theme') || 'dark';
     const esOscuro = temaActual === 'dark';
     const colFondo = esOscuro ? '#000000' : '#ffffff';
     const colTexto = esOscuro ? '#ffffff' : '#333333';
 
     try {
+        // Realtime
         supabase.channel('config-live')
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'configuracion' }, 
-            () => location.reload()).subscribe();
+            () => {
+                if (localStorage.getItem('modo_dev') !== 'activo') location.reload();
+            }).subscribe();
 
         const { data, error } = await supabase.from('configuracion').select('*').single();
 
-        // Si no hay mantenimiento, liberar la web directamente
         if (error || !data || !data.mantenimiento) {
             finalizarBloqueo();
             return;
         }
 
         const target = new Date(data.fecha_apertura).getTime();
-        const now = new Date().getTime();
-
-        // Si la fecha ya pasó, activar el proceso de carga con Spinner
-        if (target <= now) {
+        if (target <= new Date().getTime()) {
             await ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto);
             return;
         }
@@ -79,17 +88,15 @@ async function chequearEstadoWeb() {
                         display: flex !important; flex-direction: column; align-items: center; 
                         justify-content: center; min-height: 100vh; font-family: sans-serif; padding: 20px;
                     }
-                    .neon-title { text-shadow: 0 0 15px #E11D48; font-size: clamp(1.2rem, 5vw, 2.2rem); text-transform: uppercase; margin-bottom: 30px; text-align: center; font-weight: bold; }
-                    .countdown { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; width: 100%; }
+                    .neon-title { text-shadow: 0 0 15px #E11D48; font-size: clamp(1.2rem, 5vw, 2rem); text-transform: uppercase; margin-bottom: 30px; text-align: center; }
+                    .countdown { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
                     .time-box { 
-                        text-align: center; border: 2px solid #E11D48; padding: clamp(10px, 4vw, 20px); border-radius: 15px; 
-                        flex: 1 1 80px; max-width: 110px; background: ${esOscuro ? 'rgba(225, 29, 72, 0.1)' : 'rgba(225, 29, 72, 0.05)'}; 
-                        box-shadow: 0 0 20px rgba(225, 29, 72, 0.2);
+                        text-align: center; border: 2px solid #E11D48; padding: 15px; border-radius: 12px; 
+                        min-width: 80px; background: rgba(225, 29, 72, 0.1); 
                     }
-                    .time-box span { display: block; font-size: clamp(1.8rem, 8vw, 2.5rem); font-weight: bold; color: ${colTexto} !important; }
+                    .time-box span { display: block; font-size: 2rem; font-weight: bold; color: ${colTexto} !important; }
                     .label { font-size: 0.7rem; color: #E11D48; margin-top: 5px; font-weight: bold; text-transform: uppercase; }
-                    .btn-back { margin-top: 40px; padding: 12px 25px; border-radius: 50px; border: 1px solid #E11D48; background: transparent; color: ${colTexto}; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s; }
-                    .btn-back:hover { background: #E11D48; color: white; }
+                    .btn-back { margin-top: 30px; padding: 10px 20px; border-radius: 50px; border: 1px solid #E11D48; background: transparent; color: ${colTexto}; cursor: pointer; }
                     .btn-back {text-decoration:none;}
                 </style>
             </head>
@@ -100,19 +107,13 @@ async function chequearEstadoWeb() {
                     <div class="time-box"><span id="minutes">00</span><div class="label">Minutos</div></div>
                     <div class="time-box"><span id="seconds">00</span><div class="label">Segundos</div></div>
                 </div>
-                <a href="https://www.google.com/"
-                <button class="btn-back">← Salir</button>
-              
+                <a href="https://google.com"<button class="btn-back">← Salir</button>
             </body>
         `;
 
-        const timer = setInterval(() => {
+        setInterval(() => {
             const diff = target - new Date().getTime();
-            if (diff <= 0) {
-                clearInterval(timer);
-                ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto);
-                return;
-            }
+            if (diff <= 0) location.reload();
             document.getElementById('hours').innerText = Math.floor(diff / 3600000).toString().padStart(2,'0');
             document.getElementById('minutes').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
             document.getElementById('seconds').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
@@ -124,30 +125,18 @@ async function chequearEstadoWeb() {
 }
 
 async function ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto) {
-    // 1. Desactivar mantenimiento en DB
     await supabase.from('configuracion').update({ mantenimiento: false }).eq('id', 1);
-
-    // 2. Inyectar Spinner Premium
     document.documentElement.innerHTML = `
         <style>
-            body { background: ${colFondo}; margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; overflow: hidden; }
-            .loader-wrap { position: relative; width: 80px; height: 80px; }
-            .ring {
-                position: absolute; width: 100%; height: 100%;
-                border: 4px solid transparent; border-top: 4px solid #E11D48;
-                border-radius: 50%; animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-            }
-            .ring:nth-child(2) { border-top: 4px solid ${colTexto}; animation-delay: 0.2s; scale: 0.7; }
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            .loading-text { color: ${colTexto}; margin-top: 30px; letter-spacing: 3px; text-transform: uppercase; font-size: 0.75rem; font-weight: bold; animation: pulse 1.5s infinite; }
-            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+            body { background: ${colFondo}; margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; }
+            .loader-wrap { position: relative; width: 60px; height: 60px; }
+            .ring { position: absolute; width: 100%; height: 100%; border: 4px solid transparent; border-top: 4px solid #E11D48; border-radius: 50%; animation: spin 1s linear infinite; }
+            @keyframes spin { 100% { transform: rotate(360deg); } }
         </style>
-        <div class="loader-wrap"><div class="ring"></div><div class="ring"></div></div>
-        <div class="loading-text">Cargando contenido...</div>
+        <div class="loader-wrap"><div class="ring"></div></div>
+        <div style="color:${colTexto}; margin-top:20px; letter-spacing:2px">CARGANDO...</div>
     `;
-
-    // 3. Recarga final después de 5 segundos
-    setTimeout(() => { location.reload(); }, 5000);
+    setTimeout(() => { location.reload(); }, 4000);
 }
 
 function finalizarBloqueo() {
