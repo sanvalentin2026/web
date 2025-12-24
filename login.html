@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <text y='0.9em' font-size='90'>❤️</text>
+</svg>">
+
+<script>
+    (function() {
+        const sesionRaw = localStorage.getItem("usuario");
+        console.log("Revisando sesión en Login:", sesionRaw); // Ver en consola
+        
+        if (sesionRaw) {
+            const sesion = JSON.parse(sesionRaw);
+            // Comprobamos si es true (booleano) o "true" (texto)
+            if (sesion.permisos === true || sesion.permisos === "true") {
+                console.log("¡VIP detectado! Saltando...");
+                window.location.replace("index.html");
+            }
+        }
+    })();
+</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesion</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="js/auth.js"></script>
+
+  <link rel="stylesheet" href="css/verification.css">
+</head>
+<body>
+
+  <div class="auth-container">
+    <h2 id="titulo">Iniciar sesión</h2>
+
+    <div class="input-group">
+      <i class="fa fa-user"></i>
+      <input type="text" id="username" placeholder="Usuario">
+    </div>
+
+    <div class="input-group">
+      <i class="fa fa-lock"></i>
+      <input type="password" id="password" placeholder="Contraseña">
+    </div>
+
+    <button id="btnPrincipal" onclick="login()">Entrar</button>
+
+    <p class="toggle">
+      <span id="textoToggle">¿No tienes cuenta?</span>
+      <a href="register.html" onclick="toggleModo()">Crear cuenta</a>
+    </p>
+  </div>
+  
+<script type="module" src="js/themes.js"></script>
+</body>
+</html>

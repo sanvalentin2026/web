@@ -1,0 +1,132 @@
+/* ===== Reset y Base ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  transition: background-color 0.3s ease;
+}
+
+/* ===== MODO CLARO (Default) ===== */
+body.modo-claro {
+  background-color: #FFF0F6;
+}
+
+.modo-claro .auth-container {
+  background: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modo-claro h2 { color: #E11D48; }
+
+.modo-claro .input-group input {
+  border: 1px solid #F3C1D9;
+  background: #fff;
+}
+
+/* ===== MODO OSCURO (Glassmorphism) ===== */
+body.modo-oscuro {
+  background-color: #050505;
+}
+
+.modo-oscuro .auth-container {
+  background: rgba(28, 28, 30, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+.modo-oscuro h2 { color: #ff375f; }
+
+.modo-oscuro .input-group input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.modo-oscuro .input-group i { color: #ff375f; }
+
+/* ===== Componentes del Formulario ===== */
+.auth-container {
+  width: 100%;
+  max-width: 380px;
+  padding: 40px 30px;
+  border-radius: 24px;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.input-group i {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #E11D48;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 14px 14px 45px;
+  border-radius: 14px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+/* Botón Principal (Mismo estilo que index) */
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #E11D48;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.modo-oscuro button {
+  background: #ff375f;
+}
+
+/* Enlaces inferiores */
+.toggle {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.toggle a {
+  color: #E11D48;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.modo-oscuro .toggle a { color: #ff375f; }

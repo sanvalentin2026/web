@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear cuenta</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="js/auth.js"></script>
+
+  <!-- TU CSS -->
+  <link rel="stylesheet" href="css/verification.css">
+</head>
+<body>
+
+  <div class="auth-container">
+    <h2>Crear cuenta</h2>
+
+    <div class="input-group">
+      <i class="fa fa-user"></i>
+      <input type="text" id="username" placeholder="Nombre de usuario">
+    </div>
+
+    <div class="input-group">
+      <i class="fa fa-lock"></i>
+      <input type="password" id="password" placeholder="Contraseña">
+    </div>
+
+    <div class="input-group">
+      <i class="fa fa-lock"></i>
+      <input type="password" id="password2" placeholder="Repetir contraseña">
+    </div>
+
+    <button onclick="register()">Crear cuenta</button>
+
+    <p class="toggle">
+      ¿Ya tienes cuenta?
+      <a href="login.html">Iniciar sesión</a>
+    </p>
+  </div>
+  <script type="module" src="js/themes.js"></script>
+</body>
+</html>

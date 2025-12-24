@@ -23,7 +23,7 @@ content="
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
   <text y='0.9em' font-size='90'>❤️</text>
 </svg>">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -332,6 +332,15 @@ btn.disabled = false;
 btn.textContent = "Enviar reporte";
 });
   </script>
+<script type="module">
+    import { verificarSesion } from './js/auth.js';
+    
+    // Ejecutar inmediatamente
+    verificarSesion().catch(err => {
+        console.error("Error de guardia:", err);
+        window.location.href = "login.html";
+    });
+</script>
 <script src="js/themes.js"></script>
 </body>
 </html>

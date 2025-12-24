@@ -40,6 +40,78 @@ blocker.id = 'blocker-style';
 blocker.innerHTML = "body { display: none !important; background: #000; }";
 document.head.appendChild(blocker);
 
+
+/* ======================================================
+    🛡️ MONITOR DE SEGURIDAD (DEBUG MODE)
+====================================================== */
+function activarMonitorDeSeguridad() {
+    console.log("1. Intentando iniciar monitor...");
+    
+    const sesionRaw = localStorage.getItem("usuario");
+    if (!sesionRaw) {
+        console.error("❌ No se encontró sesión en localStorage");
+        return;
+    }
+
+    const sesion = JSON.parse(sesionRaw);
+    console.log("2. Sesión cargada para ID:", sesion.id);
+
+    // Creamos el canal
+    const canal = supabase.channel(`monitor-${sesion.id}`);
+
+    canal.on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'usuarios', 
+        filter: `id=eq.${sesion.id}` 
+    }, (payload) => {
+        console.log("3. ¡DATOS RECIBIDOS DESDE DB!", payload);
+        
+        const valorPermiso = payload.new.permisos;
+        const tema = obtenerTema();
+
+        // CASO: TRUE
+        if (valorPermiso === true || valorPermiso === 'true') {
+            console.log("4. DISPARANDO ALERT: PERMISO CONCEDIDO");
+            
+            sesion.permisos = true;
+            localStorage.setItem("usuario", JSON.stringify(sesion));
+
+            Swal.fire({
+                title: "¡Permisos concedidos!",
+                text: "Ahora eres administrador.",
+                icon: "success",
+                background: tema.bg,
+                color: tema.txt,
+                confirmButtonColor: '#E11D48'
+            }).then(() => { location.reload(); });
+        }
+
+        // CASO: FALSE
+        if (valorPermiso === false || valorPermiso === 'false') {
+            console.log("4. DISPARANDO ALERT: PERMISO RETIRADO");
+            
+            localStorage.removeItem("usuario");
+            Swal.fire({
+                title: "Permisos Retirados",
+                text: "Ya no eres administrador.",
+                icon: "error",
+                background: tema.bg,
+                color: tema.txt,
+                confirmButtonColor: '#E11D48'
+            }).then(() => { window.location.href = "login.html"; });
+        }
+    })
+    .subscribe((status) => {
+        console.log("5. ESTADO DE SUSCRIPCIÓN:", status);
+    });
+}
+
+// FORZAR EJECUCIÓN
+console.log("0. Script cargado, llamando a monitor...");
+activarMonitorDeSeguridad();
+
+
 async function chequearEstadoWeb() {
     // --- LLAVE MAESTRA PARA TI ---
     const urlParams = new URLSearchParams(window.location.search);
@@ -148,14 +220,6 @@ function finalizarBloqueo() {
 
 chequearEstadoWeb();
 
-
-/* =========================
-   🧠 TOKEN SAFE LAYER
-========================= */
-function limpiarTokenAdmin() {
-  localStorage.removeItem("admin_token");
-}
-
 // Esto quita el bloqueo de audio tras el primer clic del usuario
 const desbloquearAudio = () => {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -164,71 +228,50 @@ const desbloquearAudio = () => {
 };
 window.addEventListener('click', desbloquearAudio);
 
-async function solicitarPermisoAdmin() {
-  const token = localStorage.getItem("admin_token");
-  if (token) return token;
+async function verificarAccesoAdmin() {
+    const rawData = localStorage.getItem("usuario");
+    const tema = obtenerTema(); // <--- Obtenemos el tema actual
+    
+    if (!rawData) {
+        playNotification('error');
+        Swal.fire({
+            title: "Sesión expirada",
+            text: "Por favor, inicia sesión nuevamente.",
+            icon: "warning",
+            confirmButtonColor: '#E11D48',
+            background: tema.bg, // <--- Aplicamos fondo
+            color: tema.txt      // <--- Aplicamos texto
+        }).then(() => {
+            window.location.href = "login.html";
+        });
+        return false;
+    }
 
-  const tema = obtenerTema();
+    try {
+        const sesion = JSON.parse(rawData);
+        const { data, error } = await supabase
+            .from("usuarios")
+            .select("permisos")
+            .eq("id", sesion.id)
+            .single();
 
-  // 1. Pedir contraseña con Bloqueo de clic externo
-  const { value: password } = await Swal.fire({
-    title: 'Acción restringida',
-    input: 'password',
-    inputLabel: 'Contraseña de administrador',
-    showCancelButton: true,
-    confirmButtonText: 'Confirmar',
-    confirmButtonColor: '#E11D48',
-    background: tema.bg,
-    color: tema.txt,
-    allowOutsideClick: false, // <--- ESTO EVITA SALTAR EL LOGEO
-    allowEscapeKey: false    // <--- EVITA SALIR CON LA TECLA ESC
-  });
-
-  // Si cancela, devolvemos null explícitamente
-  if (!password) return null;
-
-  // 2. Verificación Directa (Sin Spinner intermedio)
-  const { data, error } = await supabase.rpc("admin_login", {
-    p_password: password
-  });
-
-  if (error || typeof data !== "string" || data.length < 10) {
-    playNotification('error');
-    await Swal.fire({
-      icon: "error",
-      title: "Acceso Denegado",
-      text: "Contraseña incorrecta.",
-      confirmButtonColor: '#E11D48',
-      background: tema.bg,
-      color: tema.txt,
-    });
-    return null;
-  }
-
-  localStorage.setItem("admin_token", data);
-  return data;
-}
-
-async function ejecutarAdminRPC(nombreRPC, params, reintento = true) {
-  let token = localStorage.getItem("admin_token");
-
-  if (!token) {
-    token = await solicitarPermisoAdmin();
-    // Si el usuario canceló el login, cortamos la ejecución aquí
-    if (!token) return { error: "cancelado" }; 
-  }
-
-  const res = await supabase.rpc(nombreRPC, {
-    ...params,
-    p_token: token
-  });
-
-  if (res.error && reintento) {
-    limpiarTokenAdmin();
-    return ejecutarAdminRPC(nombreRPC, params, false);
-  }
-
-  return res;
+        if (error || !data?.permisos) {
+            playNotification('error');
+            Swal.fire({
+                title: "Acceso Denegado",
+                text: "No tienes permisos de administrador.",
+                icon: "error",
+                confirmButtonColor: '#E11D48',
+                background: tema.bg,
+                color: tema.txt
+            });
+            return false;
+        }
+        return true;
+    } catch (e) {
+        localStorage.removeItem("usuario");
+        return false;
+    }
 }
 
 /* =========================
@@ -503,23 +546,92 @@ const tema = obtenerTema(); // <--- Usamos tu helper de temas
 }
 
 /* =========================
-   📝 REGISTRAR
+    📝 REGISTRAR PEDIDO
 ========================= */
 form.addEventListener("submit", async e => {
-  e.preventDefault();
+    e.preventDefault();
+    const tema = obtenerTema();
 
-  await supabase.from("pedidos").insert({
-    nombre_comprador: nombre.value,
-    seccion_comprador: seccionSelect.value,
-    nombre_receptor: receptor.value,
-    seccion_receptor: seccionReceptorSelect.value,
-    producto: producto.value,
-    detalles: detallesInput.value || null,
-    pagado: false
-  });
+    // 1. Obtener sesión local
+    const sesionRaw = localStorage.getItem("usuario");
+    if (!sesionRaw) {
+        window.location.href = "login.html";
+        return;
+    }
+    const sesion = JSON.parse(sesionRaw);
 
-  form.reset();
-  cargarPedidos(false, 'success');
+    // 2. VERIFICACIÓN REAL DE PERMISOS (El "Filtro")
+    // Consultamos a la DB si este usuario realmente tiene permiso = true
+    const { data: userCheck, error: authError } = await supabase
+        .from("usuarios")
+        .select("permisos")
+        .eq("id", sesion.id)
+        .single();
+
+    if (authError || !userCheck || userCheck.permisos !== true) {
+        playNotification('error');
+        Swal.fire({
+            title: "Acceso Restringido",
+            text: "Tu cuenta aún no ha sido autorizada por un administrador para realizar pedidos.",
+            icon: "error",
+            background: tema.bg,
+            color: tema.txt
+        });
+        return;
+    }
+
+    // 3. Si tiene permiso, procedemos con el bloqueo visual
+    Swal.fire({
+        title: 'Procesando pedido...',
+        background: tema.bg,
+        color: tema.txt,
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        const nombreComprador = document.getElementById("nombre").value.trim();
+        const seccionComprador = seccionSelect.value;
+        const nombreReceptor = document.getElementById("receptor").value.trim();
+        const seccionReceptor = seccionReceptorSelect.value;
+        const productoSeleccionado = document.getElementById("producto").value;
+
+// ... dentro del try del submit ...
+        const detallesOriginales = detallesInput.value.trim();
+
+// Eliminamos la "llave" y enviamos solo el texto limpio
+const { error } = await supabase.from("pedidos").insert({
+    nombre_comprador: nombreComprador,
+    seccion_comprador: seccionComprador,
+    nombre_receptor: nombreReceptor,
+    seccion_receptor: seccionReceptor,
+    producto: productoSeleccionado,
+    detalles: detallesOriginales,
+    pagado: false,
+    creado_por: sesion.username, 
+    // AQUÍ EL CAMBIO: En lugar del nombre, ponemos la etiqueta de original
+    ultima_edicion_por: "(Detalles originales)" 
+});
+
+if (error) throw error;
+
+        form.reset();
+        playNotification('success');
+        Swal.fire({
+            icon: 'success',
+            title: '¡Pedido creado!',
+            timer: 2000,
+            showConfirmButton: false,
+            background: tema.bg,
+            color: tema.txt
+        });
+
+        cargarPedidos(true);
+
+    } catch (err) {
+        playNotification('error');
+        Swal.fire({ title: "Error", text: "No se pudo procesar.", icon: "error" });
+    }
 });
 
 /* =========================
@@ -548,7 +660,14 @@ style.innerHTML = `
 document.head.appendChild(style);
 
 // 2. Funciones de Gestión
+/* =========================
+    ⚙️ ACCIONES ACTUALIZADAS
+========================= */
+
 window.togglePagado = async (id, estado) => {
+    if (!(await verificarAccesoAdmin())) return;
+    const tema = obtenerTema();
+
     const result = await Swal.fire({
         title: estado ? '¿Marcar como NO pagado?' : '¿Confirmar pago?',
         icon: 'question',
@@ -556,31 +675,42 @@ window.togglePagado = async (id, estado) => {
         confirmButtonColor: '#E11D48',
         cancelButtonColor: '#6e7881',
         confirmButtonText: 'Cambiar',
-        cancelButtonText: 'Cancelar',
-        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+        background: tema.bg,
+        color: tema.txt
     });
 
-if (result.isConfirmed) {
-    await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
-    await cargarPedidos(true); // Actualiza tabla sin cartel
-    playNotification('success');
-    
-  setTimeout(() => {
-    Swal.fire({
-      icon: 'success',
-      title: '¡Estado de pago actualizado!',
-      timer: 1300,
-      showConfirmButton: false,
-      background: obtenerTema().bg,
-      color: obtenerTema().txt
-    });
-  }, 80);
-  }
+    if (result.isConfirmed) {
+        await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
+        await cargarPedidos(true);
+        playNotification('success');
+        
+        setTimeout(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Estado actualizado!',
+                timer: 1300,
+                showConfirmButton: false,
+                background: tema.bg,
+                color: tema.txt
+            });
+        }, 80);
+    }
 };
 
 window.editarDetalles = async (id, actuales) => {
+    if (!(await verificarAccesoAdmin())) return;
     const tema = obtenerTema();
+
+    // 1. Obtener el nombre real de quien está sentado frente a la pantalla
+    const sesionRaw = localStorage.getItem("usuario");
+    let nombreEditorReal = "Usuario Desconocido";
+
+    if (sesionRaw) {
+        const objetoUsuario = JSON.parse(sesionRaw);
+        nombreEditorReal = objetoUsuario.username || "Usuario";
+    }
+
+    // 2. Abrir la ventana de edición
     const { value: nuevo } = await Swal.fire({
         title: 'Editar detalles:',
         input: 'textarea',
@@ -588,55 +718,102 @@ window.editarDetalles = async (id, actuales) => {
         confirmButtonColor: '#E11D48',
         background: tema.bg,
         color: tema.txt,
-        confirmButtonText: 'Guardar', // Texto del botón principal
-        cancelButtonText: 'Cancelar',
         showCancelButton: true,
-        allowOutsideClick: false
+        cancelButtonText: 'Cancelar'
     });
 
-if (nuevo !== undefined && nuevo !== null) {
-  const resultado = await ejecutarAdminRPC("admin_update_detalles", {
-    p_pedido_id: id,
-    p_detalles: nuevo.trim()
-  });
+    // 3. Si el usuario escribió algo y dio a "Confirmar"
+    if (nuevo !== undefined && nuevo !== null) {
+        // Mostramos un pequeño cargando opcional
+        console.log("Actualizando pedido...", id);
 
-  if (resultado.error) return;
+        const { error } = await supabase
+            .from("pedidos")
+            .update({ 
+                detalles: nuevo.trim(),
+                // Aquí es donde cambiamos "(Detalles originales)" por tu nombre real
+                ultima_edicion_por: nombreEditorReal 
+            })
+            .eq("id", id);
 
-  await cargarPedidos(true);
-  playNotification('success');
+        if (error) {
+            console.error("ERROR DE SUPABASE:", error.message);
+            playNotification('error');
+            Swal.fire({
+                title: "Error",
+                text: "No se pudieron guardar los cambios",
+                icon: "error",
+                background: tema.bg,
+                color: tema.txt
+            });
+        } else {
+            // ÉXITO
+            await cargarPedidos(true);
+            playNotification('success');
 
-  // 👇 AQUÍ ES DONDE DECÍA
-  setTimeout(() => {
-    Swal.fire({
-      icon: 'success',
-      title: '¡Detalles guardados!',
-      timer: 1300,
-      showConfirmButton: false,
-      background: obtenerTema().bg,
-      color: obtenerTema().txt
+            // Feedback visual rápido
+            Swal.fire({
+                icon: 'success',
+                title: 'Detalles actualizados',
+                text: `Registrado por: ${nombreEditorReal}`,
+                timer: 1500,
+                showConfirmButton: false,
+                background: tema.bg,
+                color: tema.txt
+            });
+        }
+    }
+};
+/* =========================
+    🗑️ ELIMINAR PEDIDO
+========================= */
+window.entregarPedido = async (id) => {
+    // 1. Verificamos permisos antes de hacer nada
+    if (!(await verificarAccesoAdmin())) return;
+    
+    const tema = obtenerTema();
+
+    const result = await Swal.fire({
+        title: '¿Eliminar pedido?',
+        text: "Esta acción no se puede deshacer.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#6e7881',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        background: tema.bg,
+        color: tema.txt
     });
-  }, 80);
-}};
-
-
-window.entregarPedido = async id => {
-const result = await Swal.fire({
-    title: '¿Eliminar pedido?',
-    text: "Esta acción borrará el pedido por completo.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#E11D48',
-    cancelButtonColor: '#6e7881',
-    confirmButtonText: 'Eliminar',
-    cancelButtonText: 'Cancelar',
-    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
-    allowOutsideClick: false // Recomendado para evitar cierres accidentales
-});
 
     if (result.isConfirmed) {
-        await ejecutarAdminRPC("admin_delete_pedido", { p_pedido_id: id });
-        cargarPedidos(false, 'success');
+        try {
+            const { error } = await supabase
+                .from("pedidos")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            playNotification('delete');
+            
+            Swal.fire({
+                title: '¡Pedido eliminado!',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false,
+                background: tema.bg,
+                color: tema.txt
+            });
+
+            // No hace falta recargar manualmente, el Realtime de pedidos lo hará solo
+        } catch (err) {
+            Swal.fire({
+                title: "Error",
+                text: "No se pudo eliminar el pedido.",
+                icon: "error"
+            });
+        }
     }
 };
 

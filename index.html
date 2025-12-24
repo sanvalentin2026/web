@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+    (function() {
+        const sesionRaw = localStorage.getItem("usuario");
+        
+        if (!sesionRaw) {
+            window.location.replace("login.html");
+            return;
+        }
+
+        const sesion = JSON.parse(sesionRaw);
+        // Si NO es true y NO es "true", para afuera
+        if (sesion.permisos !== true && sesion.permisos !== "true") {
+            window.location.replace("login.html");
+        }
+    })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy"
-content="
-  default-src 'self';
-
-  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com;
-
-  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
-  style-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
-
-  font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-
-  img-src 'self' data:;
-
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net;
-">
-<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="theme-color" content="#E11D48">
 
@@ -26,6 +26,7 @@ content="
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
 <title>Pedidos San Valentin</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/changelog.css">
 <link rel="icon" href="data:image/svg+xml,
@@ -40,14 +41,27 @@ content="
 </head>
 <body>
 
-<h1>Pedidos San Valentin</h1> <!-- Botón para reiniciar token -->
+<header class="main-header">
+    <div class="header-container">
+        <div class="header-logo">
+            <h1>San Valentín</h1>
+        </div>
+        
+        <nav class="header-actions">
+            <a href="reportar.html" class="action-btn report-btn" title="Reportar un error">
+                <i class="fa-solid fa-bug"></i>
+            </a>
 
-<div class="header-top-controls">
-    <a href="reportar.html" class="btn-reportar-simple">¿Algo no funciona bien? Click aquí</a>
-    <button id="boton-clima" class="btn-toggle">
-        <i id="icono-clima" class="fa-solid fa-moon"></i>
-    </button>
-</div>
+            <button id="btn-tema" class="action-btn" title="Cambiar tema">
+                <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+
+            <button onclick="logout()" class="action-btn logout" title="Cerrar Sesión">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </nav>
+    </div>
+</header>
 
 
 <form id="pedidoForm">
@@ -55,13 +69,13 @@ content="
   <select id="seccion" required></select>
   <input type="text" id="receptor" placeholder="Nombre del receptor:" required>
   <select id="seccion_receptor" required></select>
-  <input type="text" id="producto" placeholder="Producto (Que cosa es):" required>
+  <input type="text" id="producto" placeholder="Producto (Tipo):" required>
   <textarea
   id="detalles"
   placeholder="Detalles o notas del pedido (opcional):"
   rows="3"
 ></textarea>
-  <button type="submit">Registrar el pedido</button>
+  <button type="submit">Crear pedido</button>
 </form>
 
 <div class="controls">
@@ -75,7 +89,7 @@ content="
       <li data-orden="id_desc">ID descendente</li>
     </ul>
   </div>
-  <input type="text" id="buscador" placeholder="Buscar por ID, nombre, seccion, producto, detalles...">
+  <input type="text" id="buscador" placeholder="Buscar pedido por caracteristicas">
   <select id="filtroSeccion">
     <option value="">Filtrar busqueda por secciones</option>
     <option value="7-1">7-1</option>
@@ -120,15 +134,20 @@ content="
   <span id="infoPagina"></span>
   <button id="nextPage">Siguiente ➡</button>
 </div>
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js")
-      .then(() => console.log("✅ PWA lista"))
-      .catch(err => console.error("❌ SW error", err));
-  }
+<script type="module">
+    import { verificarSesion } from './js/auth.js';
+    
+    // Al cargar index.html, verificamos sesión
+    verificarSesion().catch(err => {
+        console.error("Sesión no válida:", err);
+        // IMPORTANTE: Redirigir fuera de aquí
+        window.location.replace("login.html");
+    });
 </script>
-
-<script  src="js/themes.js"></script>
+<script type="module" src="js/auth.js"></script>
+</script>
+<script src="js/header.js"></script>
+<script src="js/themes.js"></script>
 <script type="module" src="js/connection_db.js"></script>
 </body>
 </html>

@@ -124,7 +124,7 @@ form button:hover {
 }
 
 #buscador:focus,
-#filtroSeccion:focus
+#filtroSeccion:focus,
 #btn-reportar
  {
   outline: none;
@@ -444,10 +444,6 @@ table button {
 table button:hover {
   background-color: #E11D48;
 }
-
-  table {
-  }
-
 
   thead th {
     border-bottom: 2px solid #e91e63; /* línea más fuerte en el header */
@@ -1196,4 +1192,105 @@ h1 {
 
 .modo-oscuro form button{
   background-color: #ff375f;
+}
+/* ===== HEADER STYLE ===== */
+.main-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px); /* Efecto cristal */
+    border-bottom: 1px solid rgba(225, 29, 72, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 10px 0;
+    border-radius: 15px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.header-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-logo h1 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.action-btn {
+    background: #f3c1d9;
+    border: none;
+    color: #e11d48;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: #e11d48;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.action-btn.logout {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.action-btn.logout:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Modo Oscuro para el Header */
+.modo-oscuro .main-header {
+    background: rgba(28, 28, 30, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modo-oscuro .action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff375f;
+}
+
+/* RESPONSIVE MÓVIL */
+@media (max-width: 600px) {
+    .header-logo h1 {
+        font-size: 1.4rem;
+    }
+    
+    .header-actions {
+        gap: 8px;
+    }
+
+    .action-btn {
+        padding: 8px 10px;
+        font-size: 1rem;
+    }
+    
+    /* Ocultamos texto del contador en móvil si es necesario */
+    #user-count {
+        font-size: 0.9rem;
+    }
+}
+
+form{
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
