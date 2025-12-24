@@ -150,38 +150,115 @@ async function chequearEstadoWeb() {
         }
 
         // --- PANTALLA MANTENIMIENTO ---
-        document.documentElement.innerHTML = `
-            <head>
-                <title>Mantenimiento | San Valentín</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body { 
-                        margin: 0; background: ${colFondo} !important; color: ${colTexto} !important; 
-                        display: flex !important; flex-direction: column; align-items: center; 
-                        justify-content: center; min-height: 100vh; font-family: sans-serif; padding: 20px;
-                    }
-                    .neon-title { text-shadow: 0 0 15px #E11D48; font-size: clamp(1.2rem, 5vw, 2rem); text-transform: uppercase; margin-bottom: 30px; text-align: center; }
-                    .countdown { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-                    .time-box { 
-                        text-align: center; border: 2px solid #E11D48; padding: 15px; border-radius: 12px; 
-                        min-width: 80px; background: rgba(225, 29, 72, 0.1); 
-                    }
-                    .time-box span { display: block; font-size: 2rem; font-weight: bold; color: ${colTexto} !important; }
-                    .label { font-size: 0.7rem; color: #E11D48; margin-top: 5px; font-weight: bold; text-transform: uppercase; }
-                    .btn-back { margin-top: 30px; padding: 10px 20px; border-radius: 50px; border: 1px solid #E11D48; background: transparent; color: ${colTexto}; cursor: pointer; }
-                    .btn-back {text-decoration:none;}
-                </style>
-            </head>
-            <body>
-                <h1 class="neon-title">En mantenimiento</h1>
-                <div class="countdown">
-                    <div class="time-box"><span id="hours">00</span><div class="label">Horas</div></div>
-                    <div class="time-box"><span id="minutes">00</span><div class="label">Minutos</div></div>
-                    <div class="time-box"><span id="seconds">00</span><div class="label">Segundos</div></div>
-                </div>
-                <a href="https://google.com"<button class="btn-back">← Salir</button>
-            </body>
-        `;
+// --- PANTALLA MANTENIMIENTO v2.2.1 ---
+// --- PANTALLA MANTENIMIENTO v2.2.2 (Scroll Bloqueado) ---
+document.documentElement.innerHTML = `
+    <head>
+        <title>Mantenimiento | San Valentín</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <style>
+            /* Bloqueo total de scroll */
+            html, body { 
+                margin: 0; 
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden !important; /* Evita scroll en PC */
+                position: fixed; /* Evita rebote en iOS/Safari */
+                background: ${colFondo} !important;
+            }
+
+            body { 
+                color: ${colTexto} !important; 
+                display: flex !important; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                font-family: 'Segoe UI', Roboto, sans-serif;
+                padding: 20px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+
+            .neon-title { 
+                text-shadow: 0 0 15px #E11D48; 
+                font-size: 1.6rem; 
+                text-transform: uppercase; 
+                margin-bottom: 5px; 
+                color: #E11D48;
+                font-weight: 800;
+                letter-spacing: 1px;
+            }
+
+            .sub-texto {
+                font-size: 0.95rem;
+                opacity: 0.8;
+                margin-bottom: 25px;
+                max-width: 260px;
+                line-height: 1.4;
+            }
+
+            .countdown { 
+                display: flex; 
+                gap: 10px; 
+                justify-content: center; 
+                width: 100%;
+                max-width: 350px; /* Tamaño ideal para móvil */
+            }
+
+            .time-box { 
+                flex: 1; 
+                text-align: center; 
+                border: 2px solid #E11D48; 
+                padding: 12px 2px; 
+                border-radius: 15px; 
+                background: rgba(225, 29, 72, 0.05); 
+                backdrop-filter: blur(5px);
+            }
+
+            .time-box span { 
+                display: block; 
+                font-size: 1.6rem; 
+                font-weight: bold; 
+                color: ${colTexto} !important; 
+            }
+
+            .label { 
+                font-size: 0.6rem; 
+                color: #E11D48; 
+                margin-top: 2px; 
+                font-weight: bold; 
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .btn-back { 
+                margin-top: 40px; 
+                padding: 12px 30px; 
+                border-radius: 50px; 
+                border: 1px solid rgba(225, 29, 72, 0.5); 
+                background: transparent; 
+                color: ${colTexto}; 
+                text-decoration: none;
+                font-size: 0.85rem;
+                transition: 0.3s;
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 class="neon-title">EN MANTENIMIENTO</h1>
+        <p class="sub-texto">La web se abrirá automáticamente en:</p>
+        
+        <div class="countdown">
+            <div class="time-box"><span id="hours">00</span><div class="label">Horas</div></div>
+            <div class="time-box"><span id="minutes">00</span><div class="label">Minutos</div></div>
+            <div class="time-box"><span id="seconds">00</span><div class="label">Segundos</div></div>
+        </div>
+
+        <a href="https://google.com" class="btn-back">← Salir</a>
+    </body>
+`;
 
         setInterval(() => {
             const diff = target - new Date().getTime();
@@ -347,50 +424,50 @@ function formatFechaMobile(fechaStr) {
    🖥️ RENDER PEDIDOS
 ========================= */
 function renderPedidos(pedidos) {
-  if (cargandoPedidos) return;
+    if (cargandoPedidos) return;
+    
+    let htmlFinal = "";
+    const esMobile = window.innerWidth <= 900;
 
-  pedidosBody.innerHTML = "";
+    if (!pedidos.length) {
+        pedidosBody.innerHTML = `<tr><td colspan="7" class="no-pedidos">Sin pedidos para mostrar</td></tr>`;
+        return;
+    }
 
-  if (!pedidos.length) {
-    pedidosBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="no-pedidos">Sin pedidos para mostrar</td>
-      </tr>
-    `;
-    return;
-  }
+pedidos.forEach(p => {
+    // 1. Formateamos la fecha fuera del IF para tenerla disponible
+    const fechaFormateada = formatFechaMobile(p.created_at);
 
-  const esMobile = window.innerWidth <= 900;
+    // 2. Si es mobile, la ponemos en un div. Si es PC, la ponemos como texto pequeño.
+    const fechaHTML = esMobile 
+        ? `<div style="font-size: 11px; color: gray; margin-bottom: 5px;">📅 ${fechaFormateada}</div>` 
+        : `<br><span style="font-size: 10px; opacity: 0.6;">${fechaFormateada}</span>`;
 
-  pedidos.forEach(p => {
-
-    const fechaMobile = esMobile
-  ? `
-    <div class="campo">
-      <span class="valor">${formatFechaMobile(p.created_at)}</span>
-    </div>
-  `
-  : "";
-
-
-    pedidosBody.innerHTML += `
-      <tr>
-        <td>${p.id}</td>
-        <td>${p.nombre_comprador} (${p.seccion_comprador})</td>
-        <td>${p.nombre_receptor} (${p.seccion_receptor})</td>
-        <td>${p.producto}</td>
-        <td>${p.detalles || "<em>Sin detalles</em>"}</td>
-        <td>${p.pagado ? "✅" : "❌"}</td>
-
-        <td>
-          ${fechaMobile}
-          <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
-          <button onclick="editarDetalles(${p.id}, \`${p.detalles || ""}\`)">Detalles</button>
-          <button onclick="entregarPedido(${p.id})">Eliminar</button>
-        </td>
-      </tr>
-    `;
-  });
+    htmlFinal += `
+        <tr>
+            <td>${p.id}</td>
+            <td>${p.nombre_comprador} (${p.seccion_comprador})</td>
+            <td>${p.nombre_receptor} (${p.seccion_receptor})</td>
+            <td>${p.producto}</td>
+            <td class="detalles-celda">
+                ${p.detalles || "<em>Sin detalles</em>"}
+                <br>
+                <small style="opacity:0.5; font-size:10px; color: #E11D48;">
+                    ${p.ultima_edicion_por || ""}
+                </small>
+            </td>
+            <td>${p.pagado ? "✅" : "❌"}</td>
+            <td>
+                ${fechaHTML} <div class="acciones-botones">
+                    <button class="btn-pago" onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
+                    <button class="btn-edit" onclick="editarDetalles(${p.id}, \`${p.detalles || ""}\`)">Detalles</button>
+                    <button class="btn-del" onclick="entregarPedido(${p.id})">Eliminar</button>
+                </div>
+            </td>
+        </tr>`;
+});
+    
+    pedidosBody.innerHTML = htmlFinal;
 }
 
 
@@ -499,7 +576,11 @@ document.head.appendChild(styleSwal);
 ========================= */
 async function cargarPedidos(silencioso = false, tipoSonido = null) {
     cargandoPedidos = true;
-const tema = obtenerTema(); // <--- Usamos tu helper de temas
+    const tema = obtenerTema();
+
+    // Calculamos el rango para traer solo 20 (esta página y la que sigue)
+    const desde = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
+    const hasta = desde + (PEDIDOS_POR_PAGINA * 2) - 1;
 
     if (!silencioso) {
         Swal.fire({
@@ -511,37 +592,28 @@ const tema = obtenerTema(); // <--- Usamos tu helper de temas
         });
     }
 
-    const { data } = await supabase
+    // CONSULTA OPTIMIZADA v1.3.9
+    const { data, count, error } = await supabase
         .from("pedidos")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*", { count: 'exact' }) 
+        .order("created_at", { ascending: false })
+        .range(desde, hasta); // Solo trae lo necesario
+
+    if (error) {
+        console.error("Error v1.3.9:", error.message);
+        return;
+    }
 
     pedidosCache = data || [];
+    // Actualizamos el total para la paginación basado en el 'count' real de la DB
+    pedidosFiltrados = pedidosCache; 
+    
     cargandoPedidos = false;
-    aplicarFiltros(); // Esto renderiza la tabla
+    renderPagina(); // Ahora renderPagina solo dibujará lo que ya filtramos por rango
 
-    // B: Si no es silencioso, cerramos el loading y disparamos sonido + toast
-// B: Si no es silencioso, manejamos el cierre y el sonido
     if (!silencioso) {
-        // 1. Si hay un sonido, lo lanzamos PRIMERO
         if (tipoSonido) playNotification(tipoSonido);
-
-        // 2. Esperamos un momento (300ms) para que el sonido empiece fuerte
-        // y el usuario note que algo terminó antes de que desaparezca el cargando
-        setTimeout(() => {
-            Swal.close(); 
-
-            // 3. Mostramos la confirmación final
-            const esOscuro = document.body.classList.contains('modo-oscuro');
-            Swal.fire({
-                icon: 'success',
-                title: '¡Listo!',
-                timer: 1300, // Un poco más de tiempo para que se aprecie
-                showConfirmButton: false,
-                background: esOscuro ? '#1c1c1e' : '#fff',
-                color: esOscuro ? '#f5f5f7' : '#374151',
-            });
-        }, 300); // Este pequeño retraso es la clave
+        setTimeout(() => { Swal.close(); }, 300);
     }
 }
 
@@ -855,3 +927,20 @@ supabase
    🚀 INIT
 ========================= */
 cargarPedidos(true);
+setInterval(async () => {
+    const sesionRaw = localStorage.getItem("usuario");
+    if (sesionRaw) {
+        const sesion = JSON.parse(sesionRaw);
+        const { data } = await supabase
+            .from("usuarios")
+            .select("permisos")
+            .eq("id", sesion.id)
+            .single();
+
+        if (!data || !data.permisos) {
+            console.warn("⚠️ Sesión invalidada por el servidor.");
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+    }
+}, 60000); // Una vez por minuto
