@@ -497,7 +497,6 @@ const tema = obtenerTema(); // <--- Usamos tu helper de temas
                 showConfirmButton: false,
                 background: esOscuro ? '#1c1c1e' : '#fff',
                 color: esOscuro ? '#f5f5f7' : '#374151',
-                iconColor: 'green'
             });
         }, 300); // Este pequeño retraso es la clave
     }
@@ -567,14 +566,16 @@ if (result.isConfirmed) {
     await cargarPedidos(true); // Actualiza tabla sin cartel
     playNotification('success');
     
+  setTimeout(() => {
     Swal.fire({
-        icon: 'success',
-        title: 'Estado de pago actualizado',
-        showConfirmButton: false,
-        timer: 1300,
-        background: obtenerTema().bg,
-        color: obtenerTema().txt
+      icon: 'success',
+      title: '¡Estado de pago actualizado!',
+      timer: 1300,
+      showConfirmButton: false,
+      background: obtenerTema().bg,
+      color: obtenerTema().txt
     });
+  }, 80);
   }
 };
 
@@ -594,27 +595,29 @@ window.editarDetalles = async (id, actuales) => {
     });
 
 if (nuevo !== undefined && nuevo !== null) {
-        // Ejecutamos y guardamos el resultado
-        const resultado = await ejecutarAdminRPC("admin_update_detalles", {
-            p_pedido_id: id,
-            p_detalles: nuevo.trim()
-        });
+  const resultado = await ejecutarAdminRPC("admin_update_detalles", {
+    p_pedido_id: id,
+    p_detalles: nuevo.trim()
+  });
 
-        // SI EL RESULTADO TIENE ERROR O FUE CANCELADO, NO MOSTRAMOS ÉXITO
-        if (resultado.error) return; 
+  if (resultado.error) return;
 
-        await cargarPedidos(true); 
-        playNotification('success');
-        Swal.fire({
-            icon: 'success',
-            title: '¡Detalles guardados!',
-            timer: 1300,
-            showConfirmButton: false,
-            background: tema.bg,
-            color: tema.txt
-        });
-    }
-};
+  await cargarPedidos(true);
+  playNotification('success');
+
+  // 👇 AQUÍ ES DONDE DECÍA
+  setTimeout(() => {
+    Swal.fire({
+      icon: 'success',
+      title: '¡Detalles guardados!',
+      timer: 1300,
+      showConfirmButton: false,
+      background: obtenerTema().bg,
+      color: obtenerTema().txt
+    });
+  }, 80);
+}};
+
 
 window.entregarPedido = async id => {
 const result = await Swal.fire({
