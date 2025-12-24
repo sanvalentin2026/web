@@ -323,13 +323,17 @@ table {
 }
 /* 📅 Fecha solo visible en cards */
 .fecha-mobile {
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #E11D48;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #9ca3af; /* gris */
+  margin-top: 4px;
 }
 
+.fecha-mobile .hora {
+  color: #dc2626; /* rojo */
+  font-weight: 600;
+}
 
 
 /* Modos de estilos */

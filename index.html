@@ -3,6 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy"
+content="
+  default-src 'self';
+
+  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com;
+
+  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+  style-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+
+  font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+
+  img-src 'self' data:;
+
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net;
+">
+
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+
 <title>Pedidos San Valentin</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/changelog.css">
