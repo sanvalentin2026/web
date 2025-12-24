@@ -1294,3 +1294,41 @@ form{
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
 }
+/* --- ESTILO DE BOTONES UNIFICADO v2.2.4 --- */
+.acciones-botones {
+    display: flex;
+    flex-direction: column; /* Siempre en columna */
+    gap: 8px;               /* Espacio entre botones */
+    width: 100%;            /* Abarca todo el ancho disponible */
+    margin-top: 10px;       /* Separa los botones del contenido superior */
+}
+
+.acciones-botones button {
+    width: 100% !important; /* Fuerza el ancho total */
+    padding: 10px 0;        /* Altura consistente */
+    font-size: 12px;        /* Tamaño de letra legible */
+    font-weight: bold;
+    border-radius: 8px;     /* Bordes redondeados modernos */
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.1s ease;
+}
+
+.acciones-botones button:active {
+    transform: scale(0.98); /* Efecto de clic */
+}
+
+/* Colores consistentes */
+.btn-pago { background-color: #10b981 !important; color: white; }
+.btn-edit { background-color: #3b82f6 !important; color: white; }
+.btn-del  { background-color: #ef4444 !important; color: white; }
+
+/* Corrección de la fecha para que no se encime */
+.contenedor-fecha {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2); /* Separador sutil */
+}
