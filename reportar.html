@@ -12,10 +12,14 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* Bloqueo visual inicial para evitar parpadeo */
     html { background-color: #050505; } 
-    
     * { box-sizing: border-box; }
+
+    /* --- ESTILO PARA LAS ALERTAS REDONDEADAS --- */
+    .mi-borde-redondeado {
+      border-radius: 20px !important;
+    }
+
     body {
       font-family: system-ui, -apple-system, sans-serif;
       background: linear-gradient(135deg, #ffe4f1, #fff);
@@ -23,7 +27,7 @@
       padding: 20px;
       color: #333;
       transition: background 0.3s ease;
-      display: none; /* Se activa por JS tras verificar sesión */
+      display: none; 
     }
 
     .container { max-width: 600px; margin: 0 auto; }
@@ -88,7 +92,9 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #ffffff;
     }
-    .modo-oscuro select option { background-color: #1c1c1e; color: white; }
+    option{
+      color: black;
+    }
 
     @media (max-width: 600px) {
       body { padding: 14px; }
@@ -137,7 +143,6 @@
   <script type="module">
     import { verificarSesion, supabase, obtenerTema } from './js/auth.js'; 
 
-    // 2. Verificación de seguridad y mostrar contenido
     const init = async () => {
       try {
         await verificarSesion();
@@ -148,12 +153,13 @@
     };
     init();
 
-    // 3. Lógica de envío
     const form = document.getElementById("formReporte");
     const btn = document.getElementById("btnEnviar");
 
     form.addEventListener("submit", async e => {
       e.preventDefault();
+      const tema = obtenerTema(); // Traemos el objeto completo de auth.js
+
       btn.disabled = true;
       btn.textContent = "Enviando...";
 
@@ -165,27 +171,28 @@
         user_agent: navigator.userAgent
       });
 
-      const tema = obtenerTema();
-
       if (error) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
           text: 'No se pudo enviar el reporte',
           position: 'top',
-          background: tema.bg,
-          color: tema.txt
+          customClass: {
+            popup: 'mi-borde-redondeado'
+          },
+          ...tema // Pasamos background, color y customClass automáticos
         });
       } else {
         await Swal.fire({
           icon: 'success',
           title: 'Reporte enviado',
-          text: '¡Gracias por tu ayuda!',
           timer: 2000,
           showConfirmButton: false,
           position: 'top',
-          background: tema.bg,
-          color: tema.txt
+          customClass: {
+            popup: 'mi-borde-redondeado'
+          },
+          ...tema
         });
         form.reset();
       }

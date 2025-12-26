@@ -303,8 +303,7 @@ window.editarDetalles = async (id, texto) => {
             // 4. 🔥 NUEVA ALERTA DE DETALLES GUARDADOS
             Swal.fire({
                 icon: 'success',
-                title: '¡Guardado!',
-                text: 'Detalles guardados',
+                title: 'Detalles guardados',
                 timer: 1700,
                 showConfirmButton: false,
                 background: tema.bg,
