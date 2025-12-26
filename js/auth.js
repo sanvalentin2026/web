@@ -1,6 +1,6 @@
-// ==========================
-// 🔐 SUPABASE CONFIG
-// ==========================
+// ==========================================
+// 🔐 CONFIGURACIÓN ÚNICA DE SUPABASE
+// ==========================================
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
@@ -9,177 +9,201 @@ const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==========================================
-// 🎨 UTILIDAD DE TEMAS (Para SweetAlert)
+// 🎨 UTILIDAD DE TEMAS (Lectura de LocalStorage)
 // ==========================================
-const obtenerTema = () => ({
-    bg: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-    txt: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-});
+export const obtenerTema = () => {
+    const temaGuardado = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+    const esOscuro = temaGuardado === 'modo-oscuro';
+    
+    return {
+        background: esOscuro ? '#1c1c1e' : '#ffffff',
+        color: esOscuro ? '#f5f5f7' : '#374151',
+        confirmButtonColor: '#ff375f',
+    };
+};
 
-
-
-// =================================================
-// 🛡️ GUARDIA DE ACCESO (PROTECCIÓN TOTAL)
-// Bloquea el renderizado ANTES de mostrar nada
-// =================================================
+// ==========================================
+// 🛡️ GUARDIA DE ACCESO
+// ==========================================
 export const verificarSesion = async function() {
     const sesionLocal = localStorage.getItem("usuario");
     if (!sesionLocal) {
-        document.documentElement.style.display = 'none'; 
-        window.location.replace("login.html"); // Usa replace para evitar bucles
-        return;
-    }
-
-    const sesion = JSON.parse(sesionLocal);
-
-    const { data, error } = await supabase
-        .from("usuarios")
-        .select("id, username, permisos") // Traemos también el username por si acaso
-        .eq("id", sesion.id)
-        .single();
-
-    if (error || !data || data.permisos !== true) { // <--- Verificamos permiso de una vez
-        localStorage.removeItem("usuario");
+        document.documentElement.style.display = 'none';
         window.location.replace("login.html");
-        return;
+        return null;
     }
+    try {
+        const sesion = JSON.parse(sesionLocal);
+        const { data, error } = await supabase
+            .from("usuarios")
+            .select("id, permisos")
+            .eq("id", sesion.id)
+            .single();
 
-    // 🔥 ACTUALIZAMOS EL LOCALSTORAGE CON LA INFO REAL DE LA DB
-    // Esto hace que si cambias el permiso en Supabase, el navegador se entere
-    localStorage.setItem("usuario", JSON.stringify({
-        ...sesion,           // Mantiene lo que ya tenías (id, loginTime)
-        permisos: data.permisos // Actualiza con el valor fresco (true)
-    }));
-    
-    document.documentElement.style.display = 'block';
-    return data;
+        // 🚨 SI EL PERMISO CAMBIÓ A FALSE O HUBO ERROR
+        if (error || !data || data.permisos !== true) {
+            const tema = obtenerTema();
+            localStorage.removeItem("usuario");
+
+            await Swal.fire({
+                title: "Sesión Revocada",
+                text: "Tu acceso ha sido desactivado por un administrador.",
+                icon: "error",
+                allowOutsideClick: false,
+                ...tema
+            });
+            
+            window.location.replace("login.html");
+            return null;
+        }
+        
+        document.body.style.display = 'block';
+        return data;
+    } catch (e) {
+        window.location.replace("login.html");
+        return null;
+    }
 };
 // ==========================
-// 🟢 REGISTRO (INSERCIÓN ÚNICA)
+// 🟢 REGISTRO (CON ALERTA Y TEMA)
 // ==========================
-window.register = async function register() {
-    const username = document.getElementById("username").value.trim();
-    const password1 = document.getElementById("password").value.trim();
-    const password2 = document.getElementById("password2").value.trim();
+window.register = async function() {
+    const user = document.getElementById("username")?.value.trim();
+    const pass = document.getElementById("password")?.value.trim();
+    const pass2 = document.getElementById("password2")?.value.trim();
     const tema = obtenerTema();
 
-    if (!username || !password1 || !password2) {
-        Swal.fire({ title: "Error", text: "Completa todos los campos", icon: "error", background: tema.bg, color: tema.txt });
+    if (!user || !pass || !pass2) {
+        Swal.fire({ title: "Error", text: "Campos incompletos", icon: "warning", ...tema });
         return;
     }
-    if (password1 !== password2) {
-        Swal.fire({ title: "Error", text: "Las contraseñas no coinciden", icon: "error", background: tema.bg, color: tema.txt });
+    if (pass !== pass2) {
+        Swal.fire({ title: "Error", text: "Las contraseñas no coinciden", icon: "error", ...tema });
         return;
     }
 
-    Swal.fire({ title: 'Creando cuenta...', background: tema.bg, color: tema.txt, didOpen: () => Swal.showLoading() });
+    Swal.fire({ title: 'Creando cuenta...', ...tema, didOpen: () => Swal.showLoading(), position:'top' });
 
-    // Inserción directa con verificación de RLS
     const { error } = await supabase.from("usuarios").insert({
-        username: username,
-        password: password1,
+        username: user,
+        password: pass,
         permisos: false 
     });
 
     if (error) {
-        // Si el error es por duplicado (username único en DB)
-        const msg = error.code === "23505" ? "El usuario ya existe" : error.message;
-        Swal.fire({ title: "Error", text: msg, icon: "error", background: tema.bg, color: tema.txt });
+        const msg = error.code === "23505" ? "El usuario ya existe" : "Error al registrar";
+        Swal.fire({ title: "Error", text: msg, icon: "error", ...tema });
     } else {
         await Swal.fire({ 
-            title: "¡Éxito!", 
-            text: "Cuenta creada. Inicia sesión.", 
-            icon: "success", 
-            background: tema.bg, 
-            color: tema.txt 
+            text: "Cuenta enviada para aprobación", 
+            showConfirmButton: false,
+            timer: 2500,
+            icon: "success",
+            position: 'top', 
+            customClass: {
+            popup: 'mi-borde-redondeado'
+        },
+            ...tema 
         });
-        window.location.href = "login.html";
+        window.location.replace("login.html");
     }
 };
 
 // ==========================================
-// 🔵 LOGIN SEGURO
+// 🔵 LOGIN (CON TEMA)
 // ==========================================
-window.login = async function login() {
+window.login = async function() {
     const userInput = document.getElementById("username")?.value.trim();
     const passInput = document.getElementById("password")?.value;
     const tema = obtenerTema();
 
     if (!userInput || !passInput) {
-        Swal.fire({ title: "Error", text: "Completa los campos", icon: "error", background: tema.bg, color: tema.txt });
+        Swal.fire({ title: "Error", text: "Ingresa tus datos", icon: "warning", ...tema });
         return;
     }
 
-    Swal.fire({ title: 'Verificando...', background: tema.bg, color: tema.txt, didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+    Swal.fire({ title: 'Verificando...', ...tema, didOpen: () => Swal.showLoading(), position: 'top', customClass: {
+            popup: 'mi-borde-redondeado'
+        } });
 
     const { data, error } = await supabase
         .from("usuarios")
-        .select("id, username, password, permisos")
+        .select("*")
         .eq("username", userInput)
         .eq("password", passInput)
         .maybeSingle();
 
     if (error || !data) {
-        Swal.fire({ title: "Error", text: "Credenciales incorrectas", icon: "error", background: tema.bg, color: tema.txt });
+        Swal.fire({ title: "Error", text: "Credenciales inválidas", icon: "error", ...tema, position: 'top', customClass: {
+            popup: 'mi-borde-redondeado'
+        } });
         return;
     }
 
-    // Guardamos los datos en el navegador
     localStorage.setItem("usuario", JSON.stringify({
         id: data.id,
         username: data.username,
-        permisos: data.permisos,
-        loginTime: Date.now()
+        permisos: data.permisos
     }));
 
-    // --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
-    if (data.permisos === true || data.permisos === "true") {
-        // SI TIENE PERMISO: Se va a las tablas
+    if (data.permisos === true) {
         window.location.replace("index.html");
     } else {
-        // SI NO TIENE PERMISO: Se queda aquí y le avisamos
         Swal.fire({ 
             title: "Acceso Pendiente", 
-            text: "Tu cuenta ha sido creada y registrada, pero debe verificarse por un administrador.", 
+            text: "Tu cuenta debe ser aprobada por un administrador.", 
             icon: "info", 
-            background: tema.bg, 
-            color: tema.txt 
+            customClass: {
+            popup: 'mi-borde-redondeado'
+        },
+            ...tema 
         });
     }
 };
 
-// ==========================
-// 🔴 LOGOUT
-// ==========================
-// Definimos la función afuera para que sea GLOBAL
-// Definimos la función y la asignamos a 'window' para que el HTML la vea sí o si
+// ==========================================
+// 🔴 LOGOUT (CON TEMA)
+// ==========================================
 window.logout = function() {
-    // Verificar que SweetAlert esté cargado
-    if (typeof Swal === 'undefined') {
-        if (confirm("¿Seguro que quieres salir?")) {
-            localStorage.removeItem('usuario');
-            window.location.href = 'login.html';
-        }
-        return;
-    }
-
-    // Configuración de la Alerta
+    const tema = obtenerTema();
     Swal.fire({
         title: '¿Cerrar sesión?',
-        text: "Tendrás que volver a iniciar sesión para interactuar.",
-        icon: 'warning',
+        icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#E11D48',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Sí, salir',
+        text: "Tendras que volver a iniciar sesion para interactuar.",
+        confirmButtonText: 'Confirmar',
         cancelButtonText: 'Cancelar',
-        // Adaptación de colores al tema actual
-        background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-        color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
+        ...tema
     }).then((result) => {
         if (result.isConfirmed) {
-            localStorage.removeItem('usuario'); // Borra la sesión
-            window.location.href = 'login.html'; // Redirige
+            localStorage.removeItem('usuario');
+            window.location.replace('login.html');
         }
     });
 };
+
+// =================================================
+// 🕵️ VIGILANTE EN TIEMPO REAL
+// =================================================
+if (localStorage.getItem("usuario")) {
+    // Opción A: Revisar cada 30 segundos (Muy estable y no consume recursos)
+    setInterval(async () => {
+        await verificarSesion();
+    }, 30000); // 30000ms = 30 segundos
+
+    // Opción B: Escuchar cambios directos en la base de datos (Tiempo Real)
+    const sesion = JSON.parse(localStorage.getItem("usuario"));
+    supabase
+        .channel('cambios-permisos')
+        .on('postgres_changes', { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'usuarios', 
+            filter: `id=eq.${sesion.id}` 
+        }, (payload) => {
+            if (payload.new.permisos === false) {
+                verificarSesion(); // Esto disparará la alerta y el logout
+            }
+        })
+        .subscribe();
+}

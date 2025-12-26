@@ -304,7 +304,7 @@ table {
 .paginacion button {
   min-width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 30%;
   border: none;
   background: #f3c1d9;
   color: #7a1f4b;
@@ -989,7 +989,7 @@ table {
         border-collapse: separate; /* Cambiar a separate ayuda a que los bordes redondeados se vean mejor */
         border-spacing: 0;
         border: 1px solid #F3C1D9 !important; /* El borde exterior de la tabla */
-        border-radius: 14px;
+        border-radius: 20px;
         overflow: hidden;
     }
 

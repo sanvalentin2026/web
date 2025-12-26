@@ -287,25 +287,6 @@ const detallesInput = document.getElementById("detalles");
 const paginacionDiv = document.getElementById("paginacion");
 
 
-//FIXES DE CARGADO
-
-supabase
-  .channel("pedidos-realtime")
-  .on(
-    "postgres_changes",
-    { event: "*", schema: "public", table: "pedidos" },
-    () => {
-      if (realtimeTimeout) return;
-
-      realtimeTimeout = setTimeout(() => {
-        realtimeTimeout = null;
-        cargarPedidos();
-      }, 400); // 🔒 agrupa eventos
-    }
-  )
-  .subscribe();
-
-
 /* =========================
    📄 PAGINACIÓN
 ========================= */
@@ -497,13 +478,16 @@ document.head.appendChild(styleSwal);
 /* =========================
    🔄 CARGAR
 ========================= */
+/* =========================
+    🔄 CARGAR (CORREGIDO)
+========================= */
 async function cargarPedidos(silencioso = false, tipoSonido = null) {
     cargandoPedidos = true;
-const tema = obtenerTema(); // <--- Usamos tu helper de temas
+    const tema = obtenerTema();
 
     if (!silencioso) {
         Swal.fire({
-            title: 'Cargando...',
+            title: 'Cargando pedidos...',
             background: tema.bg,
             color: tema.txt,
             allowOutsideClick: false,
@@ -511,37 +495,25 @@ const tema = obtenerTema(); // <--- Usamos tu helper de temas
         });
     }
 
-    const { data } = await supabase
+    // ORDENAMOS POR ID: Esto garantiza que NADA se mueva de su lugar al editar
+    const { data, error } = await supabase
         .from("pedidos")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("id", { ascending: true }); 
 
-    pedidosCache = data || [];
+    if (error) {
+        console.error("Error:", error.message);
+    } else {
+        pedidosCache = data || [];
+        // Aplicamos filtros inmediatamente para que la página 1 se vea al cargar
+        aplicarFiltros(); 
+    }
+
     cargandoPedidos = false;
-    aplicarFiltros(); // Esto renderiza la tabla
 
-    // B: Si no es silencioso, cerramos el loading y disparamos sonido + toast
-// B: Si no es silencioso, manejamos el cierre y el sonido
     if (!silencioso) {
-        // 1. Si hay un sonido, lo lanzamos PRIMERO
         if (tipoSonido) playNotification(tipoSonido);
-
-        // 2. Esperamos un momento (300ms) para que el sonido empiece fuerte
-        // y el usuario note que algo terminó antes de que desaparezca el cargando
-        setTimeout(() => {
-            Swal.close(); 
-
-            // 3. Mostramos la confirmación final
-            const esOscuro = document.body.classList.contains('modo-oscuro');
-            Swal.fire({
-                icon: 'success',
-                title: '¡Listo!',
-                timer: 1300, // Un poco más de tiempo para que se aprecie
-                showConfirmButton: false,
-                background: esOscuro ? '#1c1c1e' : '#fff',
-                color: esOscuro ? '#f5f5f7' : '#374151',
-            });
-        }, 300); // Este pequeño retraso es la clave
+        setTimeout(() => { Swal.close(); }, 300);
     }
 }
 
@@ -681,7 +653,12 @@ window.togglePagado = async (id, estado) => {
 
     if (result.isConfirmed) {
         await supabase.from("pedidos").update({ pagado: !estado }).eq("id", id);
-        await cargarPedidos(true);
+        const index = pedidosCache.findIndex(p => p.id === id);
+        if (index !== -1) {
+        pedidosCache[index].pagado = !estado;
+        aplicarFiltros(); // re-render sin reordenar
+        }
+
         playNotification('success');
         
         setTimeout(() => {
@@ -748,7 +725,6 @@ window.editarDetalles = async (id, actuales) => {
             });
         } else {
             // ÉXITO
-            await cargarPedidos(true);
             playNotification('success');
 
             // Feedback visual rápido
@@ -836,22 +812,22 @@ supabase
   .on(
     "postgres_changes", 
     { event: "*", schema: "public", table: "pedidos" }, 
-    () => {
-      // Si ya hay un temporizador corriendo, no hagas nada
-      if (realtimeTimeout) return;
-
-      // Espera 400ms antes de actualizar para no saturar
+    (payload) => {
+      // Si recibimos un cambio, actualizamos la lista silenciosamente
+      if (realtimeTimeout) clearTimeout(realtimeTimeout);
+      
       realtimeTimeout = setTimeout(() => {
         realtimeTimeout = null;
-        
-        // LLAMADA CLAVE: 'true' significa silencioso
-        // Actualiza la lista pero NO muestra el Loading ni suena
-        cargarPedidos(true); 
-      }, 400); 
+        cargarPedidos(true); // Actualiza la tabla sin mostrar cartel de carga
+      }, 300);
     }
   )
   .subscribe();
 /* =========================
-   🚀 INIT
+    🚀 INIT
 ========================= */
-cargarPedidos(true);
+// IMPORTANTE: Al cargar el script, llamamos a la función
+// Cambiamos a 'false' para que el usuario vea que está conectando al principio
+document.addEventListener("DOMContentLoaded", () => {
+    cargarPedidos(false); 
+});

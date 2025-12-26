@@ -4,57 +4,32 @@
   <meta charset="UTF-8">
   <title>Reportar un problema</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy"
-content="
-  default-src 'self';
+  
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net;">
 
-  script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com;
-
-  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
-  style-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
-
-  font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-
-  img-src 'self' data:;
-
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net;
-">
-<link rel="icon" href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-  <text y='0.9em' font-size='90'>❤️</text>
-</svg>">
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>❤️</text></svg>">
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
+    /* Bloqueo visual inicial para evitar parpadeo */
+    html { background-color: #050505; } 
+    
     * { box-sizing: border-box; }
-
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: linear-gradient(135deg, #ffe4f1, #fff);
       min-height: 100vh;
       padding: 20px;
       color: #333;
+      transition: background 0.3s ease;
+      display: none; /* Se activa por JS tras verificar sesión */
     }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 32px;
-      margin-bottom: 8px;
-      color: #e63946;
-    }
-
-    .sub {
-      text-align: center;
-      color: #666;
-      margin-bottom: 24px;
-      font-size: 15px;
-    }
-
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { text-align: center; font-size: 32px; margin-bottom: 8px; color: #e63946; }
+    .sub { text-align: center; color: #666; margin-bottom: 24px; font-size: 15px; }
+    
     form {
       background: #fff;
       padding: 22px;
@@ -64,12 +39,7 @@ content="
       gap: 14px;
     }
 
-    label {
-      font-weight: 600;
-      font-size: 14px;
-      color: #444;
-    }
-
+    label { font-weight: 600; font-size: 14px; color: #444; }
     input, textarea, select {
       padding: 12px;
       border-radius: 10px;
@@ -78,18 +48,7 @@ content="
       width: 100%;
     }
 
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: #e63946;
-    }
-
+    textarea { min-height: 120px; resize: vertical; }
     button {
       margin-top: 10px;
       padding: 14px;
@@ -100,129 +59,45 @@ content="
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-volver {
+      background: none; border: none; color: #ff4d6d;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      margin-bottom: 14px;
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    /* MODO OSCURO */
+    body.modo-oscuro {
+      background: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%) !important;
+      color: #f5f5f7;
     }
-
-    .info {
-      font-size: 13px;
-      color: #777;
-      text-align: center;
-      margin-top: 8px;
+    .modo-oscuro h1 { color: #ff375f; }
+    .modo-oscuro .sub { color: #a1a1a6; }
+    .modo-oscuro form {
+      background: rgba(28, 28, 30, 0.75);
+      backdrop-filter: blur(25px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    /* ===== Botón Volver ===== */
-.btn-volver {
-  display: inline-block;
-  margin-bottom: 14px;
-  background: none;
-  border: none;
-  color: #ff4d6d;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-    /* ===== MODO OSCURO (Liquid Glass Black) ===== */
-.modo-oscuro {
-  /* Fondo oscuro con gradiente sutil para resaltar el vidrio */
-  background: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%) !important;
-  color: #f5f5f7;
-
-  /* Títulos con brillo neón */
-  h1 {
-    color: #ff375f;
-  }
-
-  .sub, .info {
-    color: #a1a1a6;
-  }
-
-  /* Formulario tipo Vidrio Ahumado */
-  form {
-    background: rgba(28, 28, 30, 0.75);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-  }
-
-  label {
-    color: #e5e5e7;
-  }
-
-  /* Inputs y Selects oscuros */
-  input, textarea, select {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    transition: all 0.3s ease;
-  }
-
-  input:focus, textarea:focus, select:focus {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #ff375f;
-    box-shadow: 0 0 0 4px rgba(255, 55, 95, 0.1);
-  }
-
-  /* Botón Principal */
-  button {
-    background: linear-gradient(135deg, #ff375f 0%, #e11d48 100%);
-  }
-
-  button:hover {
-    filter: brightness(1.2);
-    transform: translateY(-1px);
-  }
-
-  button:disabled {
-    background: #444;
-    color: #888;
-  }
-
-  /* Botón Volver minimalista */
-  .btn-volver {
-    color: #ff375f;
-    background:none;
-  }
-}
-
-/* Ajuste específico para que el select se vea bien en oscuro */
-.modo-oscuro select option {
-  background-color: #1c1c1e;
-  color: white;
-
-.btn-volver:hover {
-  text-decoration: underline;
-}
+    .modo-oscuro label { color: #e5e5e7; }
+    .modo-oscuro input, .modo-oscuro textarea, .modo-oscuro select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+    .modo-oscuro select option { background-color: #1c1c1e; color: white; }
 
     @media (max-width: 600px) {
-
-    body {
-    padding: 14px;
+      body { padding: 14px; }
+      h1 { font-size: 24px; }
     }
-
-    .report-container {
-    padding: 16px;
-    border-radius: 14px;
-    }
-
-    .report-container h2 {
-    font-size: 19px;
-    }
-    }
-    .info {
-      font-size: 11px;
-    }
-}
-
-
   </style>
 </head>
 <body>
 
-<body>
   <script>
     (function() {
       const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
@@ -230,17 +105,14 @@ content="
     })();
   </script>
 
-<button class="btn-volver" onclick="history.back()">
-  ← Volver atras
-</button>
+  <button class="btn-volver" onclick="history.back()">← Volver atrás</button>
+  
   <div class="container">
     <h1>Reportar un problema</h1>
-    <p class="sub">
-      Si algo no funciona bien, repórtelo aquí.
-    </p>
+    <p class="sub">Si algo no funciona bien, repórtelo aquí.</p>
 
     <form id="formReporte">
-      <label>Tipo de reporte</label>
+      <label for="tipo">Tipo de reporte</label>
       <select id="tipo" required>
         <option value="soporte">Soporte</option>
         <option value="error">Error / No funciona</option>
@@ -249,98 +121,78 @@ content="
         <option value="otro">Otro</option>
       </select>
 
-      <label>¿Qué ocurrió?</label>
-      <textarea id="descripcion" placeholder="Describa lo que paso previo, durante y despues del error" required></textarea>
+      <label for="descripcion">¿Qué ocurrió?</label>
+      <textarea id="descripcion" placeholder="Describa lo que pasó..." required></textarea>
 
-      <label>Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.2.26 (Actual)" required>
+      <label for="version">Versión de la web</label>
+      <input id="version" placeholder="Ej: v1.4.0 (Actual)" required>
 
-      <label>Dispositivo y navegador</label>
-      <input id="entorno" placeholder="Ej: Android · Google | iPhone · Safari" required>
+      <label for="entorno">Dispositivo y navegador</label>
+      <input id="entorno" placeholder="Ej: iPhone · Safari" required>
 
-      <button type="submit">Enviar reporte</button>
-
-      <div class="info">
-        Gracias por reportar! su problema sera solucionado muy pronto.
-      </div>
+      <button type="submit" id="btnEnviar">Enviar reporte</button>
     </form>
   </div>
 
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    import { verificarSesion, supabase, obtenerTema } from './js/auth.js'; 
 
-    const supabase = createClient(
-      "https://yujwifmejokfbxndhtnf.supabase.co",
-      "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno"
-    );
+    // 2. Verificación de seguridad y mostrar contenido
+    const init = async () => {
+      try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    };
+    init();
 
+    // 3. Lógica de envío
     const form = document.getElementById("formReporte");
-    const btn = form.querySelector("button");
+    const btn = document.getElementById("btnEnviar");
 
     form.addEventListener("submit", async e => {
       e.preventDefault();
-
       btn.disabled = true;
       btn.textContent = "Enviando...";
 
       const { error } = await supabase.from("reportes_web").insert({
-        tipo: tipo.value,
-        descripcion: descripcion.value.trim(),
-        version: version.value.trim(),
-        entorno: entorno.value.trim(),
+        tipo: document.getElementById("tipo").value,
+        descripcion: document.getElementById("descripcion").value.trim(),
+        version: document.getElementById("version").value.trim(),
+        entorno: document.getElementById("entorno").value.trim(),
         user_agent: navigator.userAgent
       });
 
-// 1. Detectamos el tema justo antes de mostrar la alerta
-const esOscuro = document.body.classList.contains('modo-oscuro');
-const temaConfig = {
-    background: esOscuro ? '#1c1c1e' : '#fff',
-    color: esOscuro ? '#f5f5f7' : '#374151'
-};
+      const tema = obtenerTema();
 
-if (error) {
-    // Sonido de error (si tienes la función playNotification en esta hoja)
-    if (typeof playNotification === "function") playNotification('error');
+      if (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo enviar el reporte',
+          position: 'top',
+          background: tema.bg,
+          color: tema.txt
+        });
+      } else {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Reporte enviado',
+          text: '¡Gracias por tu ayuda!',
+          timer: 2000,
+          showConfirmButton: false,
+          position: 'top',
+          background: tema.bg,
+          color: tema.txt
+        });
+        form.reset();
+      }
 
-    Swal.fire({
-        icon: 'error',
-        title: 'No se pudo enviar',
-        text: 'Revise su conexión a internet',
-        timer: 2500,
-        showConfirmButton: false,
-        ...temaConfig, // Aplica fondo y color dinámico
-        iconColor: 'red' // Rojo de tu marca
+      btn.disabled = false;
+      btn.textContent = "Enviar reporte";
     });
-    console.error(error);
-} else {
-    // Sonido de éxito
-    if (typeof playNotification === "function") playNotification('success');
-
-    Swal.fire({
-        icon: 'success',
-        title: 'Reporte enviado',
-        text: '¡Muchas gracias!',
-        timer: 2000,
-        showConfirmButton: false,
-        ...temaConfig, // Aplica fondo y color dinámico
-        iconColor: 'green' // Mantenemos coherencia con el rojo o usa 'green' si prefieres
-    });
-    form.reset();
-}
-
-btn.disabled = false;
-btn.textContent = "Enviar reporte";
-});
   </script>
-<script type="module">
-    import { verificarSesion } from './js/auth.js';
-    
-    // Ejecutar inmediatamente
-    verificarSesion().catch(err => {
-        console.error("Error de guardia:", err);
-        window.location.href = "login.html";
-    });
-</script>
-<script src="js/themes.js"></script>
 </body>
 </html>
