@@ -174,7 +174,7 @@ window.logout = function() {
         title: '¿Cerrar sesión?',
         icon: 'question',
         showCancelButton: true,
-        text: "Tendras que volver a iniciar sesion para interactuar.",
+        text: "Tendra que volver a iniciar sesion para interactuar.",
         confirmButtonText: 'Confirmar',
         cancelButtonText: 'Cancelar',
         ...tema

@@ -240,8 +240,7 @@ window.togglePagado = async (id, estadoActual) => {
         // 3. Mostrar el SweetAlert de confirmación
         Swal.fire({
             icon: 'success',
-            title: estadoActual ? 'Estado actualizado' : 'Estado actualizado',
-            text: estadoActual ? 'Pedido NO pagado' : 'Pedido pagado',
+            title: estadoActual ? 'Pago actualizado' : 'Pago actualizado',
             timer: 2500, // Se cierra solo en 1.5 segundos
             showConfirmButton: false,
             background: tema.bg,
@@ -359,8 +358,7 @@ window.eliminarPedido = async (id) => {
             playNotification('delete');
             Swal.fire({
                 icon: 'success',
-                title: '¡Eliminado!',
-                text: 'El pedido ha sido borrado.',
+                title: 'Pedido eliminado',
                 timer: 1500,
                 showConfirmButton: false,
                 background: tema.bg,
