@@ -47,20 +47,23 @@
         <div class="header-logo">
             <h1>San Valentín</h1>
         </div>
-        
-        <nav class="header-actions">
-            <a href="reportar.html" class="action-btn report-btn" title="Reportar un error">
-                <i class="fa-solid fa-bug"></i>
-            </a>
+<nav class="header-actions">
+    <a href="reportar.html" class="action-btn report-btn" title="Reportar un error">
+        <i class="fa-solid fa-bug"></i>
+    </a>
 
-            <button id="btn-tema" class="action-btn" title="Cambiar tema">
-                <i class="fa-solid fa-moon" id="theme-icon"></i>
-            </button>
+    <button id="btnPDF" class="action-btn" title="Descargar Respaldo PDF">
+        <i class="fa-solid fa-file-pdf"></i>
+    </button>
+    
+     <button id="btn-tema" class="action-btn" title="Cambiar tema">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+    </button>
 
-            <button onclick="logout()" class="action-btn logout" title="Cerrar Sesión">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
-        </nav>
+    <button onclick="logout()" class="action-btn logout" title="Cerrar Sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+</nav>
     </div>
 </header>
 
@@ -78,6 +81,7 @@
 ></textarea>
   <button type="submit">Crear pedido</button>
 </form>
+
 
 <div class="controls">
   <div class="orden-container">
@@ -150,10 +154,10 @@
         window.location.replace("login.html");
     });
 </script>
-<script type="module" src="js/auth.js"></script>
-</script>
 <script src="js/header.js"></script>
-<script src="js/themes.js"></script>
-<script type="module" src="js/process.js"></script>
+    <script src="js/themes.js"></script>
+    <script type="module" src="js/process.js"></script>
+</body>
+</html>
 </body>
 </html>

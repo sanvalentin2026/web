@@ -10,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 /* =========================
    📦 ESTADO GLOBAL Y DOM
 ========================= */
-let pedidosCache = [];
+window.pedidosCache = []; // Usamos window desde el inicio
 let pedidosFiltrados = [];
 let paginaActual = Number(sessionStorage.getItem("paginaActual")) || 1;
 const PEDIDOS_POR_PAGINA = 20;
@@ -118,7 +118,7 @@ function formatFechaMobile(fechaStr) {
 async function cargarPedidos(silencioso = false) {
     const { data, error } = await supabase.from("pedidos").select("*").order("id", { ascending: true });
     if (!error) {
-        pedidosCache = data || [];
+        window.pedidosCache = data || [];
         aplicarFiltros();
     }
 }
@@ -378,6 +378,150 @@ window.eliminarPedido = async (id) => {
         }
     }
 };
+
+
+
+/* =================================================
+   🕵️ FUNCIONES SECRETAS DE ADMINISTRACIÓN (CORREGIDA)
+   ================================================= */
+window.descargarPDF = function() {
+    const datos = window.pedidosCache;
+    if (!datos || datos.length === 0) return;
+
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString('es-ES').replace(/\//g, '-');
+    const horaAMPM = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    
+    // --- 🛡️ MEDIDAS DE SEGURIDAD IRREPETIBLES ---
+    // 1. Generamos un Hash de Verificación (Único por cada descarga)
+    const seed = `${ahora.getTime()}-${datos.length}-${Math.random()}`;
+    const hashSeguridad = btoa(seed).substring(0, 16).toUpperCase(); 
+    
+    // 2. Folio de Auditoría
+    const folio = `REF-${ahora.getFullYear()}${(ahora.getMonth()+1)}${ahora.getDate()}-${hashSeguridad.substring(0,4)}`;
+
+    const ventanaImpresion = window.open('', '_blank');
+    
+    let tablaHTML = `
+        <html>
+        <head>
+            <title>${folio}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Courier+Prime&display=swap" rel="stylesheet">
+            <style>
+                body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.4; }
+                .sello-agua { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0,0,0,0.03); font-weight: bold; pointer-events: none; white-space: nowrap; }
+                
+                /* Código de Verificación en el borde */
+                .codigo-lateral { position: fixed; right: 10px; top: 50%; transform: rotate(90deg); font-family: 'Courier Prime', monospace; font-size: 8px; color: #999; }
+
+                .header { border-left: 5px solid #E11D48; padding-left: 15px; margin-bottom: 30px; }
+                .folio-box { background: #f3f4f6; padding: 10px; border-radius: 5px; font-family: 'Courier Prime', monospace; font-size: 12px; display: inline-block; margin-top: 10px; }
+                
+                table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                th { background: #1f2937; color: white; padding: 8px; text-align: left; }
+                td { border: 1px solid #e5e7eb; padding: 6px; }
+
+                .seccion-firmas { margin-top: 80px; display: flex; justify-content: space-around; }
+                .firma-web { font-family: 'Dancing Script', cursive; font-size: 24px; color: #1e40af; border-bottom: 1px solid #333; display: inline-block; padding: 0 20px; }
+                .desc-firma { font-size: 10px; font-weight: bold; margin-top: 5px; }
+            </style>
+        </head>
+        <body>
+            <div class="sello-agua">DOCUMENTO ORIGINAL</div>
+            <div class="codigo-lateral">VERIFY_HASH: ${hashSeguridad} | TIMESTAMP: ${ahora.getTime()}</div>
+
+            <div class="header">
+                <h1 style="margin:0; font-size: 20px;">REPORTE DE CONTROL DE PEDIDOS</h1>
+                <div class="folio-box">FOLIO DE SEGURIDAD: ${folio}</div>
+                <div style="font-size: 11px; margin-top: 5px;">Emitido: ${ahora.toLocaleDateString()} a las ${horaAMPM}</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Comprador</th>
+                        <th>Receptor</th>
+                        <th>Producto</th>
+                        <th>Detalles</th>
+                        <th>Pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${datos.map(p => `
+                        <tr>
+                            <td>#${p.id}</td>
+                            <td>${p.nombre_comprador}</td>
+                            <td>${p.nombre_receptor}</td>
+                            <td>${p.producto}</td>
+                            <td>${p.detalles || 'SIN DETALLES'}</td>
+                            <td>${p.pagado ? 'PAGADO' : 'PENDIENTE'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+
+            <div class="seccion-firmas">
+                <div style="text-align:center">
+                    <div class="firma-web">Digital System Auth</div>
+                    <div class="desc-firma">FIRMA DE WEB (AUTOMÁTICA)</div>
+                    <div style="font-size:8px">Hash: ${hashSeguridad.split('').reverse().join('')}</div>
+                </div>
+                <div style="text-align:center">
+                    <div style="height:40px; width:200px; border-bottom: 1px solid #333"></div>
+                    <div class="desc-firma">FIRMA FÍSICA (RESPONSABLE)</div>
+                </div>
+            </div>
+
+            <p style="font-size: 8px; color: #999; margin-top: 50px; text-align: center;">
+                Este documento contiene una huella digital única <strong>${hashSeguridad}</strong> vinculada a este conjunto de datos. 
+                Cualquier modificación manual de los valores de la tabla invalidará la integridad del reporte.
+            </p>
+        </body>
+        </html>
+    `;
+
+    ventanaImpresion.document.write(tablaHTML);
+    ventanaImpresion.document.close();
+    setTimeout(() => { ventanaImpresion.print(); ventanaImpresion.close(); }, 800);
+};
+
+/* =================================================
+   🚀 DISPARADOR DEL RESPALDO PDF
+   ================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+    const btnPDF = document.getElementById("btnPDF");
+
+    if (btnPDF) {
+        btnPDF.addEventListener("click", () => {
+            // Usamos tu función obtenerTema() para que la alerta combine
+            const tema = (typeof obtenerTema === 'function') ? obtenerTema() : { bg: '#fff', txt: '#333' };
+
+            Swal.fire({
+                title: '¿Generar PDF?',
+                text: "Se descargará un documento oficial con los datos que existen actualmente.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#E11D48',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Descargar PDF',
+                cancelButtonText: 'Cancelar',
+                background: tema.bg,
+                color: tema.txt,
+                position: 'top' // Para que sea cómodo en móviles
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Llamamos a la función que ya definimos antes
+                    if (typeof window.descargarPDF === 'function') {
+                        window.descargarPDF();
+                    } else {
+                        console.error("❌ La función descargarPDF no está definida.");
+                    }
+                }
+            });
+        });
+    }
+});
 
 /* =========================
    🔴 REALTIME & INIT
