@@ -384,10 +384,15 @@ window.descargarPDF = function() {
     const datos = window.pedidosCache;
     if (!datos || datos.length === 0) return;
 
+    // Generación de datos únicos en el momento del clic
     const ahora = new Date();
-    const hash = btoa(ahora.getTime().toString()).substring(0, 6).toUpperCase();
-    const fechaFull = ahora.toLocaleDateString('es-MX', { 
-        day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+    const randomHex = Math.floor(Math.random() * 16777215).toString(16).toUpperCase();
+    const folioUnico = `REF-${ahora.getTime()}-${randomHex.substring(0, 4)}`;
+    
+    // Formato de fecha solicitado
+    const fechaEmision = ahora.toLocaleString('es-MX', { 
+        day: '2-digit', month: '2-digit', year: 'numeric', 
+        hour: '2-digit', minute: '2-digit', second: '2-digit' 
     });
 
     const contenidoHTML = `
@@ -395,100 +400,88 @@ window.descargarPDF = function() {
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>REPORTE DE PEDIDOS ${hash}</title>
             <style>
-                body { 
-                    font-family: sans-serif; 
-                    padding: 30px; 
-                    color: #1a1a1a;
-                    position: relative;
-                }
-                /* Marca de Agua Resaltada */
+                @media print { @page { margin: 10mm; } }
+                body { font-family: sans-serif; padding: 20px; color: #1a1a1a; position: relative; }
                 .watermark {
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                    font-size: 70px;
-                    color: rgba(225, 29, 72, 0.07);
-                    z-index: -1;
-                    white-space: nowrap;
-                    font-weight: bold;
-                    pointer-events: none;
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 45px; color: rgba(225, 29, 72, 0.05); z-index: -1; font-weight: bold; pointer-events: none;
                 }
-                .header { border-bottom: 3px solid #E11D48; margin-bottom: 20px; }
-                .info-resaltada {
-                    background: #fff5f7;
-                    border: 1px dashed #E11D48;
-                    padding: 15px;
-                    margin-bottom: 20px;
-                    border-radius: 8px;
+                .header { border-bottom: 3px solid #E11D48; margin-bottom: 15px; text-align: center; }
+                .resaltado { 
+                    background: #fff5f7; border: 1px dashed #E11D48; padding: 12px; 
+                    margin-bottom: 20px; border-radius: 8px; text-align: center; 
                 }
-                .bold-red { color: #E11D48; font-weight: bold; font-size: 1.1em; }
-                table { width: 100%; border-collapse: collapse; }
-                th { background-color: #E11D48; color: white; padding: 10px; font-size: 12px; }
-                td { border: 1px solid #f3c1d9; padding: 8px; font-size: 11px; text-align: center; word-break: break-all; }
+                .status-pago { font-weight: bold; font-size: 11px; }
+                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                th { background-color: #E11D48; color: white; padding: 10px; font-size: 11px; text-transform: uppercase; }
+                td { border: 1px solid #f3c1d9; padding: 8px; font-size: 10px; text-align: center; word-break: break-all; }
+                .footer { margin-top: 30px; font-size: 9px; text-align: center; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
             </style>
         </head>
         <body>
-            <div class="watermark">DOCUMENTO OFICIAL</div>
+            <div class="watermark">REPORTE OFICIAL ${folioUnico}</div>
+            
             <div class="header">
-                <h1 style="color:#E11D48; margin:0;">REPORTE DE PEDIDOS OFICIAL</h1>
+                <h1 style="color:#E11D48; margin:0; font-size:22px;">REPORTE DE PEDIDOS OFICIAL</h1>
             </div>
 
-            <div class="info-resaltada">
-                <strong>FOLIO DE SEGURIDAD:</strong> <span class="bold-red">${hash}</span><br>
-                <strong>EMITIDO EL:</strong> <span class="bold-red">${fechaFull}</span>
+            <div class="resaltado">
+                <div style="font-size: 14px; margin-bottom: 5px;">
+                    <strong>FOLIO:</strong> <span style="color:#E11D48;">${folioUnico}</span>
+                </div>
+                <div style="font-size: 13px;">
+                    <strong>EMITIDO EL:</strong> <span>${fechaEmision}</span>
+                </div>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th style="width:30px;">ID</th>
+                        <th style="width:35px;">ID</th>
                         <th>EMISOR</th>
                         <th>RECEPTOR</th>
                         <th>PRODUCTO</th>
-                        <th>DETALLES</th>
+                        <th style="width:25%;">DETALLES</th>
+                        <th style="width:60px;">ESTADO</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${datos.map(p => `
                         <tr>
-                            <td>${p.id}</td>
+                            <td style="font-weight:bold;">${p.id}</td>
                             <td>${p.nombre_comprador}</td>
                             <td>${p.nombre_receptor}</td>
                             <td>${p.producto}</td>
                             <td style="text-align:left;">${p.detalles || '-'}</td>
-                        </tr>
-                    `).join('')}
+                            <td class="status-pago">${p.pagado ? 'PAGADO' : 'PENDIENTE'}</td>
+                        </tr>`).join('')}
                 </tbody>
             </table>
-            
-            <script>
-                // Auto-invocar impresión al cargar en móviles
-                window.onload = () => { 
-                    setTimeout(() => { window.print(); }, 500);
-                };
-            </script>
+
+            <div class="footer">
+                Este documento es un comprobante oficial emitido por el Sistema de Control San Valentín.<br>
+                La integridad de este reporte se valida con el folio único de seguridad superior.
+            </div>
         </body>
         </html>
     `;
 
-    // --- SOLUCIÓN AL BLOQUEO DE SAFARI/CHROME MÓVIL ---
-    // Creamos un Blob (archivo virtual) con el HTML
-    const blob = new Blob([contenidoHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    // Abrimos el archivo virtual directamente
-    const nuevaVentana = window.open(url, '_blank');
-    
-    if (!nuevaVentana || nuevaVentana.closed || typeof nuevaVentana.closed === 'undefined') {
-        // Si el navegador aún bloquea el popup, forzamos la descarga del archivo
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Reporte_${hash}.html`;
-        link.click();
-    }
+    // Implementación mediante Iframe para máxima compatibilidad móvil
+    const iframe = document.createElement('iframe');
+    Object.assign(iframe.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' });
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(contenidoHTML);
+    doc.close();
+
+    iframe.contentWindow.focus();
+    setTimeout(() => {
+        iframe.contentWindow.print();
+        setTimeout(() => { document.body.removeChild(iframe); }, 1000);
+    }, 600);
 };
 /* =================================================
    🚀 DISPARADOR DEL RESPALDO PDF
