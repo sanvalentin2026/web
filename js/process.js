@@ -380,112 +380,116 @@ window.eliminarPedido = async (id) => {
 };
 
 
-
-/* =================================================
-   🕵️ FUNCIONES SECRETAS DE ADMINISTRACIÓN (CORREGIDA)
-   ================================================= */
 window.descargarPDF = function() {
     const datos = window.pedidosCache;
     if (!datos || datos.length === 0) return;
 
     const ahora = new Date();
-    const fecha = ahora.toLocaleDateString('es-ES').replace(/\//g, '-');
-    const horaAMPM = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-    
-    // --- 🛡️ MEDIDAS DE SEGURIDAD IRREPETIBLES ---
-    // 1. Generamos un Hash de Verificación (Único por cada descarga)
-    const seed = `${ahora.getTime()}-${datos.length}-${Math.random()}`;
-    const hashSeguridad = btoa(seed).substring(0, 16).toUpperCase(); 
-    
-    // 2. Folio de Auditoría
-    const folio = `REF-${ahora.getFullYear()}${(ahora.getMonth()+1)}${ahora.getDate()}-${hashSeguridad.substring(0,4)}`;
+    const hash = btoa(ahora.getTime().toString()).substring(0, 6).toUpperCase();
+    const fechaFull = ahora.toLocaleDateString('es-MX', { 
+        day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
 
-    const ventanaImpresion = window.open('', '_blank');
-    
-    let tablaHTML = `
+    const contenidoHTML = `
+        <!DOCTYPE html>
         <html>
         <head>
-            <title>${folio}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Courier+Prime&display=swap" rel="stylesheet">
+            <meta charset="UTF-8">
+            <title>REPORTE DE PEDIDOS ${hash}</title>
             <style>
-                body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.4; }
-                .sello-agua { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0,0,0,0.03); font-weight: bold; pointer-events: none; white-space: nowrap; }
-                
-                /* Código de Verificación en el borde */
-                .codigo-lateral { position: fixed; right: 10px; top: 50%; transform: rotate(90deg); font-family: 'Courier Prime', monospace; font-size: 8px; color: #999; }
-
-                .header { border-left: 5px solid #E11D48; padding-left: 15px; margin-bottom: 30px; }
-                .folio-box { background: #f3f4f6; padding: 10px; border-radius: 5px; font-family: 'Courier Prime', monospace; font-size: 12px; display: inline-block; margin-top: 10px; }
-                
-                table { width: 100%; border-collapse: collapse; font-size: 10px; }
-                th { background: #1f2937; color: white; padding: 8px; text-align: left; }
-                td { border: 1px solid #e5e7eb; padding: 6px; }
-
-                .seccion-firmas { margin-top: 80px; display: flex; justify-content: space-around; }
-                .firma-web { font-family: 'Dancing Script', cursive; font-size: 24px; color: #1e40af; border-bottom: 1px solid #333; display: inline-block; padding: 0 20px; }
-                .desc-firma { font-size: 10px; font-weight: bold; margin-top: 5px; }
+                body { 
+                    font-family: sans-serif; 
+                    padding: 30px; 
+                    color: #1a1a1a;
+                    position: relative;
+                }
+                /* Marca de Agua Resaltada */
+                .watermark {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 70px;
+                    color: rgba(225, 29, 72, 0.07);
+                    z-index: -1;
+                    white-space: nowrap;
+                    font-weight: bold;
+                    pointer-events: none;
+                }
+                .header { border-bottom: 3px solid #E11D48; margin-bottom: 20px; }
+                .info-resaltada {
+                    background: #fff5f7;
+                    border: 1px dashed #E11D48;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    border-radius: 8px;
+                }
+                .bold-red { color: #E11D48; font-weight: bold; font-size: 1.1em; }
+                table { width: 100%; border-collapse: collapse; }
+                th { background-color: #E11D48; color: white; padding: 10px; font-size: 12px; }
+                td { border: 1px solid #f3c1d9; padding: 8px; font-size: 11px; text-align: center; word-break: break-all; }
             </style>
         </head>
         <body>
-            <div class="sello-agua">DOCUMENTO ORIGINAL</div>
-            <div class="codigo-lateral">VERIFY_HASH: ${hashSeguridad} | TIMESTAMP: ${ahora.getTime()}</div>
-
+            <div class="watermark">DOCUMENTO OFICIAL</div>
             <div class="header">
-                <h1 style="margin:0; font-size: 20px;">REPORTE DE CONTROL DE PEDIDOS</h1>
-                <div class="folio-box">FOLIO DE SEGURIDAD: ${folio}</div>
-                <div style="font-size: 11px; margin-top: 5px;">Emitido: ${ahora.toLocaleDateString()} a las ${horaAMPM}</div>
+                <h1 style="color:#E11D48; margin:0;">REPORTE DE PEDIDOS OFICIAL</h1>
+            </div>
+
+            <div class="info-resaltada">
+                <strong>FOLIO DE SEGURIDAD:</strong> <span class="bold-red">${hash}</span><br>
+                <strong>EMITIDO EL:</strong> <span class="bold-red">${fechaFull}</span>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Comprador</th>
-                        <th>Receptor</th>
-                        <th>Producto</th>
-                        <th>Detalles</th>
-                        <th>Pago</th>
+                        <th style="width:30px;">ID</th>
+                        <th>EMISOR</th>
+                        <th>RECEPTOR</th>
+                        <th>PRODUCTO</th>
+                        <th>DETALLES</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${datos.map(p => `
                         <tr>
-                            <td>#${p.id}</td>
+                            <td>${p.id}</td>
                             <td>${p.nombre_comprador}</td>
                             <td>${p.nombre_receptor}</td>
                             <td>${p.producto}</td>
-                            <td>${p.detalles || 'SIN DETALLES'}</td>
-                            <td>${p.pagado ? 'PAGADO' : 'PENDIENTE'}</td>
+                            <td style="text-align:left;">${p.detalles || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
-
-            <div class="seccion-firmas">
-                <div style="text-align:center">
-                    <div class="firma-web">Digital System Auth</div>
-                    <div class="desc-firma">FIRMA DE WEB (AUTOMÁTICA)</div>
-                    <div style="font-size:8px">Hash: ${hashSeguridad.split('').reverse().join('')}</div>
-                </div>
-                <div style="text-align:center">
-                    <div style="height:40px; width:200px; border-bottom: 1px solid #333"></div>
-                    <div class="desc-firma">FIRMA FÍSICA (RESPONSABLE)</div>
-                </div>
-            </div>
-
-            <p style="font-size: 8px; color: #999; margin-top: 50px; text-align: center;">
-                Este documento contiene una huella digital única <strong>${hashSeguridad}</strong> vinculada a este conjunto de datos. 
-                Cualquier modificación manual de los valores de la tabla invalidará la integridad del reporte.
-            </p>
+            
+            <script>
+                // Auto-invocar impresión al cargar en móviles
+                window.onload = () => { 
+                    setTimeout(() => { window.print(); }, 500);
+                };
+            </script>
         </body>
         </html>
     `;
 
-    ventanaImpresion.document.write(tablaHTML);
-    ventanaImpresion.document.close();
-    setTimeout(() => { ventanaImpresion.print(); ventanaImpresion.close(); }, 800);
+    // --- SOLUCIÓN AL BLOQUEO DE SAFARI/CHROME MÓVIL ---
+    // Creamos un Blob (archivo virtual) con el HTML
+    const blob = new Blob([contenidoHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    // Abrimos el archivo virtual directamente
+    const nuevaVentana = window.open(url, '_blank');
+    
+    if (!nuevaVentana || nuevaVentana.closed || typeof nuevaVentana.closed === 'undefined') {
+        // Si el navegador aún bloquea el popup, forzamos la descarga del archivo
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Reporte_${hash}.html`;
+        link.click();
+    }
 };
-
 /* =================================================
    🚀 DISPARADOR DEL RESPALDO PDF
    ================================================= */
