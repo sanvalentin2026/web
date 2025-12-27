@@ -225,41 +225,46 @@ dom.form.addEventListener("submit", async (e) => {
    ⚡ ACCIONES (PAGO / EDIT / DELETE)
 ========================= */
 window.togglePagado = async (id, estadoActual) => {
-    const tema = obtenerTema(); // Obtenemos el tema para que el alert combine
+    const tema = obtenerTema();
 
-    // 1. Ejecutar el cambio en Supabase
+    // 1. Mostrar Spinner de carga de inmediato
+    Swal.fire({
+        title: 'Procesando...',
+        background: tema.bg,
+        color: tema.txt,
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+        position: 'top'
+    });
+
     const { error } = await supabase
         .from("pedidos")
         .update({ pagado: !estadoActual })
         .eq("id", id);
     
-    if (!error) {
-        // 2. Lanzar sonido de éxito/pago
-        playNotification('success');
+    // Cerramos el spinner antes de mostrar el resultado
+    Swal.close();
 
-        // 3. Mostrar el SweetAlert de confirmación
+    if (!error) {
+        playNotification('success');
         Swal.fire({
             icon: 'success',
-            title: estadoActual ? 'Pago actualizado' : 'Pago actualizado',
-            timer: 2500, // Se cierra solo en 1.5 segundos
+            title: 'Pago actualizado',
+            timer: 2000,
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
-            toast: false, // Puedes ponerlo en true si prefieres que salga como una pequeña notificación arriba
             position: 'top'
         });
-        
-        // No hace falta recargar la tabla manualmente, 
-        // el Realtime detectará el cambio y lo hará por ti.
     } else {
-        // En caso de error (ej: falta de internet)
         playNotification('error');
         Swal.fire({
             icon: 'error',
             title: 'Error',
             text: 'No se pudo actualizar el pago',
             background: tema.bg,
-            color: tema.txt
+            color: tema.txt,
+            position: 'top'
         });
     }
 };
@@ -279,13 +284,20 @@ window.editarDetalles = async (id, texto) => {
         cancelButtonText: 'Cancelar'
     });
 
-    // Si el usuario presionó "Guardar" y el contenido no es undefined
     if (nuevo !== undefined) {
-        // 1. Obtener quién edita
+        // MOSTRAR CARGANDO DESPUÉS DE DAR CLIC EN GUARDAR
+        Swal.fire({
+            title: 'Procesando...',
+            background: tema.bg,
+            color: tema.txt,
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            position: 'top'
+        });
+
         const sesion = JSON.parse(localStorage.getItem("usuario"));
         const usuarioNombre = sesion ? sesion.username : "Desconocido";
 
-        // 2. Actualizar en Supabase
         const { error } = await supabase
             .from("pedidos")
             .update({ 
@@ -294,11 +306,10 @@ window.editarDetalles = async (id, texto) => {
             })
             .eq("id", id);
 
-        if (!error) {
-            // 3. Reproducir sonido de éxito
-            playNotification('success');
+        Swal.close(); // Quitar spinner
 
-            // 4. 🔥 NUEVA ALERTA DE DETALLES GUARDADOS
+        if (!error) {
+            playNotification('success');
             Swal.fire({
                 icon: 'success',
                 title: 'Detalles guardados',
@@ -309,16 +320,8 @@ window.editarDetalles = async (id, texto) => {
                 position: 'top'
             });
         } else {
-            // Alerta en caso de error
             playNotification('error');
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudieron guardar los cambios.',
-                background: tema.bg,
-                color: tema.txt,
-                position: 'top'
-            });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al conectar con la base de datos.', background: tema.bg, color: tema.txt, position: 'top' });
         }
     }
 };
@@ -343,7 +346,7 @@ window.eliminarPedido = async (id) => {
     if (res.isConfirmed) {
         // 2. Mostrar carga mientras borra en la DB
         Swal.fire({
-            title: 'Eliminando...',
+            title: 'Procesando...',
             background: tema.bg,
             color: tema.txt,
             allowOutsideClick: false,
@@ -428,7 +431,7 @@ window.descargarPDF = function() {
 
             <div class="resaltado">
                 <div style="font-size: 14px; margin-bottom: 5px;">
-                    <strong>FOLIO:</strong> <span style="color:#E11D48;">${folioUnico}</span>
+                    <strong>REFERENCIA:</strong> <span style="color:#E11D48;">${folioUnico}</span>
                 </div>
                 <div style="font-size: 13px;">
                     <strong>EMITIDO EL:</strong> <span>${fechaEmision}</span>
@@ -450,18 +453,18 @@ window.descargarPDF = function() {
                     ${datos.map(p => `
                         <tr>
                             <td style="font-weight:bold;">${p.id}</td>
-                            <td>${p.nombre_comprador}</td>
-                            <td>${p.nombre_receptor}</td>
+                            <td>${p.nombre_comprador}, ${p.seccion_comprador}</td>
+                            <td>${p.nombre_receptor}, ${p.seccion_receptor}</td>
                             <td>${p.producto}</td>
-                            <td style="text-align:left;">${p.detalles || '-'}</td>
+                            <td style="text-align:left;">${p.detalles || '---'}</td>
                             <td class="status-pago">${p.pagado ? 'PAGADO' : 'PENDIENTE'}</td>
                         </tr>`).join('')}
                 </tbody>
             </table>
 
             <div class="footer">
-                Este documento es un comprobante oficial emitido por el Sistema de Control San Valentín.<br>
-                La integridad de este reporte se valida con el folio único de seguridad superior.
+                Este documento es un comprobante oficial emitido por el Sistema de Control de pedidos.<br>
+                La integridad de este reporte se valida con la referencia única de seguridad superior, cualquier <br> edicion manual invalidara en su totalidad el documento.
             </div>
         </body>
         </html>
