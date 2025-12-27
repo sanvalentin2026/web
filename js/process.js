@@ -142,13 +142,12 @@ function renderizarTabla() {
     const inicio = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
     const items = pedidosFiltrados.slice(inicio, inicio + PEDIDOS_POR_PAGINA);
     
-    // Detectamos si es móvil (menos de 900px)
     const esMobile = window.innerWidth <= 900;
 
     items.forEach(p => {
-        // Generamos el HTML de la fecha solo si es mobile
+        // Usamos la CLASE en lugar de estilos fijos
         const fechaHTML = esMobile 
-            ? `<div style="font-size: 0.8rem; color: #fff; margin-bottom: 5px;">${formatFechaMobile(p.created_at)}</div>` 
+            ? `<div class="fecha-dinamica">${formatFechaMobile(p.created_at)}</div>` 
             : "";
 
         const row = document.createElement("tr");

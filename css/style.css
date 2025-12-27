@@ -609,8 +609,7 @@ td{
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 20px; /* Para que parezca una burbuja */
-    margin-bottom: 16px;
-    padding: 15px;
+
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
   form input[type="text"],
@@ -1137,13 +1136,12 @@ h1 {
     .modo-claro tbody tr {
         background: #ffffff;
         border-radius: 16px;
-        margin-bottom: 15px;
         border: 1px solid rgba(243, 193, 217, 0.5) !important; /* Borde muy suave solo para la card */
     }
     
     /* Para que los datos dentro de la card respiren */
     .modo-claro td {
-        padding: 10px;
+
         display: flex;
         justify-content: space-between;
     }
@@ -1331,4 +1329,80 @@ form{
     margin-bottom: 8px;
     padding-bottom: 5px;
     border-bottom: 1px solid rgba(128, 128, 128, 0.2); /* Separador sutil */
+}
+/* Color por defecto (Modo Claro) */
+:root {
+    --color-fecha-tabla: #374151;
+}
+
+/* Color cuando el body tiene la clase modo-oscuro */
+body.modo-oscuro {
+    --color-fecha-tabla: #ffffff;
+}
+
+/* Clase para el div de la fecha */
+.fecha-dinamica {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--color-fecha-tabla); /* <--- Aquí está la clave */
+}
+/* --- ESTILOS DEL FOOTER --- */
+:root {
+    --footer-text: #666666;
+    --footer-highlight: #e63946;
+    --footer-line: rgba(0, 0, 0, 0.1);
+}
+
+body.modo-oscuro {
+    --footer-text: #a1a1a6;
+    --footer-highlight: #ff375f;
+    --footer-line: rgba(255, 255, 255, 0.1);
+}
+
+.main-footer {
+    margin-top: 50px;
+    padding: 30px 20px;
+    text-align: center;
+    border-top: 1px solid var(--footer-line);
+    transition: all 0.3s ease;
+}
+
+.footer-content p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: var(--footer-text);
+    letter-spacing: 0.5px;
+}
+
+.footer-content .author {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--footer-highlight);
+    margin-bottom: 10px;
+}
+
+.footer-content .divider {
+    width: 300px;
+    height: 2px;
+    background: var(--footer-highlight);
+    margin: 15px auto;
+    border-radius: 2px;
+    opacity: 0.6;
+}
+
+.footer-content .copyright {
+    font-size: 12px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 600px) {
+    .main-footer {
+        margin-top: 30px;
+        padding: 20px 15px;
+    }
 }
