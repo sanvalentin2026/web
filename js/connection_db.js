@@ -34,10 +34,11 @@ const obtenerTema = () => ({
    🚀 CONTROL DE ACCESO (v2.2.0 - Developer Mode)
    ================================================= */
 
-// 1. Bloqueo inicial
+// 1. Bloqueo total e inmediato
 const blocker = document.createElement('style');
 blocker.id = 'blocker-style';
-blocker.innerHTML = "body { display: none !important; background: #000; }";
+// Usamos opacity 0 y pointer-events none para que ni siquiera puedan clickear nada
+blocker.innerHTML = "body { opacity: 0 !important; background: #000 !important; pointer-events: none !important; }";
 document.head.appendChild(blocker);
 
 
@@ -110,115 +111,6 @@ function activarMonitorDeSeguridad() {
 // FORZAR EJECUCIÓN
 console.log("0. Script cargado, llamando a monitor...");
 activarMonitorDeSeguridad();
-
-
-async function chequearEstadoWeb() {
-    // --- LLAVE MAESTRA PARA TI ---
-    const urlParams = new URLSearchParams(window.location.search);
-    // Si entras con ?dev=123 (puedes cambiar 123 por tu clave secreta)
-    if (urlParams.get('dev') === '123' || localStorage.getItem('modo_dev') === 'activo') {
-        localStorage.setItem('modo_dev', 'activo'); // Guarda la sesión para que no tengas que poner la URL siempre
-        finalizarBloqueo();
-        console.log("🛠️ Modo Desarrollador Activo");
-        return; 
-    }
-
-    const temaActual = localStorage.getItem('theme') || 'dark';
-    const esOscuro = temaActual === 'dark';
-    const colFondo = esOscuro ? '#000000' : '#ffffff';
-    const colTexto = esOscuro ? '#ffffff' : '#333333';
-
-    try {
-        // Realtime
-        supabase.channel('config-live')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'configuracion' }, 
-            () => {
-                if (localStorage.getItem('modo_dev') !== 'activo') location.reload();
-            }).subscribe();
-
-        const { data, error } = await supabase.from('configuracion').select('*').single();
-
-        if (error || !data || !data.mantenimiento) {
-            finalizarBloqueo();
-            return;
-        }
-
-        const target = new Date(data.fecha_apertura).getTime();
-        if (target <= new Date().getTime()) {
-            await ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto);
-            return;
-        }
-
-        // --- PANTALLA MANTENIMIENTO ---
-        document.documentElement.innerHTML = `
-            <head>
-                <title>Mantenimiento | San Valentín</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body { 
-                        margin: 0; background: ${colFondo} !important; color: ${colTexto} !important; 
-                        display: flex !important; flex-direction: column; align-items: center; 
-                        justify-content: center; min-height: 100vh; font-family: sans-serif; padding: 20px;
-                    }
-                    .neon-title { text-shadow: 0 0 15px #E11D48; font-size: clamp(1.2rem, 5vw, 2rem); text-transform: uppercase; margin-bottom: 30px; text-align: center; }
-                    .countdown { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-                    .time-box { 
-                        text-align: center; border: 2px solid #E11D48; padding: 15px; border-radius: 12px; 
-                        min-width: 80px; background: rgba(225, 29, 72, 0.1); 
-                    }
-                    .time-box span { display: block; font-size: 2rem; font-weight: bold; color: ${colTexto} !important; }
-                    .label { font-size: 0.7rem; color: #E11D48; margin-top: 5px; font-weight: bold; text-transform: uppercase; }
-                    .btn-back { margin-top: 30px; padding: 10px 20px; border-radius: 50px; border: 1px solid #E11D48; background: transparent; color: ${colTexto}; cursor: pointer; }
-                    .btn-back {text-decoration:none;}
-                </style>
-            </head>
-            <body>
-                <h1 class="neon-title">En mantenimiento</h1>
-                <div class="countdown">
-                    <div class="time-box"><span id="hours">00</span><div class="label">Horas</div></div>
-                    <div class="time-box"><span id="minutes">00</span><div class="label">Minutos</div></div>
-                    <div class="time-box"><span id="seconds">00</span><div class="label">Segundos</div></div>
-                </div>
-                <a href="https://google.com"<button class="btn-back">← Salir</button>
-            </body>
-        `;
-
-        setInterval(() => {
-            const diff = target - new Date().getTime();
-            if (diff <= 0) location.reload();
-            document.getElementById('hours').innerText = Math.floor(diff / 3600000).toString().padStart(2,'0');
-            document.getElementById('minutes').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
-            document.getElementById('seconds').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
-        }, 1000);
-
-    } catch (err) {
-        finalizarBloqueo();
-    }
-}
-
-async function ejecutarAperturaConSpinner(esOscuro, colFondo, colTexto) {
-    await supabase.from('configuracion').update({ mantenimiento: false }).eq('id', 1);
-    document.documentElement.innerHTML = `
-        <style>
-            body { background: ${colFondo}; margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; }
-            .loader-wrap { position: relative; width: 60px; height: 60px; }
-            .ring { position: absolute; width: 100%; height: 100%; border: 4px solid transparent; border-top: 4px solid #E11D48; border-radius: 50%; animation: spin 1s linear infinite; }
-            @keyframes spin { 100% { transform: rotate(360deg); } }
-        </style>
-        <div class="loader-wrap"><div class="ring"></div></div>
-        <div style="color:${colTexto}; margin-top:20px; letter-spacing:2px">CARGANDO...</div>
-    `;
-    setTimeout(() => { location.reload(); }, 4000);
-}
-
-function finalizarBloqueo() {
-    const el = document.getElementById('blocker-style');
-    if (el) el.remove();
-    document.body.style.display = 'block';
-    document.body.style.opacity = '1';
-}
-
-chequearEstadoWeb();
 
 // Esto quita el bloqueo de audio tras el primer clic del usuario
 const desbloquearAudio = () => {
@@ -823,11 +715,81 @@ supabase
     }
   )
   .subscribe();
+
+/* ======================================================
+    🛡️ PARCHE DE SEGURIDAD: VALIDACIÓN ANTI-CONSOLA
+====================================================== */
+async function validarSeguridadReal() {
+    const sesionRaw = localStorage.getItem("usuario");
+    
+    // Si no hay nada, al login
+    if (!sesionRaw) {
+        window.location.replace("login.html");
+        return false;
+    }
+
+    try {
+        const sesion = JSON.parse(sesionRaw);
+        
+        // CONSULTA DE VERDAD: Le preguntamos a la DB por ese ID
+        const { data, error } = await supabase
+            .from("usuarios")
+            .select("permisos")
+            .eq("id", sesion.id)
+            .single();
+
+        // Si hay error, el usuario no existe, o los permisos en DB son FALSE
+        if (error || !data || data.permisos !== true) {
+            console.error("🚫 Intento de acceso no autorizado detectado.");
+            localStorage.removeItem("usuario"); // Limpiamos el hack
+            window.location.replace("login.html");
+            return false;
+        }
+
+        // Si llegamos aquí, el usuario es REAL y tiene PERMISOS en la nube
+        return true;
+    } catch (e) {
+        window.location.replace("login.html");
+        return false;
+    }
+}
+
+
 /* =========================
-    🚀 INIT
+    🚀 INIT (PROTEGIDO)
 ========================= */
-// IMPORTANTE: Al cargar el script, llamamos a la función
-// Cambiamos a 'false' para que el usuario vea que está conectando al principio
-document.addEventListener("DOMContentLoaded", () => {
-    cargarPedidos(false); 
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Mantenemos el cuerpo oculto por si acaso
+    document.body.style.display = "none";
+
+    const sesionRaw = localStorage.getItem("usuario");
+    if (!sesionRaw) {
+        window.location.replace("login.html");
+        return;
+    }
+
+    const sesion = JSON.parse(sesionRaw);
+
+    // 2. ÚNICA FUENTE DE VERDAD: Supabase
+    // Si el hacker inventó un ID, Supabase devolverá vacío.
+    const { data, error } = await supabase
+        .from("usuarios")
+        .select("permisos")
+        .eq("id", sesion.id)
+        .single();
+
+    // 3. LA VALIDACIÓN AGRESIVA
+    if (error || !data || data.permisos !== true) {
+        console.error("🔥 HACK DETECTADO O SESIÓN INVÁLIDA");
+        localStorage.clear(); // Borramos TODO lo que el hacker inyectó
+        window.location.replace("login.html");
+        return; // Detenemos todo
+    }
+
+    // 4. SOLO SI PASÓ LA PRUEBA DE FUEGO:
+    console.log("✅ Acceso verificado con la base de datos.");
+    document.body.style.display = "block"; // Mostramos la web
+    
+    if (typeof finalizarBloqueo === "function") finalizarBloqueo();
+    cargarPedidos(false);
 });

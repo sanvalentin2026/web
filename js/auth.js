@@ -122,10 +122,14 @@ window.login = async function() {
         return;
     }
 
-    Swal.fire({ title: 'Verificando...', ...tema, didOpen: () => Swal.showLoading(), position: 'top', customClass: {
-            popup: 'mi-borde-redondeado'
-        } });
+    Swal.fire({ 
+        title: 'Verificando...', 
+        ...tema, 
+        didOpen: () => Swal.showLoading(), 
+        position: 'top' 
+    });
 
+    // 1. Buscamos al usuario en la DB
     const { data, error } = await supabase
         .from("usuarios")
         .select("*")
@@ -133,29 +137,29 @@ window.login = async function() {
         .eq("password", passInput)
         .maybeSingle();
 
+    // 2. Si no existe o hay error, BORRAMOS cualquier rastro de intentos previos
     if (error || !data) {
-        Swal.fire({ title: "Error", text: "Credenciales inválidas", icon: "error", ...tema, position: 'top', customClass: {
-            popup: 'mi-borde-redondeado'
-        } });
+        localStorage.removeItem("usuario"); // SEGURIDAD: Limpiar ante error
+        Swal.fire({ title: "Error", text: "Credenciales inválidas", icon: "error", ...tema });
         return;
     }
 
-    localStorage.setItem("usuario", JSON.stringify({
-        id: data.id,
-        username: data.username,
-        permisos: data.permisos
-    }));
-
+    // 3. Verificamos permisos antes de dejarlo pasar
     if (data.permisos === true) {
+        // RECIÉN AQUÍ, cuando estamos seguros, guardamos la sesión
+        localStorage.setItem("usuario", JSON.stringify({
+            id: data.id,
+            username: data.username,
+            permisos: true
+        }));
         window.location.replace("index.html");
     } else {
+        // Si no tiene permisos, NO GUARDAMOS NADA y limpiamos el storage
+        localStorage.removeItem("usuario"); 
         Swal.fire({ 
             title: "Acceso Pendiente", 
             text: "Tu cuenta debe ser aprobada por un administrador.", 
             icon: "info", 
-            customClass: {
-            popup: 'mi-borde-redondeado'
-        },
             ...tema 
         });
     }
@@ -206,4 +210,41 @@ if (localStorage.getItem("usuario")) {
             }
         })
         .subscribe();
+}
+/* ======================================================
+    🛡️ PARCHE DE SEGURIDAD: VALIDACIÓN ANTI-CONSOLA
+====================================================== */
+async function validarSeguridadReal() {
+    const sesionRaw = localStorage.getItem("usuario");
+    
+    // Si no hay nada, al login
+    if (!sesionRaw) {
+        window.location.replace("login.html");
+        return false;
+    }
+
+    try {
+        const sesion = JSON.parse(sesionRaw);
+        
+        // CONSULTA DE VERDAD: Le preguntamos a la DB por ese ID
+        const { data, error } = await supabase
+            .from("usuarios")
+            .select("permisos")
+            .eq("id", sesion.id)
+            .single();
+
+        // Si hay error, el usuario no existe, o los permisos en DB son FALSE
+        if (error || !data || data.permisos !== true) {
+            console.error("🚫 Intento de acceso no autorizado detectado.");
+            localStorage.removeItem("usuario"); // Limpiamos el hack
+            window.location.replace("login.html");
+            return false;
+        }
+
+        // Si llegamos aquí, el usuario es REAL y tiene PERMISOS en la nube
+        return true;
+    } catch (e) {
+        window.location.replace("login.html");
+        return false;
+    }
 }

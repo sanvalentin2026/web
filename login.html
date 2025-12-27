@@ -6,17 +6,20 @@
 <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
 
 <link rel="apple-touch-icon" href="https://fav.farm/❤️">
-<script>
-    (function() {
+<script type="module">
+    import { validarSeguridadReal } from "./js/auth.js";
+
+    (async function() {
         const sesionRaw = localStorage.getItem("usuario");
-        console.log("Revisando sesión en Login:", sesionRaw); // Ver en consola
-        
         if (sesionRaw) {
-            const sesion = JSON.parse(sesionRaw);
-            // Comprobamos si es true (booleano) o "true" (texto)
-            if (sesion.permisos === true || sesion.permisos === "true") {
-                console.log("¡VIP detectado! Saltando...");
+            // No confiamos en el LocalStorage, vamos a Supabase a preguntar
+            const esReal = await validarSeguridadReal();
+            if (esReal) {
                 window.location.replace("index.html");
+            } else {
+                // Si el hacker puso datos falsos, limpiamos y se queda en el login
+                localStorage.removeItem("usuario");
+                console.log("Sesión falsa detectada y eliminada.");
             }
         }
     })();

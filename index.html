@@ -2,21 +2,14 @@
 <html lang="es">
 <head>
 <script>
-    (function() {
-        const sesionRaw = localStorage.getItem("usuario");
-        
-        if (!sesionRaw) {
-            window.location.replace("login.html");
-            return;
-        }
-
-        const sesion = JSON.parse(sesionRaw);
-        // Si NO es true y NO es "true", para afuera
-        if (sesion.permisos !== true && sesion.permisos !== "true") {
+        // BLOQUEO INMEDIATO: Si el usuario no tiene permisos en el storage, 
+        // ni siquiera dejamos que el navegador descargue el resto de la página.
+        const session = JSON.parse(localStorage.getItem("usuario") || "{}");
+        if (!session.permisos || session.permisos === "false") {
+            window.stop(); // Detiene la carga de la página
             window.location.replace("login.html");
         }
-    })();
-</script>
+    </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -40,7 +33,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
+<body style="display: none;"> <script>
+        // Si no hay usuario en el storage, ni siquiera cargues el resto del HTML
+        if (!localStorage.getItem("usuario")) {
+            window.location.replace("login.html");
+        } else {
+            document.body.style.display = "block";
+        }
+    </script>
 
 <header class="main-header">
     <div class="header-container">
