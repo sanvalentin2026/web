@@ -192,7 +192,7 @@ dom.form.addEventListener("submit", async (e) => {
     const tema = obtenerTema();
     
     // Bloqueo visual
-    Swal.fire({ title: 'Procesando...', background: tema.bg, color: tema.txt, allowOutsideClick: false, didOpen: () => Swal.showLoading(), position:'top' });
+    Swal.fire({ title: 'Procesando pedido...', background: tema.bg, color: tema.txt, allowOutsideClick: false, didOpen: () => Swal.showLoading(), position:'top', customClass: { popup: 'mi-borde-redondeado'}, });
 
     const sesion = JSON.parse(localStorage.getItem("usuario"));
     const usuario = sesion ? sesion.username : "Desconocido";
@@ -212,11 +212,11 @@ dom.form.addEventListener("submit", async (e) => {
     const { error } = await supabase.from("pedidos").insert([nuevoPedido]);
 
     if (error) {
-        Swal.fire({ icon: 'error', title: 'Error al crear', text: error.message });
+        Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2000, });
     } else {
         dom.form.reset();
         playNotification('success');
-        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 1800, showConfirmButton: false, background: tema.bg, color: tema.txt, position: 'top' });
+        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 2000, showConfirmButton: false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
         // El Realtime actualizará la tabla solo
     }
 });
@@ -234,7 +234,8 @@ window.togglePagado = async (id, estadoActual) => {
         color: tema.txt,
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
-        position: 'top'
+        position: 'top',
+        customClass: { popup: 'mi-borde-redondeado'},
     });
 
     const { error } = await supabase
@@ -254,8 +255,9 @@ window.togglePagado = async (id, estadoActual) => {
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
-            position: 'top'
-        });
+            position: 'top',
+            customClass: { popup: 'mi-borde-redondeado'},
+    })
     } else {
         playNotification('error');
         Swal.fire({
@@ -264,7 +266,8 @@ window.togglePagado = async (id, estadoActual) => {
             text: 'No se pudo actualizar el pago',
             background: tema.bg,
             color: tema.txt,
-            position: 'top'
+            position: 'top',
+            customClass: { popup: 'mi-borde-redondeado'},
         });
     }
 };
@@ -281,7 +284,8 @@ window.editarDetalles = async (id, texto) => {
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         confirmButtonText: 'Guardar',
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
+        customClass: { popup: 'mi-borde-redondeado'},
     });
 
     if (nuevo !== undefined) {
@@ -292,7 +296,8 @@ window.editarDetalles = async (id, texto) => {
             color: tema.txt,
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
-            position: 'top'
+            position: 'top',
+            customClass: { popup: 'mi-borde-redondeado'},
         });
 
         const sesion = JSON.parse(localStorage.getItem("usuario"));
@@ -317,7 +322,8 @@ window.editarDetalles = async (id, texto) => {
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top'
+                position: 'top',
+                customClass: { popup: 'mi-borde-redondeado'},
             });
         } else {
             playNotification('error');
@@ -340,7 +346,8 @@ window.eliminarPedido = async (id) => {
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
         background: tema.bg,
-        color: tema.txt
+        color: tema.txt,
+        customClass: { popup: 'mi-borde-redondeado'},
     });
 
     if (res.isConfirmed) {
@@ -351,7 +358,8 @@ window.eliminarPedido = async (id) => {
             color: tema.txt,
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
-            position: 'top'
+            position: 'top',
+            customClass: { popup: 'mi-borde-redondeado'},
         });
 
         const { error } = await supabase.from("pedidos").delete().eq("id", id);
@@ -366,7 +374,8 @@ window.eliminarPedido = async (id) => {
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top'
+                position: 'top',
+                customClass: { popup: 'mi-borde-redondeado'},
             });
         } else {
             playNotification('error');
@@ -376,7 +385,8 @@ window.eliminarPedido = async (id) => {
                 text: 'No se pudo eliminar el pedido: ' + error.message,
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top'
+                position: 'top',
+                customClass: { popup: 'mi-borde-redondeado'},
             });
         }
     }
@@ -508,7 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 cancelButtonText: 'Cancelar',
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top' // Para que sea cómodo en móviles
+                position: 'top', // Para que sea cómodo en móviles
+                customClass: { popup: 'mi-borde-redondeado'},
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Llamamos a la función que ya definimos antes

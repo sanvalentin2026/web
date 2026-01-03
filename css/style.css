@@ -1406,3 +1406,7 @@ body.modo-oscuro {
         padding: 20px 15px;
     }
 }
+
+.mi-borde-redondeado {
+  border-radius: 20px !important;
+}
