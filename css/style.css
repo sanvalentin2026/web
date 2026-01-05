@@ -1195,7 +1195,6 @@ h1 {
 .main-header {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px); /* Efecto cristal */
-    border-bottom: 1px solid rgba(225, 29, 72, 0.2);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -1237,7 +1236,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
+    justify-content: center !important;
 }
 
 .action-btn:hover {
@@ -1259,7 +1258,6 @@ h1 {
 /* Modo Oscuro para el Header */
 .modo-oscuro .main-header {
     background: rgba(28, 28, 30, 0.9);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modo-oscuro .action-btn {
@@ -1409,4 +1407,11 @@ body.modo-oscuro {
 
 .mi-borde-redondeado {
   border-radius: 20px !important;
+}
+.action-btn i {
+    width: 20px; /* Ancho fijo para el icono */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* Evita que el icono se aplaste */
 }

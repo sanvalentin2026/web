@@ -1,0 +1,45 @@
+//------------------------------------------------------
+// SAN VALENTIN
+//------------------------------------------------------
+
+Este proyecto termina su fase de desarrollo el 04/01/2026,
+es decir no se le daran mas actualizaciones ni nuevas fun-
+ciones, solo soporte y nuevas versiones en CASO DE ERRORES
+DE PROGRAMACION.
+
+-- Tecnologias usadas --
+-- Desarrollo --
+
+Visual Studio Code
+SublimeText3
+
+-- Frontend --
+HTML5
+
+-- Frontend --
+CSS3
+
+-- Backend --
+JavaScript
+
+-- Host --
+GitHub Pages
+
+-- Base de datos --
+Supabase
+
+
+Personas a cargo del proyecto:
+
+-Alexei Chaves
+
+Soporte tecnico del sistema:
+
+-Alexei Chaves
+
+Controlador de base de datos:
+
+-Alexei Chaves
+
+
+Firma: Alexei Chaves

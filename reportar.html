@@ -104,6 +104,28 @@
       body { padding: 14px; }
       h1 { font-size: 24px; }
     }
+/* Asegúrate de que tu contenedor principal tenga esto */
+.container {
+    position: relative; 
+    padding-top: 40px; /* Deja espacio arriba para que no choque con el título */
+    /* ... tus otros estilos de container ... */
+}
+
+/* Estilo para moverlo arriba a la derecha */
+.version-container {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 11px; /* Tamaño pequeño */
+    opacity: 0.6;    /* Un toque elegante para que no resalte tanto */
+    font-weight: 500;
+    color: inherit;  /* Mantiene el color según el tema (oscuro/claro) */
+}
+
+.version-number {
+    font-weight: bold;
+    margin-left: 3px;
+}
   </style>
 </head>
 <body>
@@ -119,6 +141,9 @@
   
   <div class="container">
     <h1>Reportar un problema</h1>
+    <div class="version-container">
+    Version actual: <span class="version-number">v1.4.0</span>
+    </div>
     <p class="sub">Si algo no funciona bien, repórtelo aquí.</p>
 
     <form id="formReporte">
@@ -135,7 +160,7 @@
       <textarea id="descripcion" placeholder="Describa lo que pasó..." required></textarea>
 
       <label for="version">Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.3.14 (Actual)" required>
+      <input id="version" placeholder="Ej: v1.4.0 (Actual)" required>
 
       <label for="entorno">Dispositivo y navegador</label>
       <input id="entorno" placeholder="Ej: iPhone · Safari" required>
