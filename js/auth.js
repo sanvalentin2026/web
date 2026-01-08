@@ -335,7 +335,7 @@ window.login = async function() {
 
         localStorage.removeItem("usuario"); // SEGURIDAD: Limpiar ante error
 
-        Swal.fire({text: "Datos incorrectos", icon: "error", position:'top', showConfirmButton: false, timer: 3000, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
+        Swal.fire({text: "La cuenta no existe o los datos son incorrectos.", icon: "error", position:'top', showConfirmButton: false, timer: 3000, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
 
         return;
 

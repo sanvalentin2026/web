@@ -30,6 +30,70 @@ const dom = {
     detalles: document.getElementById("detalles")
 };
 
+// TUTORIAL
+
+function iniciarTutorial() {
+    // 1. Verificamos si ya vio el tutorial
+    if (localStorage.getItem("tutorialVisto") === "true") return;
+
+    // Verificar que Driver.js esté cargado
+    if (typeof window.driver === 'undefined') {
+        console.warn("Driver.js no está cargado aún.");
+        return;
+    }
+
+    const driver = window.driver.js.driver;
+
+    const driverObj = driver({
+        showProgress: true,
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Anterior',
+        doneBtnText: 'Finalizar tutorial',
+        popoverClass: 'driverjs-theme', 
+        // Esta opción es clave: permite que el tutorial espere a que los elementos existan
+        allowClose: false,
+        steps: [
+            { 
+                element: '#header', 
+                popover: { 
+                    title: '¡Hola! Un breve tutorial', 
+                    description: 'En esta sección encontrará acciones importantes como reportar errores, descargar PDF y cambiar el tema, esta seccion lo acopañara por toda la web.',
+                    side: "bottom", align: 'center' 
+                } 
+            },
+            { 
+                element: '#pedidoForm', 
+                popover: { 
+                    title: 'Registro de Pedidos', 
+                    description: 'Utiliza este formulario para ingresar nuevos pedidos facilmente.',
+                    side: "bottom", align: 'center' 
+                } 
+            },
+            { 
+                element: '.controls', 
+                popover: { 
+                    title: 'Búsqueda y Filtros', 
+                    description: 'Su funcion es filtrar por secciones (7-1, 8-2, etc.) o busca por nombre.',
+                    side: "top", align: 'center' 
+                } 
+            },
+                        { 
+                element: '#pedidosBody', 
+                popover: { 
+                    title: 'Pedidos', 
+                    description: 'Aqui se mostraran todos los pedidos disponibles, tienen sus botones de acciones para interactuar con ellos, cada 16 pedidos se creara una compaginacion para evitar un scroll largo.',
+                    side: "top", align: 'center' 
+                } 
+            }
+        ]
+    });
+
+    driverObj.drive();
+    localStorage.setItem("tutorialVisto", "true");
+}
+
+
+
 /* =================================================
    🎨 ESTILOS PARA BOTONES DE SWEETALERT (IGUALES)
    ================================================= */
@@ -253,7 +317,6 @@ dom.form.addEventListener("submit", async (e) => {
         Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2000, });
     } else {
         dom.form.reset();
-        playNotification('success');
         Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 2000, showConfirmButton: false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
         // El Realtime actualizará la tabla solo
     }
@@ -285,7 +348,6 @@ window.togglePagado = async (id, estadoActual) => {
     Swal.close();
 
     if (!error) {
-        playNotification('success');
         Swal.fire({
             icon: 'success',
             title: 'Pago actualizado',
@@ -297,14 +359,14 @@ window.togglePagado = async (id, estadoActual) => {
             customClass: { popup: 'mi-borde-redondeado'},
     })
     } else {
-        playNotification('error');
         Swal.fire({
             icon: 'error',
             title: 'Error',
             text: 'No se pudo actualizar el pago',
-            background: tema.bg,
-            color: tema.txt,
+            showConfirmButton:false,
+            timer:3500,
             position: 'top',
+            ...tema,
             customClass: { popup: 'mi-borde-redondeado'},
         });
     }
@@ -352,7 +414,6 @@ window.editarDetalles = async (id, texto) => {
         Swal.close(); // Quitar spinner
 
         if (!error) {
-            playNotification('success');
             Swal.fire({
                 icon: 'success',
                 title: 'Detalles guardados',
@@ -364,8 +425,7 @@ window.editarDetalles = async (id, texto) => {
                 customClass: { popup: 'mi-borde-redondeado'},
             });
         } else {
-            playNotification('error');
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al conectar con la base de datos.', background: tema.bg, color: tema.txt, position: 'top' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al guardar los detalles.', ...tema, position: 'top' });
         }
     }
 };
@@ -404,11 +464,10 @@ window.eliminarPedido = async (id) => {
 
         if (!error) {
             // 3. Confirmación final y sonido
-            playNotification('delete');
             Swal.fire({
                 icon: 'success',
                 title: 'Pedido eliminado',
-                timer: 1500,
+                timer: 1800,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
@@ -416,11 +475,11 @@ window.eliminarPedido = async (id) => {
                 customClass: { popup: 'mi-borde-redondeado'},
             });
         } else {
-            playNotification('error');
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: 'No se pudo eliminar el pedido: ' + error.message,
+                showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
                 position: 'top',
@@ -605,4 +664,165 @@ dom.filtroSeccion.addEventListener("change", () => { paginaActual = 1; aplicarFi
 document.addEventListener("DOMContentLoaded", () => {
     inicializarSecciones();
     cargarPedidos();
+    verificarBloqueoMantenimiento();
+    escucharMantenimiento();
+    setTimeout(() => {
+        iniciarTutorial();
+    }, 1500);
 });
+
+/* =================================================
+    🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL
+   ================================================= */
+    const USUARIO_ADMIN = "Alexei";
+    const tema = obtenerTema();
+
+async function escucharMantenimiento() {
+    try {
+        supabase
+            .channel('mantenimiento-realtime')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sistema_control' }, payload => {
+                const data = payload.new;
+                procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
+            })
+            .subscribe();
+    } catch (e) {
+        console.log("Error en suscripción Realtime:", e);
+    }
+}
+
+async function verificarBloqueoMantenimiento() {
+    try {
+        const { data, error } = await supabase
+            .from('sistema_control')
+            .select('en_mantenimiento, mensaje')
+            .eq('id', 1)
+            .maybeSingle(); // Usamos maybeSingle para evitar errores si no encuentra la fila
+        
+        if (error) throw error;
+        if (data) procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
+    } catch (e) {
+        console.error("Error de permisos o lectura:", e.message);
+    }
+}
+
+function procesarEstadoMantenimiento(estaActivo, mensajeDB) {
+    const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+    const miUsuario = (sesion.username || "").trim().toLowerCase();
+
+    if (estaActivo === true) {
+        if (miUsuario !== USUARIO_ADMIN.toLowerCase()) {
+            if (sessionStorage.getItem("mantenimiento_visto") === "true") {
+                aplicarPantallaMantenimiento(mensajeDB);
+            } else {
+                iniciarCuentaRegresiva(mensajeDB);
+            }
+        }
+    } else {
+        sessionStorage.removeItem("mantenimiento_visto");
+        if (document.getElementById("pantalla-mantenimiento")) {
+            window.location.reload();
+        }
+    }
+}
+
+function iniciarCuentaRegresiva(mensajeDB) {
+    sessionStorage.setItem("mantenimiento_visto", "true");
+    let segundos = 10;
+
+    if (typeof Swal === 'undefined') {
+        aplicarPantallaMantenimiento(mensajeDB);
+        return;
+    }
+
+    Swal.fire({
+        title: 'Actualización en curso',
+        html: `En: <b>${segundos}</b> segundos sera expulsado/a.`,
+        icon: 'warning',
+        allowOutsideClick: false,
+        position: 'top',
+        showConfirmButton: false,
+        background: tema.bg,
+        color: tema.txt,
+        customClass: { popup: 'mi-borde-redondeado' },
+        didOpen: () => {
+            const b = Swal.getHtmlContainer().querySelector('b');
+            const intervalo = setInterval(() => {
+                segundos--;
+                if (b) b.textContent = segundos;
+                if (segundos <= 0) {
+                    clearInterval(intervalo);
+                    aplicarPantallaMantenimiento(mensajeDB);
+                }
+            }, 1000);
+        }
+    });
+}
+
+function aplicarPantallaMantenimiento(mensajeDB) {
+    const textoMensaje = mensajeDB || "Estamos mejorando la plataforma.";
+
+    // BLOQUEO DE NAVEGACIÓN
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = () => window.history.go(1);
+
+    // CSS Y HTML RESPONSIVE
+    document.documentElement.innerHTML = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <title>Mantenimiento | En curso</title>
+            <style>
+                body {
+                    background: #0f172a;
+                    color: #f8fafc;
+                    font-family: system-ui, -apple-system, sans-serif;
+                    height: 100vh;
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+                .card {
+                    text-align: center;
+                    padding: 2rem;
+                    width: 90%;
+                    max-width: 450px;
+                }
+                h1 {
+                    color: #e11d48;
+                    font-size: clamp(1.5rem, 6vw, 2.2rem);
+                    margin-bottom: 1rem;
+                    text-transform: uppercase;
+                }
+                p {
+                    font-size: 1.1rem;
+                    line-height: 1.5;
+                    opacity: 0.9;
+                    margin-bottom: 2rem;
+                }
+                .loader {
+                    border: 3px solid rgba(255,255,255,0.1);
+                    border-left-color: #e11d48;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto;
+                }
+                @keyframes spin { to { transform: rotate(360deg); } }
+            </style>
+        </head>
+        <body id="pantalla-mantenimiento">
+            <div class="card">
+                <h1>En mantenimiento</h1>
+                <p>Instalando ${textoMensaje}, <br> vuelva en 5 minutos.</p>
+                <div class="loader"></div>
+            </div>
+        </body>
+        </html>`;
+    window.stop();
+}

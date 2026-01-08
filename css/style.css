@@ -1521,3 +1521,53 @@ body.modo-oscuro {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+/* --- ESTILO PREMIUM PARA EL TUTORIAL --- */
+.driverjs-theme {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    border-radius: 15px !important;
+    padding: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    border: 2px solid #e11d48 !important; /* Borde rojo San Valentín */
+}
+
+/* Título del tutorial */
+.driverjs-theme .driver-popover-title {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    color: #e11d48 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Descripción del tutorial */
+.driverjs-theme .driver-popover-description {
+    font-size: 0.95rem !important;
+    color: #4b5563 !important;
+    line-height: 1.5 !important;
+}
+
+/* Botones del tutorial (Sig, Ant, Finalizar) */
+.driverjs-theme .driver-popover-footer button {
+    background-color: #e11d48 !important;
+    color: white !important;
+    text-shadow: none !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.driverjs-theme .driver-popover-footer button:hover {
+    background-color: #be123c !important;
+    transform: scale(1.05);
+}
+
+/* Botón de cerrar (X) */
+.driverjs-theme .driver-popover-close-btn {
+    color: #9ca3af !important;
+}
+
+/* La flecha que apunta al elemento */
+.driverjs-theme .driver-popover-arrow-side-top { border-top-color: #e11d48 !important; }
+.driverjs-theme .driver-popover-arrow-side-bottom { border-bottom-color: #e11d48 !important; }
