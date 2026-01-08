@@ -1415,3 +1415,66 @@ body.modo-oscuro {
     align-items: center;
     flex-shrink: 0; /* Evita que el icono se aplaste */
 }
+/* Contenedor del mensaje de vacío */
+.contenedor-vacio-dinamico {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 300px;
+    padding: 40px 0;
+    text-align: center;
+}
+
+/* Icono de carpeta grande y del color de la web */
+.contenedor-vacio-dinamico i {
+    font-size: 6rem; /* Gigante para que se vea bien en Tablet/PC */
+    color: #ff375f;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.contenedor-vacio-dinamico p {
+    font-size: 1.2rem;
+    color: #a1a1a6;
+    font-weight: 500;
+}
+
+/* Fix para que en móvil no salga el "ID de pedido" si la celda está vacía */
+[data-label=""]::before {
+    content: none !important;
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    /* En móvil ocultamos la cabecera roja para que no salga el bloque huérfano a la izquierda */
+    thead {
+        display: none !important;
+    }
+}
+@media (max-width: 900px) {
+    /* Contenedor de botones en modo vertical */
+    .group-btns {
+        display: flex;
+        flex-direction: column; /* Los pone uno debajo del otro */
+        gap: 10px;             /* Espacio entre botones */
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    /* Estilo para que los botones abarquen todo el ancho */
+    .group-btns button {
+        width: 100% !important;
+        padding: 12px !important; /* Más grandes para el pulgar */
+        font-size: 1rem !important;
+        border-radius: 8px;
+        display: block;
+    }
+    
+    /* Aseguramos que la celda de acciones no tenga padding extra */
+    td[data-label="Acciones:"] {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+}

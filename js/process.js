@@ -88,7 +88,7 @@ function inicializarSecciones() {
     const selects = [dom.seccion, dom.seccion_receptor, dom.filtroSeccion];
     selects.forEach(select => {
         if (!select) return;
-        select.innerHTML = `<option value="">${select.id === 'filtroSeccion' ? 'Filtrar busqueda por seccion' : 'Seleccionar seccion'}</option>`;
+        select.innerHTML = `<option value="">${select.id === 'filtroSeccion' ? 'Filtrar busqueda por seccion' : 'Seleccione una seccion'}</option>`;
         for (let i = 7; i <= 11; i++) {
             for (let j = 1; j <= 4; j++) {
                 let v = `${i}-${j}`;
@@ -138,35 +138,73 @@ function aplicarFiltros() {
 }
 
 function renderizarTabla() {
+    // Referencia a la tabla y su cabecera para control visual total
+    const tabla = dom.body.closest('table');
+    const thead = tabla ? tabla.querySelector("thead") : null;
+    
     dom.body.innerHTML = "";
+    
+    // 1. CASO SIN PEDIDOS: Limpieza total de interfaz
+    if (!pedidosFiltrados || pedidosFiltrados.length === 0) {
+        // Ocultamos la cabecera roja para que no estorbe el centrado
+        if (thead) thead.style.display = "none";
+
+        const rowVacia = document.createElement("tr");
+        // data-label="" vacío evita que el CSS móvil inserte "ID de pedido:"
+        rowVacia.innerHTML = `
+            <td colspan="100%" data-label="" style="border: none !important;">
+                <div class="contenedor-vacio-dinamico">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <p>No hay pedidos para mostrar</p>
+                </div>
+            </td>
+        `;
+        dom.body.appendChild(rowVacia);
+        
+        // Limpiamos paginación para que no queden botones huérfanos
+        if (typeof renderizarPaginacion === "function") renderizarPaginacion();
+        return;
+    }
+
+    // 2. CASO CON PEDIDOS: Restaurar estructura
+    if (thead) {
+        // En tablets/móvil el CSS se encargará de ocultarla si es necesario, 
+        // pero aquí nos aseguramos que exista en el DOM.
+        thead.style.display = "table-header-group";
+    }
+
     const inicio = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
     const items = pedidosFiltrados.slice(inicio, inicio + PEDIDOS_POR_PAGINA);
-    
     const esMobile = window.innerWidth <= 900;
 
     items.forEach(p => {
-        // Usamos la CLASE en lugar de estilos fijos
         const fechaHTML = esMobile 
             ? `<div class="fecha-dinamica">${formatFechaMobile(p.created_at)}</div>` 
             : "";
 
+        // Escapamos comillas simples en detalles para evitar errores de sintaxis en el onclick
+        const detallesEscapados = (p.detalles || "").replace(/'/g, "\\'");
+
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${p.id}</td>
-            <td>${p.nombre_comprador} (${p.seccion_comprador})</td>
-            <td>${p.nombre_receptor} (${p.seccion_receptor})</td>
-            <td>${p.producto}</td>
-            <td>${p.detalles || "Sin detalles"}</td>
-            <td>${p.pagado ? "✅" : "❌"}</td>
-            <td>
+            <td data-label="ID del pedido:">${p.id}</td>
+            <td data-label="De:">${p.nombre_comprador} - (${p.seccion_comprador})</td>
+            <td data-label="Para:">${p.nombre_receptor} - (${p.seccion_receptor})</td>
+            <td data-label="Producto:">${p.producto}</td>
+            <td data-label="Detalles:">${p.detalles || " - Sin detalles"}</td>
+            <td data-label="Estado:">${p.pagado ? "✅" : "❌"}</td>
+            <td data-label="Acciones:">
                 ${fechaHTML}
-                <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
-                <button onclick="editarDetalles(${p.id}, '${p.detalles || ""}')">Detalles</button>
-                <button onclick="eliminarPedido(${p.id})">Borrar</button>
+                <div class="group-btns">
+                    <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
+                    <button onclick="editarDetalles(${p.id}, '${detallesEscapados}')">Detalles</button>
+                    <button onclick="eliminarPedido(${p.id})">Borrar</button>
+                </div>
             </td>
         `;
         dom.body.appendChild(row);
     });
+
     renderizarPaginacion();
 }
 
@@ -276,7 +314,7 @@ window.editarDetalles = async (id, texto) => {
     const tema = obtenerTema();
     
     const { value: nuevo } = await Swal.fire({
-        title: 'Editar Detalles:',
+        title: 'Editar los detalles:',
         input: 'textarea',
         inputValue: texto,
         background: tema.bg,
@@ -338,7 +376,7 @@ window.eliminarPedido = async (id) => {
     // 1. Preguntar primero si está seguro
     const res = await Swal.fire({
         title: '¿Eliminar pedido?',
-        text: "Esta acción no se puede deshacer y el registro desaparecerá.",
+        text: "Esta acción no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
@@ -395,7 +433,22 @@ window.eliminarPedido = async (id) => {
 
 window.descargarPDF = function() {
     const datos = window.pedidosCache;
-    if (!datos || datos.length === 0) return;
+    const tema = obtenerTema();
+
+    // 1. VALIDACIÓN CON SWEETALERT (Estilo 1.4.1)
+    if (!datos || datos.length === 0) {
+        Swal.fire({
+            icon: 'error',
+            text: 'No se pudo generar el PDF porque la lista está vacía.',
+            timer: 2500,
+            showConfirmButton: false,
+            background: tema.bg,
+            color: tema.txt,
+            position: 'top',
+            customClass: { popup: 'mi-borde-redondeado' }
+        });
+        return; // Detiene la ejecución de forma limpia
+    }
 
     // Generación de datos únicos en el momento del clic
     const ahora = new Date();
