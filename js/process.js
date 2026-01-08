@@ -88,7 +88,7 @@ function inicializarSecciones() {
     const selects = [dom.seccion, dom.seccion_receptor, dom.filtroSeccion];
     selects.forEach(select => {
         if (!select) return;
-        select.innerHTML = `<option value="">${select.id === 'filtroSeccion' ? 'Filtrar busqueda por seccion' : 'Seleccione una seccion'}</option>`;
+        select.innerHTML = `<option value="">${select.id === 'filtroSeccion' ? 'Filtrar busqueda por una seccion' : 'Seleccione una seccion'}</option>`;
         for (let i = 7; i <= 11; i++) {
             for (let j = 1; j <= 4; j++) {
                 let v = `${i}-${j}`;
@@ -453,7 +453,7 @@ window.descargarPDF = function() {
     // Generación de datos únicos en el momento del clic
     const ahora = new Date();
     const randomHex = Math.floor(Math.random() * 16777215).toString(16).toUpperCase();
-    const folioUnico = `REF-${ahora.getTime()}-${randomHex.substring(0, 4)}`;
+    const folioUnico = `FOL-${ahora.getTime()}-${randomHex.substring(0, 4)}`;
     
     // Formato de fecha solicitado
     const fechaEmision = ahora.toLocaleString('es-MX', { 
@@ -494,7 +494,7 @@ window.descargarPDF = function() {
 
             <div class="resaltado">
                 <div style="font-size: 14px; margin-bottom: 5px;">
-                    <strong>REFERENCIA:</strong> <span style="color:#E11D48;">${folioUnico}</span>
+                    <strong>FOLIO:</strong> <span style="color:#E11D48;">${folioUnico}</span>
                 </div>
                 <div style="font-size: 13px;">
                     <strong>EMITIDO EL:</strong> <span>${fechaEmision}</span>
@@ -516,10 +516,10 @@ window.descargarPDF = function() {
                     ${datos.map(p => `
                         <tr>
                             <td style="font-weight:bold;">${p.id}</td>
-                            <td>${p.nombre_comprador}, ${p.seccion_comprador}</td>
-                            <td>${p.nombre_receptor}, ${p.seccion_receptor}</td>
+                            <td>${p.nombre_comprador} - (${p.seccion_comprador})</td>
+                            <td>${p.nombre_receptor} - (${p.seccion_receptor})</td>
                             <td>${p.producto}</td>
-                            <td style="text-align:left;">${p.detalles || '---'}</td>
+                            <td style="text-align:left;">${p.detalles || '- Sin detalles'}</td>
                             <td class="status-pago">${p.pagado ? 'PAGADO' : 'PENDIENTE'}</td>
                         </tr>`).join('')}
                 </tbody>
@@ -527,7 +527,7 @@ window.descargarPDF = function() {
 
             <div class="footer">
                 Este documento es un comprobante oficial emitido por el Sistema de Control de pedidos.<br>
-                La integridad de este reporte se valida con la referencia única de seguridad superior, cualquier <br> edicion manual invalidara en su totalidad el documento.
+                La integridad de este reporte se valida con el folio único de seguridad superior, cualquier <br> edicion manual invalidara en su totalidad el documento.
             </div>
         </body>
         </html>

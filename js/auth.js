@@ -125,81 +125,60 @@ export async function validarSeguridadReal() {
 // ==========================================
 
 export const verificarSesion = async function() {
-
+    const loader = document.getElementById("pantalla-carga");
     const sesionLocal = localStorage.getItem("usuario");
 
+    // Si no hay sesión, ni siquiera intentamos quitar el loader, redirigimos
     if (!sesionLocal) {
-
-        document.documentElement.style.display = 'none';
-
         window.location.replace("login.html");
-
         return null;
-
     }
 
     try {
-
         const sesion = JSON.parse(sesionLocal);
-
         const { data, error } = await supabase
-
             .from("usuarios")
-
             .select("id, permisos")
-
             .eq("id", sesion.id)
-
             .single();
 
-
-
-        // 🚨 SI EL PERMISO CAMBIÓ A FALSE O HUBO ERROR
-
+        // 🚨 SI EL PERMISO ES FALSO O NO EXISTE
         if (error || !data || data.permisos !== true) {
-
-            const tema = obtenerTema();
-
             localStorage.removeItem("usuario");
-
-
-
+            
+            // Usamos SweetAlert como guardaste en tus instrucciones
             await Swal.fire({
-                text: "Tu acceso ha sido desactivado por un administrador.",
-
-                icon: "error",
-
-                allowOutsideClick: false,
-                position:'top',
-                showConfirmButton: false,
+                icon: 'error',
+                title: 'Acceso Denegado',
+                text: 'Tu acceso ha sido revocado.',
+                position: 'top',
                 timer: 3000,
-                customClass: { popup: 'mi-borde-redondeado'},
-                ...tema
-
+                showConfirmButton: false,
+                background: '#1c1c1e',
+                color: '#ffffff',
+                customClass: { popup: 'mi-borde-redondeado'}
             });
 
-           
-
             window.location.replace("login.html");
-
             return null;
-
         }
 
-       
+        // ✅ SOLO SI TODO ESTÁ BIEN: Desplegamos la web y quitamos el loader
+        if (loader) {
+            loader.style.opacity = "0";
+            setTimeout(() => {
+                loader.style.visibility = "hidden";
+                // Aquí podrías disparar la animación de "despliegue central" de la tabla
+            }, 500);
+        }
 
         document.body.style.display = 'block';
-
         return data;
 
     } catch (e) {
-
         window.location.replace("login.html");
-
         return null;
-
     }
-
 };
 
 // ==========================
