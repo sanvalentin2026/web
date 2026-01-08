@@ -185,7 +185,7 @@ button:active {
   }
 
   .input-group input {
-    font-size: 14px; /* Mejor legibilidad en móviles */
+    font-size: 16px; /* Mejor legibilidad en móviles */
     padding: 14px 14px 14px 45px;
   }
 }
