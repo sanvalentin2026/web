@@ -718,7 +718,7 @@ function iniciarCuentaRegresiva(mensajeDB) {
     let segundos = 10;
     
     Swal.fire({
-        title: 'Actualización programada',
+        title: 'Actualización',
         html: `Sera expulsado en: <b>${segundos}</b> segundos.`,
         icon: 'warning',
         position: 'top', // Alerta en la parte superior
@@ -811,8 +811,8 @@ function finalizarMantenimiento() {
 
     // 3. Lanzamos la alerta
     Swal.fire({
-        title: '¡Actualización Terminada!',
-        html: `Plataforma lista. Entrando en <b>${segundos}</b> segundos...`,
+        title: '¡Terminado!',
+        html: `Entrando en: <b>${segundos}</b> segundos...`,
         icon: 'success',
         allowOutsideClick: false,
         showConfirmButton: false,
