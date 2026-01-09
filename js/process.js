@@ -672,38 +672,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =================================================
-    🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL
+    🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL v4.0
    ================================================= */
-    const USUARIO_ADMIN = "Alexei";
-    const tema = obtenerTema();
+const USUARIO_ADMIN = "Alexei";
+const tema = obtenerTema();
+
+// Colores del tema para las alertas
 
 async function escucharMantenimiento() {
-    try {
-        supabase
-            .channel('mantenimiento-realtime')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sistema_control' }, payload => {
-                const data = payload.new;
-                procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
-            })
-            .subscribe();
-    } catch (e) {
-        console.log("Error en suscripción Realtime:", e);
-    }
+    supabase
+        .channel('mantenimiento-realtime')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sistema_control' }, payload => {
+            procesarEstadoMantenimiento(payload.new.en_mantenimiento, payload.new.mensaje);
+        })
+        .subscribe();
 }
 
 async function verificarBloqueoMantenimiento() {
-    try {
-        const { data, error } = await supabase
-            .from('sistema_control')
-            .select('en_mantenimiento, mensaje')
-            .eq('id', 1)
-            .maybeSingle(); // Usamos maybeSingle para evitar errores si no encuentra la fila
-        
-        if (error) throw error;
-        if (data) procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
-    } catch (e) {
-        console.error("Error de permisos o lectura:", e.message);
-    }
+    const { data } = await supabase.from('sistema_control').select('en_mantenimiento, mensaje').eq('id', 1).maybeSingle();
+    if (data) procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
 }
 
 function procesarEstadoMantenimiento(estaActivo, mensajeDB) {
@@ -719,39 +706,36 @@ function procesarEstadoMantenimiento(estaActivo, mensajeDB) {
             }
         }
     } else {
-        sessionStorage.removeItem("mantenimiento_visto");
-        if (document.getElementById("pantalla-mantenimiento")) {
-            window.location.reload();
+        if (sessionStorage.getItem("mantenimiento_visto") === "true") {
+            finalizarMantenimiento();
         }
     }
 }
 
 function iniciarCuentaRegresiva(mensajeDB) {
+    const tema = obtenerTema();
     sessionStorage.setItem("mantenimiento_visto", "true");
     let segundos = 10;
-
-    if (typeof Swal === 'undefined') {
-        aplicarPantallaMantenimiento(mensajeDB);
-        return;
-    }
-
+    
     Swal.fire({
-        title: 'Actualización en curso',
-        html: `En: <b>${segundos}</b> segundos sera expulsado/a.`,
+        title: 'Actualización programada',
+        html: `Sera expulsado en: <b>${segundos}</b> segundos.`,
         icon: 'warning',
+        position: 'top', // Alerta en la parte superior
         allowOutsideClick: false,
-        position: 'top',
         showConfirmButton: false,
         background: tema.bg,
         color: tema.txt,
-        customClass: { popup: 'mi-borde-redondeado' },
+        customClass: {
+            popup: 'mi-borde-redondeado'
+        },
         didOpen: () => {
             const b = Swal.getHtmlContainer().querySelector('b');
-            const intervalo = setInterval(() => {
+            const int = setInterval(() => {
                 segundos--;
                 if (b) b.textContent = segundos;
                 if (segundos <= 0) {
-                    clearInterval(intervalo);
+                    clearInterval(int);
                     aplicarPantallaMantenimiento(mensajeDB);
                 }
             }, 1000);
@@ -760,69 +744,95 @@ function iniciarCuentaRegresiva(mensajeDB) {
 }
 
 function aplicarPantallaMantenimiento(mensajeDB) {
-    const textoMensaje = mensajeDB || "Estamos mejorando la plataforma.";
-
-    // BLOQUEO DE NAVEGACIÓN
+    const msg = mensajeDB || "Mejorando el sistema...";
+    window.stop();
+    
     window.history.pushState(null, null, window.location.href);
     window.onpopstate = () => window.history.go(1);
 
-    // CSS Y HTML RESPONSIVE
     document.documentElement.innerHTML = `
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <title>Mantenimiento | En curso</title>
-            <style>
-                body {
-                    background: #0f172a;
-                    color: #f8fafc;
-                    font-family: system-ui, -apple-system, sans-serif;
-                    height: 100vh;
-                    margin: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                }
-                .card {
-                    text-align: center;
-                    padding: 2rem;
-                    width: 90%;
-                    max-width: 450px;
-                }
-                h1 {
-                    color: #e11d48;
-                    font-size: clamp(1.5rem, 6vw, 2.2rem);
-                    margin-bottom: 1rem;
-                    text-transform: uppercase;
-                }
-                p {
-                    font-size: 1.1rem;
-                    line-height: 1.5;
-                    opacity: 0.9;
-                    margin-bottom: 2rem;
-                }
-                .loader {
-                    border: 3px solid rgba(255,255,255,0.1);
-                    border-left-color: #e11d48;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    animation: spin 1s linear infinite;
-                    margin: 0 auto;
-                }
-                @keyframes spin { to { transform: rotate(360deg); } }
-            </style>
-        </head>
-        <body id="pantalla-mantenimiento">
-            <div class="card">
-                <h1>En mantenimiento</h1>
-                <p>Instalando ${textoMensaje}, <br> vuelva en 5 minutos.</p>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mantenimiento en curso</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+        <style>
+            html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #1c1c1e; overflow: hidden; font-family: sans-serif; }
+            .main { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; color: white; }
+            h1 { color: #e11d48; font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
+            .loader { border: 4px solid #1e293b; border-left-color: #e11d48; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+            /* Asegurar que la alerta se vea perfecta sobre el fondo */
+            .swal2-container { z-index: 999999 !important; }
+            .borde-personalizado { border: 2px solid #e11d48 !important; border-radius: 15px !important; }
+        </style>
+    </head>
+    <body>
+        <div class="main">
+            <div>
+                <h1>MANTENIMIENTO</h1>
+                <p style="color: #cbd5e1; font-size: 1.2rem; margin-top: 10px;">Instalando: <b style="color: white;">${msg}</b></p>
                 <div class="loader"></div>
+                <p style="opacity: 0.5; font-size: 0.9rem;">La navegación se restaurará automáticamente.</p>
+                <p style="opacity: 0.5; font size: 0.9rem;">¡Si recarga sera redirigido al login!</p>
             </div>
-        </body>
-        </html>`;
-    window.stop();
+        </div>
+    </body>
+    </html>`;
+}
+
+function finalizarMantenimiento() {
+    sessionStorage.removeItem("mantenimiento_visto");
+    let segundos = 10;
+
+    // 1. Forzamos los colores manualmente (ya que obtenerTema() se borró al limpiar el DOM)
+    const temaFijo = {
+        bg: '#1c1c1e',
+        txt: '#ffffff',
+    };
+
+    if (typeof Swal === 'undefined') {
+        window.location.reload();
+        return;
+    }
+
+    // 2. Inyectamos el CSS de los bordes directamente al documento actual
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .mi-borde-redondeado { 
+            border-radius: 20px !important; 
+        }
+        .swal2-container { z-index: 9999999 !important; }
+    `;
+    document.head.appendChild(style);
+
+    // 3. Lanzamos la alerta
+    Swal.fire({
+        title: '¡Actualización Terminada!',
+        html: `Plataforma lista. Entrando en <b>${segundos}</b> segundos...`,
+        icon: 'success',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        background: temaFijo.bg,
+        color: temaFijo.txt,
+        position: 'top',
+        customClass: {
+            popup: 'mi-borde-redondeado'
+        },
+        didOpen: () => {
+            const b = Swal.getHtmlContainer().querySelector('b');
+            const int = setInterval(() => {
+                segundos--;
+                if (b) b.textContent = segundos;
+                if (segundos <= 0) {
+                    clearInterval(int);
+                    window.location.reload();
+                }
+            }, 1000);
+        }
+    });
 }

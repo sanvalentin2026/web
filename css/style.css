@@ -1571,3 +1571,8 @@ body.modo-oscuro {
 /* La flecha que apunta al elemento */
 .driverjs-theme .driver-popover-arrow-side-top { border-top-color: #e11d48 !important; }
 .driverjs-theme .driver-popover-arrow-side-bottom { border-bottom-color: #e11d48 !important; }
+
+/* Añade esto dentro del <style> en aplicarPantallaMantenimiento */
+.swal-sobre-bloqueo {
+    z-index: 100000000 !important; /* Un nivel más arriba que el bloqueo total */
+}
