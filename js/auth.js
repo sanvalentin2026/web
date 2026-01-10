@@ -148,11 +148,12 @@ export const verificarSesion = async function() {
             
             // Usamos SweetAlert como guardaste en tus instrucciones
             await Swal.fire({
+                toast: true,
                 icon: 'error',
                 title: 'Acceso Denegado',
                 text: 'Tu acceso ha sido revocado.',
                 position: 'top',
-                timer: 3000,
+                timer: 6000,
                 showConfirmButton: false,
                 background: '#1c1c1e',
                 color: '#ffffff',

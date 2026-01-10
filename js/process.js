@@ -494,11 +494,10 @@ window.descargarPDF = function() {
     const datos = window.pedidosCache;
     const tema = obtenerTema();
 
-    // 1. VALIDACIÓN CON SWEETALERT (Estilo 1.4.1)
     if (!datos || datos.length === 0) {
         Swal.fire({
             icon: 'error',
-            text: 'No se pudo generar el PDF porque la lista está vacía.',
+            text: 'No hay datos para generar el gráfico de actividad.',
             timer: 2500,
             showConfirmButton: false,
             background: tema.bg,
@@ -506,107 +505,144 @@ window.descargarPDF = function() {
             position: 'top',
             customClass: { popup: 'mi-borde-redondeado' }
         });
-        return; // Detiene la ejecución de forma limpia
+        return;
     }
 
-    // Generación de datos únicos en el momento del clic
-    const ahora = new Date();
-    const randomHex = Math.floor(Math.random() * 16777215).toString(16).toUpperCase();
-    const folioUnico = `FOL-${ahora.getTime()}-${randomHex.substring(0, 4)}`;
-    
-    // Formato de fecha solicitado
-    const fechaEmision = ahora.toLocaleString('es-MX', { 
-        day: '2-digit', month: '2-digit', year: 'numeric', 
-        hour: '2-digit', minute: '2-digit', second: '2-digit' 
+    // --- PROCESAMIENTO DE DATOS POR DÍA ---
+    const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const conteoPorDia = [0, 0, 0, 0, 0, 0, 0]; // Corresponde a los índices de diasSemana
+
+    datos.forEach(p => {
+        // Asumiendo que p.creado_en es la fecha de Supabase
+        const fecha = new Date(p.creado_en);
+        const diaIndice = fecha.getDay(); // 0 para Domingo, 1 para Lunes...
+        conteoPorDia[diaIndice]++;
     });
+
+    // Totales para las tarjetas
+    const total = datos.length;
+    const pagados = datos.filter(p => p.pagado).length;
+    const pendientes = total - pagados;
+
+    const ahora = new Date();
+    const folioUnico = `FOL-${ahora.getTime()}`;
 
     const contenidoHTML = `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <style>
-                @media print { @page { margin: 10mm; } }
-                body { font-family: sans-serif; padding: 20px; color: #1a1a1a; position: relative; }
-                .watermark {
-                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
-                    font-size: 45px; color: rgba(225, 29, 72, 0.05); z-index: -1; font-weight: bold; pointer-events: none;
+                body { font-family: 'Segoe UI', sans-serif; padding: 30px; color: #1e293b; }
+                .header { border-bottom: 3px solid #E11D48; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+                
+                /* Layout de Estadísticas */
+                .stats-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
+                .cards-row { display: flex; gap: 15px; }
+                .card { 
+                    flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; 
+                    text-align: center; border: 1px solid #e2e8f0;
                 }
-                .header { border-bottom: 3px solid #E11D48; margin-bottom: 15px; text-align: center; }
-                .resaltado { 
-                    background: #fff5f7; border: 1px dashed #E11D48; padding: 12px; 
-                    margin-bottom: 20px; border-radius: 8px; text-align: center; 
-                }
-                .status-pago { font-weight: bold; font-size: 11px; }
-                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-                th { background-color: #E11D48; color: white; padding: 10px; font-size: 11px; text-transform: uppercase; }
-                td { border: 1px solid #f3c1d9; padding: 8px; font-size: 10px; text-align: center; word-break: break-all; }
-                .footer { margin-top: 30px; font-size: 9px; text-align: center; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+                .card small { color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: bold; }
+                .card div { font-size: 22px; font-weight: 900; margin-top: 5px; }
+
+                .chart-section { background: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; }
+                .chart-container { height: 280px; width: 100%; }
+
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10px; }
+                th { background: #1e293b; color: white; padding: 10px; }
+                td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+                .footer { margin-top: 40px; font-size: 9px; text-align: center; color: #94a3b8; border-top: 1px solid #eee; padding-top: 10px; }
             </style>
         </head>
         <body>
-            <div class="watermark">REPORTE OFICIAL ${folioUnico}</div>
-            
             <div class="header">
-                <h1 style="color:#E11D48; margin:0; font-size:22px;">REPORTE DE PEDIDOS OFICIAL</h1>
+                <h1 style="margin:0; color:#E11D48;">REPORTE DE PEDIDOS</h1>
+                <p style="margin:5px 0;">Folio: ${folioUnico} | Emitido el: ${ahora.toLocaleString()}</p>
             </div>
 
-            <div class="resaltado">
-                <div style="font-size: 14px; margin-bottom: 5px;">
-                    <strong>FOLIO:</strong> <span style="color:#E11D48;">${folioUnico}</span>
+            <div class="stats-container">
+                <div class="cards-row">
+                    <div class="card"><small>Total Pedidos</small><div style="color:#1e293b;">${total}</div></div>
+                    <div class="card"><small>Pagados</small><div style="color:#22c55e;">${pagados}</div></div>
+                    <div class="card"><small>Pendientes</small><div style="color:#e11d48;">${pendientes}</div></div>
                 </div>
-                <div style="font-size: 13px;">
-                    <strong>EMITIDO EL:</strong> <span>${fechaEmision}</span>
-                </div>
-            </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th style="width:35px;">ID</th>
-                        <th>EMISOR</th>
-                        <th>RECEPTOR</th>
+                        <th>ID</th>
+                        <th>DE</th>
+                        <th>PARA</th>
                         <th>PRODUCTO</th>
-                        <th style="width:25%;">DETALLES</th>
-                        <th style="width:60px;">ESTADO</th>
+                        <th>DETALLES</th>
+                        <th>ESTADO</th>
+
                     </tr>
                 </thead>
                 <tbody>
-                    ${datos.map(p => `
+                    ${datos.slice(0, 10).map(p => `
                         <tr>
-                            <td style="font-weight:bold;">${p.id}</td>
-                            <td>${p.nombre_comprador} - (${p.seccion_comprador})</td>
-                            <td>${p.nombre_receptor} - (${p.seccion_receptor})</td>
+                            <td>${p.id}</td>
+                            <td>${p.nombre_comprador}</td>
+                            <td>${p.nombre_receptor}</td>
                             <td>${p.producto}</td>
-                            <td style="text-align:left;">${p.detalles || '- Sin detalles'}</td>
-                            <td class="status-pago">${p.pagado ? 'PAGADO' : 'PENDIENTE'}</td>
-                        </tr>`).join('')}
+                            <td>${p.detalles || '- Sin detalles'}</td>
+                            <td style="font-weight:bold; color: ${p.pagado ? '#16a34a' : '#dc2626'}">
+                                ${p.pagado ? 'PAGADO' : 'PENDIENTE'}
+                            </td>
+                        </tr>
+                    `).join('')}
                 </tbody>
             </table>
 
-            <div class="footer">
-                Este documento es un comprobante oficial emitido por el Sistema de Control de pedidos.<br>
-                La integridad de este reporte se valida con el folio único de seguridad superior, cualquier <br> edicion manual invalidara en su totalidad el documento.
-            </div>
+            <div class="footer">Emitido por el Sistema de Control de Pedidos - Documento Privado<br>
+            Cualquier edicion del documento invalidara el mismo en su totalidad.</div>
+
+            <script>
+                const ctx = document.getElementById('graficoDias').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                        datasets: [{
+                            label: 'Pedidos',
+                            data: [${conteoPorDia.join(',')}],
+                            backgroundColor: '#E11D48',
+                            borderRadius: 5,
+                            hoverBackgroundColor: '#be123c'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            </script>
         </body>
         </html>
     `;
 
-    // Implementación mediante Iframe para máxima compatibilidad móvil
     const iframe = document.createElement('iframe');
     Object.assign(iframe.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' });
     document.body.appendChild(iframe);
-
     const doc = iframe.contentWindow.document;
     doc.open();
     doc.write(contenidoHTML);
     doc.close();
 
-    iframe.contentWindow.focus();
     setTimeout(() => {
+        iframe.contentWindow.focus();
         iframe.contentWindow.print();
-        setTimeout(() => { document.body.removeChild(iframe); }, 1000);
-    }, 600);
+        setTimeout(() => { document.body.removeChild(iframe); }, 2000);
+    }, 1500);
 };
 /* =================================================
    🚀 DISPARADOR DEL RESPALDO PDF
@@ -638,7 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (typeof window.descargarPDF === 'function') {
                         window.descargarPDF();
                     } else {
-                        console.error("❌ La función descargarPDF no está definida.");
+                        console.error("La función descargarPDF no está definida.");
                     }
                 }
             });
@@ -718,11 +754,11 @@ function iniciarCuentaRegresiva(mensajeDB) {
     let segundos = 10;
     
     Swal.fire({
-        title: 'Actualización',
-        html: `Sera expulsado en: <b>${segundos}</b> segundos.`,
+        toast: true,
+        title: 'Actualización en curso',
+        html: `Iniciando en: <b>${segundos}</b>s.`,
         icon: 'warning',
         position: 'top', // Alerta en la parte superior
-        allowOutsideClick: false,
         showConfirmButton: false,
         background: tema.bg,
         color: tema.txt,
@@ -746,6 +782,7 @@ function iniciarCuentaRegresiva(mensajeDB) {
 function aplicarPantallaMantenimiento(mensajeDB) {
     const msg = mensajeDB || "Mejorando el sistema...";
     window.stop();
+    const tema = obtenerTema();
     
     window.history.pushState(null, null, window.location.href);
     window.onpopstate = () => window.history.go(1);
@@ -760,10 +797,10 @@ function aplicarPantallaMantenimiento(mensajeDB) {
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
         <style>
-            html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #1c1c1e; overflow: hidden; font-family: sans-serif; }
+            html, body { margin: 0; padding: 0; width: 100%; height: 100%; background:${tema.bg}; overflow: hidden; font-family: sans-serif; }
             .main { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; color: white; }
-            h1 { color: #e11d48; font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
-            .loader { border: 4px solid #1e293b; border-left-color: #e11d48; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
+            h1 { color: ${tema.txt}; font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
+            .loader { border: 4px solid ${tema.txt}; border-left-color: #e11d48; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
             @keyframes spin { to { transform: rotate(360deg); } }
             /* Asegurar que la alerta se vea perfecta sobre el fondo */
             .swal2-container { z-index: 999999 !important; }
@@ -773,11 +810,11 @@ function aplicarPantallaMantenimiento(mensajeDB) {
     <body>
         <div class="main">
             <div>
-                <h1>MANTENIMIENTO</h1>
-                <p style="color: #cbd5e1; font-size: 1.2rem; margin-top: 10px;">Instalando: <b style="color: white;">${msg}</b></p>
+                <h1>ACTUALIZANDO...</h1>
+                <p style="color: ${tema.txt}; font-size: 1.2rem; margin-top: 10px;">Instalando: <b style="color: ${tema.txt};">${msg}</b></p>
                 <div class="loader"></div>
-                <p style="opacity: 0.5; font-size: 0.9rem;">La navegación se restaurará automáticamente.</p>
-                <p style="opacity: 0.5; font size: 0.9rem;">¡Si recarga sera redirigido al login!</p>
+                <p style="opacity: 0.5; font-size: 0.9rem; color:${tema.txt};">La navegación se restaurará automáticamente.</p>
+                <p style="opacity: 0.5; font size: 0.9rem; color:${tema.txt};">¡Si recarga sera redirigido al login!</p>
             </div>
         </div>
     </body>
@@ -786,53 +823,137 @@ function aplicarPantallaMantenimiento(mensajeDB) {
 
 function finalizarMantenimiento() {
     sessionStorage.removeItem("mantenimiento_visto");
-    let segundos = 10;
+    
+    // 1. LECTOR DE TEMAS
+    const temaGuardado = localStorage.getItem('tema') || 'oscuro'; 
+    const esOscuro = temaGuardado === 'oscuro';
 
-    // 1. Forzamos los colores manualmente (ya que obtenerTema() se borró al limpiar el DOM)
-    const temaFijo = {
-        bg: '#1c1c1e',
-        txt: '#ffffff',
+    // Definición estricta de colores:
+    // Oscuro: Fondo casi negro, Texto blanco.
+    // Claro: Fondo blanco, Texto negro/gris oscuro.
+    const temaAplicado = {
+        bg: esOscuro ? '#1c1c1e' : '#ffffff',
+        txt: esOscuro ? '#ffffff' : '#1e293b'
     };
+
+    let segundos = 10;
 
     if (typeof Swal === 'undefined') {
         window.location.reload();
         return;
     }
 
-    // 2. Inyectamos el CSS de los bordes directamente al documento actual
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .mi-borde-redondeado { 
-            border-radius: 20px !important; 
-        }
-        .swal2-container { z-index: 9999999 !important; }
-    `;
-    document.head.appendChild(style);
+    // 2. APLICADOR DE ESTILOS (Sin variables de acento)
+    const styleId = 'style-mantenimiento-fin';
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+            .mi-borde-redondeado { 
+                border-radius: 20px !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+                border: 1px solid ${esOscuro ? '#333' : '#ddd'} !important;
+            }
+            .swal2-container { z-index: 9999999 !important; }
+            .swal2-title { font-weight: 800 !important; }
+        `;
+        document.head.appendChild(style);
+    }
 
-    // 3. Lanzamos la alerta
+    // 3. LANZAMIENTO DE LA ALERTA
     Swal.fire({
-        title: '¡Terminado!',
-        html: `Entrando en: <b>${segundos}</b> segundos...`,
-        icon: 'success',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        background: temaFijo.bg,
-        color: temaFijo.txt,
+        toast: true,
         position: 'top',
+        icon: 'success',
+        title: 'Terminada',
+        html: `Entrando en: <b>${segundos}</b>s`,
+        background: temaAplicado.bg,
+        color: temaAplicado.txt,
+        timer: 10000,
+        showConfirmButton: false,
         customClass: {
             popup: 'mi-borde-redondeado'
         },
         didOpen: () => {
             const b = Swal.getHtmlContainer().querySelector('b');
-            const int = setInterval(() => {
+            const timerInterval = setInterval(() => {
                 segundos--;
                 if (b) b.textContent = segundos;
                 if (segundos <= 0) {
-                    clearInterval(int);
+                    clearInterval(timerInterval);
                     window.location.reload();
                 }
             }, 1000);
+
+            Swal.getPopup().addEventListener('click', () => clearInterval(timerInterval));
+        }
+    }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+            window.location.reload();
         }
     });
 }
+/* =================================================
+    🔔 SISTEMA DE NOTIFICACIONES REALTIME
+   ================================================= */
+
+// Configuración de colores para el tema
+const COLORES_NOTI = {
+    success: '#22c55e', // Verde
+    error: '#e11d48',   // Rojo
+    warning: '#f59e0b', // Ámbar
+    info: '#3b82f6'      // Azul
+};
+
+/**
+ * Escucha la inserción de nuevas filas en la tabla 'notificaciones'
+ */
+async function escucharNotificaciones() {
+    // Obtenemos el usuario de la sesión para filtrar mensajes privados
+    const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+    const miUsuario = (sesion.username || "").trim().toLowerCase();
+
+    supabase
+        .channel('canal-notificaciones')
+        .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'notificaciones' 
+        }, payload => {
+            const nota = payload.new;
+
+            // Lógica de visibilidad: Para todos o para mí específicamente
+            if (nota.usuario_destino === 'todos' || nota.usuario_destino.toLowerCase() === miUsuario) {
+                mostrarAlertaVisual(nota);
+            }
+        })
+        .subscribe();
+}
+
+
+function mostrarAlertaVisual(nota) {
+    const tema = obtenerTema();
+    const colorBorde = COLORES_NOTI[nota.tipo] || COLORES_NOTI.info;
+
+    Swal.fire({
+        confirmButtonText: 'Cerrar', 
+        confirmButtonColor: '#e11d48',
+        title: nota.titulo,
+        text: nota.mensaje,
+        icon: nota.tipo,
+        toast: true,
+        position: 'top', 
+        showConfirmButton: true,
+        background: tema.bg,
+        color: tema.txt,    
+        didOpen: (toast) => {
+            toast.style.borderRadius = '20px';
+            
+            
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+}
+
+escucharNotificaciones();
