@@ -1576,3 +1576,24 @@ body.modo-oscuro {
 .swal-sobre-bloqueo {
     z-index: 100000000 !important; /* Un nivel más arriba que el bloqueo total */
 }
+/* Estilo para los inputs y selects dentro de SweetAlert */
+.swal2-input, .swal2-textarea, .swal2-select {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: grey !important;
+    border: 1px solid grey;
+    border-radius: 12px !important;
+    margin: 5px 0 !important;
+    box-shadow: none !important;
+}
+
+/* Estilo para las opciones dentro del select */
+.swal2-input option {
+    background-color: #1c1c1e !important;
+    color: white !important;
+}
+
+/* Quitar el borde azul al hacer clic */
+.swal2-input:focus {
+    border-color: #E11D48 !important;
+    box-shadow: 0 0 0 1px #E11D48 !important;
+}

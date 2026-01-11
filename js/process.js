@@ -30,6 +30,9 @@ const dom = {
     detalles: document.getElementById("detalles")
 };
 
+
+
+
 // TUTORIAL
 
 function iniciarTutorial() {
@@ -142,12 +145,6 @@ const obtenerTema = () => ({
     bg: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
     txt: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
 });
-
-function playNotification(tipo) {
-    const sonidos = { success: 'si.mp3', pago: 'applepay.mp3', delete: 'si.mp3', create: 'pedido.mp3', error: 'error.mp3' };
-    new Audio(sonidos[tipo] || 'si.mp3').play().catch(() => {});
-}
-
 function inicializarSecciones() {
     const selects = [dom.seccion, dom.seccion_receptor, dom.filtroSeccion];
     selects.forEach(select => {
@@ -261,7 +258,7 @@ function renderizarTabla() {
                 ${fechaHTML}
                 <div class="group-btns">
                     <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
-                    <button onclick="editarDetalles(${p.id}, '${detallesEscapados}')">Detalles</button>
+                    <button onclick="editarPedidoCompleto(${p.id}, '${detallesEscapados}')">Editar</button>
                     <button onclick="eliminarPedido(${p.id})">Borrar</button>
                 </div>
             </td>
@@ -294,7 +291,7 @@ dom.form.addEventListener("submit", async (e) => {
     const tema = obtenerTema();
     
     // Bloqueo visual
-    Swal.fire({ title: 'Procesando pedido...', background: tema.bg, color: tema.txt, allowOutsideClick: false, didOpen: () => Swal.showLoading(), position:'top', customClass: { popup: 'mi-borde-redondeado'}, });
+    Swal.fire({ title: 'Procesando...', background: tema.bg, color: tema.txt, toast:true, showConfirmButton:false, allowOutsideClick: false, didOpen: () => Swal.showLoading(), position:'top', customClass: { popup: 'mi-borde-redondeado'}, });
 
     const sesion = JSON.parse(localStorage.getItem("usuario"));
     const usuario = sesion ? sesion.username : "Desconocido";
@@ -314,10 +311,10 @@ dom.form.addEventListener("submit", async (e) => {
     const { error } = await supabase.from("pedidos").insert([nuevoPedido]);
 
     if (error) {
-        Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2000, });
+        Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false,toast:true, showConfirmButton:false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2000, });
     } else {
         dom.form.reset();
-        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 2000, showConfirmButton: false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
+        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 2500, showConfirmButton: false,toast:true, showConfirmButton:false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
         // El Realtime actualizará la tabla solo
     }
 });
@@ -330,6 +327,8 @@ window.togglePagado = async (id, estadoActual) => {
 
     // 1. Mostrar Spinner de carga de inmediato
     Swal.fire({
+        toast:true,
+        showConfirmButton:false,
         title: 'Procesando...',
         background: tema.bg,
         color: tema.txt,
@@ -349,9 +348,10 @@ window.togglePagado = async (id, estadoActual) => {
 
     if (!error) {
         Swal.fire({
+            toast:true,
             icon: 'success',
             title: 'Pago actualizado',
-            timer: 2000,
+            timer: 2500,
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
@@ -360,6 +360,7 @@ window.togglePagado = async (id, estadoActual) => {
     })
     } else {
         Swal.fire({
+            toast:true,
             icon: 'error',
             title: 'Error',
             text: 'No se pudo actualizar el pago',
@@ -372,32 +373,83 @@ window.togglePagado = async (id, estadoActual) => {
     }
 };
 
-window.editarDetalles = async (id, texto) => {
+window.editarPedidoCompleto = async (pedidoId) => {
     const tema = obtenerTema();
+
+    const { data: p, error: errFetch } = await supabase
+        .from("pedidos")
+        .select("*")
+        .eq("id", pedidoId)
+        .single();
+
+    if (errFetch || !p) return;
+
+    // Lista de secciones
+    const secciones = ["7-1", "7-2", "7-3", "7-4", "8-1", "8-2", "8-3", "8-4", "9-1", "9-2", "9-3", "9-4", "10-1", "10-2", "10-3", "10-4", "11-1", "11-2", "11-3", "11-4"];
     
-    const { value: nuevo } = await Swal.fire({
-        title: 'Editar los detalles:',
-        input: 'textarea',
-        inputValue: texto,
+    const opcionesSeccionC = secciones.map(s => 
+        `<option value="${s}" ${p.seccion_comprador === s ? 'selected' : ''}>${s}</option>`
+    ).join('');
+
+    const opcionesSeccionR = secciones.map(s => 
+        `<option value="${s}" ${p.seccion_receptor === s ? 'selected' : ''}>${s}</option>`
+    ).join('');
+
+    const { value: camposNuevos } = await Swal.fire({
+        title: `Editar Pedido #${p.id}`,
         background: tema.bg,
         color: tema.txt,
+        html: `
+            <div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
+                
+                <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
+                <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${p.nombre_comprador || ''}">
+                <select id="swal-seccion-c" class="swal2-input">
+                    ${opcionesSeccionC}
+                </select>
+
+                <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
+                <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${p.nombre_receptor || ''}">
+                <select id="swal-seccion-r" class="swal2-input">
+                    ${opcionesSeccionR}
+                </select>
+
+                <label style="font-size: 10px;color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y NOTAS:</label>
+                <input id="swal-producto" class="swal2-input" placeholder="Producto" value="${p.producto || ''}">
+                <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles...">${p.detalles || ''}</textarea>
+            </div>
+        `,
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         confirmButtonText: 'Guardar',
         cancelButtonText: 'Cancelar',
-        customClass: { popup: 'mi-borde-redondeado'},
+        customClass: { 
+            popup: 'mi-borde-redondeado',
+            input: 'custom-swal-input' // Clase extra por si acaso
+        },
+        preConfirm: () => {
+            return {
+                nombre_comprador: document.getElementById('swal-nombre-c').value.trim(),
+                seccion_comprador: document.getElementById('swal-seccion-c').value,
+                nombre_receptor: document.getElementById('swal-nombre-r').value.trim(),
+                seccion_receptor: document.getElementById('swal-seccion-r').value,
+                producto: document.getElementById('swal-producto').value.trim(),
+                detalles: document.getElementById('swal-detalles').value.trim()
+            }
+        }
     });
 
-    if (nuevo !== undefined) {
-        // MOSTRAR CARGANDO DESPUÉS DE DAR CLIC EN GUARDAR
+    if (camposNuevos) {
+        // Usar SweetAlert para la carga (Estilo solicitado en instrucciones)
         Swal.fire({
+            toast: true,
             title: 'Procesando...',
+            showConfirmButton:false,
             background: tema.bg,
             color: tema.txt,
-            allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             position: 'top',
-            customClass: { popup: 'mi-borde-redondeado'},
+            customClass: { popup: 'mi-borde-redondeado' },
         });
 
         const sesion = JSON.parse(localStorage.getItem("usuario"));
@@ -405,27 +457,25 @@ window.editarDetalles = async (id, texto) => {
 
         const { error } = await supabase
             .from("pedidos")
-            .update({ 
-                detalles: nuevo.trim(),
-                ultima_edicion_por: usuarioNombre 
-            })
-            .eq("id", id);
+            .update({ ...camposNuevos, ultima_edicion_por: usuarioNombre })
+            .eq("id", pedidoId);
 
-        Swal.close(); // Quitar spinner
+        Swal.close();
 
         if (!error) {
+            // Notificación tipo Toast (Superior y rápida)
             Swal.fire({
                 icon: 'success',
-                title: 'Detalles guardados',
-                timer: 1700,
+                title: 'Cambios guardados',
+                toast: true,
+                position: 'top',
+                timer: 2500,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top',
                 customClass: { popup: 'mi-borde-redondeado'},
             });
-        } else {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al guardar los detalles.', ...tema, position: 'top' });
+            if (window.cargarPedidos) window.cargarPedidos();
         }
     }
 };
@@ -451,6 +501,8 @@ window.eliminarPedido = async (id) => {
     if (res.isConfirmed) {
         // 2. Mostrar carga mientras borra en la DB
         Swal.fire({
+            toast:true,
+            showConfirmButton:false,
             title: 'Procesando...',
             background: tema.bg,
             color: tema.txt,
@@ -465,9 +517,10 @@ window.eliminarPedido = async (id) => {
         if (!error) {
             // 3. Confirmación final y sonido
             Swal.fire({
+                toast:true,
                 icon: 'success',
                 title: 'Pedido eliminado',
-                timer: 1800,
+                timer: 2500,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
@@ -476,6 +529,7 @@ window.eliminarPedido = async (id) => {
             });
         } else {
             Swal.fire({
+                toast:true,
                 icon: 'error',
                 title: 'Error',
                 text: 'No se pudo eliminar el pedido: ' + error.message,
@@ -496,8 +550,9 @@ window.descargarPDF = function() {
 
     if (!datos || datos.length === 0) {
         Swal.fire({
+            toast:true,
             icon: 'error',
-            text: 'No hay datos para generar el gráfico de actividad.',
+            text: 'No hay datos para generar el PDF.',
             timer: 2500,
             showConfirmButton: false,
             background: tema.bg,
