@@ -290,7 +290,7 @@ window.login = async function() {
 
     if (!userInput || !passInput) {
 
-        Swal.fire({text: "Ingresa tus datos", icon: "warning",position:'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
+        Swal.fire({text: "Ingresa tus datos", icon: "warning", showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
 
         return;
 

@@ -29,35 +29,7 @@ const dom = {
     producto: document.getElementById("producto"),
     detalles: document.getElementById("detalles")
 };
-// COLOCAR AL PRINCIPIO ABSOLUTO DE TU ARCHIVO JS PRINCIPAL
-(async function escudoProtector() {
-    const { data, error } = await supabase
-        .from('sistema_control')
-        .select('en_mantenimiento, mensaje')
-        .eq('id', 1)
-        .single();
 
-    if (data && data.en_mantenimiento) {
-        // Bloqueamos la ejecución del resto del sitio
-        window.stop(); 
-        // Redirigimos pasando el mensaje por URL
-        window.location.replace(`mantenimiento.html?msg=${encodeURIComponent(data.mensaje)}`);
-    }
-})();
-// ESCUDO DE SEGURIDAD PRINCIPAL
-(async function verificarMantenimiento() {
-    // Usamos el nombre exacto de tu tabla: sistema_control
-    const { data, error } = await supabase
-        .from('sistema_control')
-        .select('en_mantenimiento, mensaje')
-        .eq('id', 1) // Tu fila es la ID 1
-        .single();
-
-    if (data && data.en_mantenimiento === true) {
-        // Redirigir de inmediato si el mantenimiento está activo
-        window.location.href = `mantenimiento.html?msg=${encodeURIComponent(data.mensaje)}`;
-    }
-})();
 // TUTORIAL
 
 function iniciarTutorial() {
@@ -728,11 +700,199 @@ dom.filtroSeccion.addEventListener("change", () => { paginaActual = 1; aplicarFi
 document.addEventListener("DOMContentLoaded", () => {
     inicializarSecciones();
     cargarPedidos();
+    verificarBloqueoMantenimiento();
+    escucharMantenimiento();
     setTimeout(() => {
         iniciarTutorial();
     }, 1500);
 });
 
+/* =================================================
+    🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL v4.0
+   ================================================= */
+const USUARIO_ADMIN = "Alexei";
+const tema = obtenerTema();
+
+// Colores del tema para las alertas
+
+async function escucharMantenimiento() {
+    supabase
+        .channel('mantenimiento-realtime')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sistema_control' }, payload => {
+            procesarEstadoMantenimiento(payload.new.en_mantenimiento, payload.new.mensaje);
+        })
+        .subscribe();
+}
+
+async function verificarBloqueoMantenimiento() {
+    const { data } = await supabase.from('sistema_control').select('en_mantenimiento, mensaje').eq('id', 1).maybeSingle();
+    if (data) procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
+}
+
+function procesarEstadoMantenimiento(estaActivo, mensajeDB) {
+    const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+    const miUsuario = (sesion.username || "").trim().toLowerCase();
+
+    if (estaActivo === true) {
+        if (miUsuario !== USUARIO_ADMIN.toLowerCase()) {
+            if (sessionStorage.getItem("mantenimiento_visto") === "true") {
+                aplicarPantallaMantenimiento(mensajeDB);
+            } else {
+                iniciarCuentaRegresiva(mensajeDB);
+            }
+        }
+    } else {
+        if (sessionStorage.getItem("mantenimiento_visto") === "true") {
+            finalizarMantenimiento();
+        }
+    }
+}
+
+function iniciarCuentaRegresiva(mensajeDB) {
+    const tema = obtenerTema();
+    sessionStorage.setItem("mantenimiento_visto", "true");
+    let segundos = 10;
+    
+    Swal.fire({
+        toast: true,
+        title: 'Actualización en curso',
+        html: `Iniciando en: <b>${segundos}</b>s.`,
+        icon: 'warning',
+        position: 'top', // Alerta en la parte superior
+        showConfirmButton: false,
+        background: tema.bg,
+        color: tema.txt,
+        customClass: {
+            popup: 'mi-borde-redondeado'
+        },
+        didOpen: () => {
+            const b = Swal.getHtmlContainer().querySelector('b');
+            const int = setInterval(() => {
+                segundos--;
+                if (b) b.textContent = segundos;
+                if (segundos <= 0) {
+                    clearInterval(int);
+                    aplicarPantallaMantenimiento(mensajeDB);
+                }
+            }, 1000);
+        }
+    });
+}
+
+function aplicarPantallaMantenimiento(mensajeDB) {
+    const msg = mensajeDB || "Mejorando el sistema...";
+    window.stop();
+    const tema = obtenerTema();
+    
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = () => window.history.go(1);
+
+    document.documentElement.innerHTML = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mantenimiento en curso</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+        <style>
+            html, body { margin: 0; padding: 0; width: 100%; height: 100%; background:${tema.bg}; overflow: hidden; font-family: sans-serif; }
+            .main { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; color: white; }
+            h1 { color: ${tema.txt}; font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
+            .loader { border: 4px solid ${tema.txt}; border-left-color: #e11d48; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+            /* Asegurar que la alerta se vea perfecta sobre el fondo */
+            .swal2-container { z-index: 999999 !important; }
+            .borde-personalizado { border: 2px solid #e11d48 !important; border-radius: 15px !important; }
+        </style>
+    </head>
+    <body>
+        <div class="main">
+            <div>
+                <h1>ACTUALIZANDO...</h1>
+                <p style="color: ${tema.txt}; font-size: 1.2rem; margin-top: 10px;">Instalando: <b style="color: ${tema.txt};">${msg}</b></p>
+                <div class="loader"></div>
+                <p style="opacity: 0.5; font-size: 0.9rem; color:${tema.txt};">La navegación se restaurará automáticamente.</p>
+                <p style="opacity: 0.5; font size: 0.9rem; color:${tema.txt};">¡Si recarga sera redirigido al login!</p>
+            </div>
+        </div>
+    </body>
+    </html>`;
+}
+
+function finalizarMantenimiento() {
+    sessionStorage.removeItem("mantenimiento_visto");
+    
+    // 1. LECTOR DE TEMAS
+    const temaGuardado = localStorage.getItem('tema') || 'oscuro'; 
+    const esOscuro = temaGuardado === 'oscuro';
+
+    // Definición estricta de colores:
+    // Oscuro: Fondo casi negro, Texto blanco.
+    // Claro: Fondo blanco, Texto negro/gris oscuro.
+    const temaAplicado = {
+        bg: esOscuro ? '#1c1c1e' : '#ffffff',
+        txt: esOscuro ? '#ffffff' : '#1e293b'
+    };
+
+    let segundos = 10;
+
+    if (typeof Swal === 'undefined') {
+        window.location.reload();
+        return;
+    }
+
+    // 2. APLICADOR DE ESTILOS (Sin variables de acento)
+    const styleId = 'style-mantenimiento-fin';
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+            .mi-borde-redondeado { 
+                border-radius: 20px !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+                border: 1px solid ${esOscuro ? '#333' : '#ddd'} !important;
+            }
+            .swal2-container { z-index: 9999999 !important; }
+            .swal2-title { font-weight: 800 !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 3. LANZAMIENTO DE LA ALERTA
+    Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'success',
+        title: 'Terminada',
+        html: `Entrando en: <b>${segundos}</b>s`,
+        background: temaAplicado.bg,
+        color: temaAplicado.txt,
+        timer: 10000,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'mi-borde-redondeado'
+        },
+        didOpen: () => {
+            const b = Swal.getHtmlContainer().querySelector('b');
+            const timerInterval = setInterval(() => {
+                segundos--;
+                if (b) b.textContent = segundos;
+                if (segundos <= 0) {
+                    clearInterval(timerInterval);
+                    window.location.reload();
+                }
+            }, 1000);
+
+            Swal.getPopup().addEventListener('click', () => clearInterval(timerInterval));
+        }
+    }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+            window.location.reload();
+        }
+    });
+}
 /* =================================================
     🔔 SISTEMA DE NOTIFICACIONES REALTIME
    ================================================= */
@@ -797,104 +957,3 @@ function mostrarAlertaVisual(nota) {
 }
 
 escucharNotificaciones();
-
-
-
-//================  MANTENIMIENTO CON TEMAS DINÁMICOS ================
-// [cite: 2026-01-03, 2026-01-08]
-
-function obtenerColoresTema() {
-    const temaActual = localStorage.getItem('tema') || 'oscuro';
-    const esOsc = temaActual === 'oscuro';
-    return {
-        bg: esOsc ? '#1c1c1e' : '#ffffff',
-        txt: esOsc ? '#ffffff' : '#000000',
-        accent: '#e11d48'
-    };
-}
-
-// Función para aplicar estilos al DOM según el tema actual
-function aplicarEstilosMantenimiento() {
-    const t = obtenerColoresTema();
-    let st = document.getElementById('estilo-mantenimiento-dinamico');
-    
-    if (!st) {
-        st = document.createElement('style');
-        st.id = 'estilo-mantenimiento-dinamico';
-        document.head.appendChild(st);
-    }
-    
-    st.innerHTML = `
-        .mi-borde-redondeado { 
-            border-radius: 20px !important; 
-        }
-        div:where(.swal2-container) .swal2-popup {
-            background: ${t.bg} !important;
-        }
-        div:where(.swal2-container) .swal2-html-container, 
-        div:where(.swal2-container) .swal2-title { 
-            color: ${t.txt} !important; 
-            font-weight: bold !important; 
-        }
-    `;
-}
-
-// Escuchar cambios en localStorage (por si cambias de tema en otra pestaña)
-window.addEventListener('storage', (e) => {
-    if (e.key === 'tema') aplicarEstilosMantenimiento();
-});
-
-async function monitorearMantenimiento() {
-    aplicarEstilosMantenimiento(); // Aplicar al inicio
-
-    const { data } = await supabase.from('sistema_control').select('*').eq('id', 1).single();
-
-    if (data && data.en_mantenimiento) {
-        window.location.replace(`mantenimiento.html?msg=${encodeURIComponent(data.mensaje)}`);
-        return;
-    }
-
-    supabase.channel('global_mantenimiento')
-        .on('postgres_changes', { 
-            event: 'UPDATE', 
-            schema: 'public', 
-            table: 'sistema_control',
-            filter: 'id=eq.1' 
-        }, (payload) => {
-            if (payload.new.en_mantenimiento === true) {
-                lanzarAvisoMantenimiento(payload.new.mensaje);
-            }
-        })
-        .subscribe();
-}
-
-function lanzarAvisoMantenimiento(mensaje) {
-    aplicarEstilosMantenimiento(); // Asegurar colores frescos antes de lanzar
-    const t = obtenerColoresTema();
-    let segundos = 10; 
-
-    Swal.fire({
-        toast: true,
-        position: 'top',
-        title: 'Actualización disponible',
-        html: `Iniciando en: <b>${segundos}</b>s.`,
-        icon: 'info',
-        background: t.bg,
-        color: t.txt,
-        showConfirmButton: false,
-        customClass: { popup: 'mi-borde-redondeado' },
-        didOpen: () => {
-            const b = Swal.getHtmlContainer().querySelector('b');
-            const timer = setInterval(() => {
-                segundos--;
-                if (b) b.textContent = segundos;
-                if (segundos <= 0) {
-                    clearInterval(timer);
-                    window.location.replace(`mantenimiento.html?msg=${encodeURIComponent(mensaje)}`);
-                }
-            }, 1000);
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', monitorearMantenimiento);
