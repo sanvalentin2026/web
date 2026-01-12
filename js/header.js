@@ -23,7 +23,7 @@ if (localStorage.getItem('tema') === 'oscuro') {
 const header = document.querySelector('.main-header');
 
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 0) {
+    if (window.scrollY > 20) {
         header.classList.add('scrolled');
     } else {
         header.classList.remove('scrolled');

@@ -10,8 +10,6 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
 
 <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
-
-<link rel="apple-touch-icon" href="https://fav.farm/❤️">
   
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -35,7 +33,7 @@
     }
 
     .container { max-width: 600px; margin: 0 auto; }
-    h1 { text-align: center; font-size: 32px; margin-bottom: 8px; color: #e63946; }
+    h1 { text-align: center; font-size: 32px; margin-bottom: 8px; color: #ff375f; }
     .sub { text-align: center; color: #666; margin-bottom: 24px; font-size: 15px; }
     
     form {
@@ -73,7 +71,7 @@
     button:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .btn-volver {
-      background: none; border: none; color: #ff4d6d;
+      background: none; border: none; color: #ff375f;
       font-size: 15px; font-weight: 600; cursor: pointer;
       margin-bottom: 14px;
     }
@@ -157,7 +155,7 @@
       </select>
 
       <label for="descripcion">¿Qué ocurrió?</label>
-      <textarea id="descripcion" placeholder="Describa lo que pasó..." required></textarea>
+      <textarea id="descripcion" placeholder="Describa lo que pasó aqui" required></textarea>
 
       <label for="version">Versión de la web</label>
       <input id="version" placeholder="Ej: v1.4.0 | Patch-11 (Actual)" required>
@@ -190,7 +188,7 @@
       const tema = obtenerTema(); // Traemos el objeto completo de auth.js
 
       btn.disabled = true;
-      btn.textContent = "Enviando...";
+      btn.textContent = "Reportando...";
 
       const { error } = await supabase.from("reportes_web").insert({
         tipo: document.getElementById("tipo").value,
@@ -202,6 +200,10 @@
 
       if (error) {
         Swal.fire({
+          toast:true,
+          showConfirmButton:false,
+          showConfirmButton:false,
+          timer:3000,
           icon: 'error',
           title: 'Error',
           text: 'No se pudo enviar el reporte',
@@ -213,9 +215,10 @@
         });
       } else {
         await Swal.fire({
+          toast:true,
           icon: 'success',
           title: 'Reporte enviado',
-          timer: 2000,
+          timer: 2500,
           showConfirmButton: false,
           position: 'top',
           customClass: {

@@ -13,7 +13,6 @@ body {
   align-items: center;
   padding: 20px;
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
   /* Eliminado overflow:hidden para permitir scroll en móviles si el teclado se abre */
 }
 
@@ -29,7 +28,7 @@ body.modo-claro {
   box-shadow: 0 25px 50px -12px rgba(225, 29, 72, 0.15);
 }
 
-.modo-claro h2 { color: #E11D48; }
+.modo-claro h2 { color: #ff375f; }
 
 .modo-claro .input-group input {
   border: 1.5px solid #F3C1D9;
@@ -56,9 +55,6 @@ body.modo-oscuro {
   color: white;
 }
 
-.modo-oscuro h2 { 
-  text-shadow: 0 0 20px rgba(255, 55, 95, 0.3);
-}
 
 .modo-oscuro .input-group input {
   background: rgba(255, 255, 255, 0.03);
@@ -106,7 +102,7 @@ h2 {
   transition: all 0.3s ease;
 }
 
-.modo-claro .input-group i { color: #E11D48; }
+.modo-claro .input-group i { color: #ff375f; }
 .modo-oscuro .input-group i { color: #ff375f; }
 
 .input-group input {
@@ -130,20 +126,18 @@ button {
   cursor: pointer;
   margin-top: 15px;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 15px -3px rgba(225, 29, 72, 0.3);
 }
 
 button:hover {
   transform: translateY(-2px);
   filter: brightness(1.1);
-  box-shadow: 0 20px 25px -5px rgba(225, 29, 72, 0.4);
 }
 
 button:active {
   transform: translateY(0);
 }
 
-.modo-claro button { background: #E11D48; }
+.modo-claro button { background: #ff375f; }
 .modo-oscuro button { background: #ff375f; }
 
 /* Enlaces inferiores */

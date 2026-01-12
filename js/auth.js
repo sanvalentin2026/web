@@ -249,7 +249,7 @@ window.register = async function() {
         await Swal.fire({
             toast:true,
             showConfirmButton:false,
-            text: "Cuenta enviada para aprobación",
+            title: "Cuenta creada, inicie sesion",
 
             showConfirmButton: false,
 
@@ -290,7 +290,7 @@ window.login = async function() {
 
     if (!userInput || !passInput) {
         Swal.fire({
-            text: "Ingresa tus datos", 
+            text: "Ingrese sus datos", 
             icon: "warning", 
             showConfirmButton: false, 
             toast: true, 
@@ -322,7 +322,7 @@ window.login = async function() {
     if (error || !data) {
         localStorage.removeItem("usuario");
         Swal.fire({
-            title: "Los datos son incorrectos o la cuenta no existe.",
+            title: "Datos incorrectos o inexistentes",
             icon: "error",
             position: 'top',
             showConfirmButton: false,
@@ -347,10 +347,10 @@ window.login = async function() {
             toast: true,
             showConfirmButton: false,
             title: "Acceso Pendiente",
-            text: "Tu cuenta debe ser aprobada por un administrador.",
+            text: "Su cuenta no esta verificada aun por un administrador",
             icon: "info",
             position: 'top',
-            timer: 3000,
+            timer: 3500,
             customClass: { popup: 'mi-borde-redondeado' },
             ...tema
         });

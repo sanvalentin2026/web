@@ -303,7 +303,7 @@ dom.form.addEventListener("submit", async (e) => {
     const { error } = await supabase.from("pedidos").insert([nuevoPedido]);
 
     if (error) {
-        Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false,toast:true, showConfirmButton:false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2000, });
+        Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false,toast:true, showConfirmButton:false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2500, });
     } else {
         dom.form.reset();
         Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 2500, showConfirmButton: false,toast:true, showConfirmButton:false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
@@ -356,7 +356,7 @@ window.togglePagado = async (id, estadoActual) => {
             title: 'Error',
             text: 'No se pudo actualizar el pago',
             showConfirmButton:false,
-            timer:3500,
+            timer:2500,
             position: 'top',
             ...tema,
             customClass: { popup: 'mi-borde-redondeado'},
@@ -480,7 +480,7 @@ window.eliminarPedido = async (id) => {
         text: "Esta acción no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#E11D48',
+        confirmButtonColor: '#ff375f',
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
@@ -686,9 +686,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 text: "Se descargará un documento oficial con los datos que existen actualmente.",
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonColor: '#E11D48',
+                confirmButtonColor: '#ff375f',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Descargar PDF',
+                confirmButtonText: 'Generar PDF',
                 cancelButtonText: 'Cancelar',
                 background: tema.bg,
                 color: tema.txt,
@@ -825,11 +825,11 @@ function aplicarPantallaMantenimiento(mensajeDB) {
             html, body { margin: 0; padding: 0; width: 100%; height: 100%; background:${tema.bg}; overflow: hidden; font-family: sans-serif; }
             .main { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; color: white; }
             h1 { color: ${tema.txt}; font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
-            .loader { border: 4px solid ${tema.txt}; border-left-color: #e11d48; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
+            .loader { border: 4px solid ${tema.txt}; border-left-color: #ff375f; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
             @keyframes spin { to { transform: rotate(360deg); } }
             /* Asegurar que la alerta se vea perfecta sobre el fondo */
             .swal2-container { z-index: 999999 !important; }
-            .borde-personalizado { border: 2px solid #e11d48 !important; border-radius: 15px !important; }
+            .borde-personalizado { border: 2px solid #ff375f !important; border-radius: 15px !important; }
         </style>
     </head>
     <body>
@@ -890,7 +890,7 @@ function finalizarMantenimiento() {
         toast: true,
         position: 'top',
         icon: 'success',
-        title: 'Terminada',
+        title: 'Actualizacion terminada',
         html: `Entrando en: <b>${segundos}</b>s`,
         background: temaAplicado.bg,
         color: temaAplicado.txt,
