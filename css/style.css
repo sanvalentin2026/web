@@ -15,22 +15,6 @@ input, select, textarea {
 }
 
 /* ===== Mensaje "no hay pedidos" ===== */
-#pedidosBody .no-pedidos {
-  display: block;
-  text-align: center;
-  padding: 16px;
-  font-weight: 600;
-  color: #E11D48;
-}
-/* Botón Reiniciar Token */
-#reiniciarToken {  
-  background-color: white;   /* rojo alerta */
-  color: black;                 /* texto blanco */
-  border: none;
-  border-radius: 8px;          /* esquinas redondeadas */         /* tamaño cómodo */
-  font-size: 16px;             /* legible */
-  font-weight: 400;          /* negrita ligera */
-}
 /* ===== Contenedor general ===== */
 body > h1,
 form,
@@ -193,7 +177,7 @@ table {
 }
 
 thead {
-  background: #E11D48;
+  background: #ff375f;
   color: white;
 }
 
@@ -366,17 +350,14 @@ table {
  form input:focus,
  form select:focus,
  form textarea:focus {
-  border-color: #e91e63;
+  border-color: #ff375f;
  }
 
  form button {
-  background: #E11D48;
+  background: #ff375f;
   color: white;
  }
 
- form button:hover {
-  background: #E11D48;
- }
  #buscador,
  #filtroSeccion,
  #btn-reportar{
@@ -1004,7 +985,7 @@ table {
     }
 
     thead th {
-        background-color: #E11D48;
+        background-color: #ff375f;
         color: white;
         border-bottom: 2px solid #e91e63 !important;
     }
@@ -1194,14 +1175,31 @@ h1 {
 /* ===== HEADER STYLE ===== */
 .main-header {
     background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px); /* Efecto cristal */
+    backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
     z-index: 1000;
     padding: 10px 0;
-    border-radius: 15px;
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;;
+    border-bottom: none;
+    transition: border-radius 0.2s ease;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
+}
+
+.main-header.scrolled {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;;
+    border-top: none;
 }
 
 .header-container {
@@ -1228,7 +1226,7 @@ h1 {
 .action-btn {
     background: #f3c1d9;
     border: none;
-    color: #e11d48;
+    color: #ff375f;
     padding: 10px 14px;
     border-radius: 12px;
     cursor: pointer;
@@ -1239,20 +1237,14 @@ h1 {
     justify-content: center !important;
 }
 
-.action-btn:hover {
-    background: #e11d48;
-    color: white;
-    transform: translateY(-2px);
-}
 
 .action-btn.logout {
-    background: #fee2e2;
-    color: #ef4444;
+    background: #f3c1d9;
+    color: #ff375f;
 }
 
 .action-btn.logout:hover {
-    background: #ef4444;
-    color: white;
+    color: #ff375f;
 }
 
 /* Modo Oscuro para el Header */
@@ -1316,9 +1308,9 @@ form{
 }
 
 /* Colores consistentes */
-.btn-pago { background-color: #10b981 !important; color: white; }
-.btn-edit { background-color: #3b82f6 !important; color: white; }
-.btn-del  { background-color: #ef4444 !important; color: white; }
+.btn-pago { background-color: #ff375f !important; color: white; }
+.btn-edit { background-color: #ff375f !important; color: white; }
+.btn-del  { background-color: #ff375f !important; color: white; }
 
 /* Corrección de la fecha para que no se encime */
 .contenedor-fecha {
@@ -1546,54 +1538,179 @@ body.modo-oscuro {
     line-height: 1.5 !important;
 }
 
-/* Botones del tutorial (Sig, Ant, Finalizar) */
-.driverjs-theme .driver-popover-footer button {
-    background-color: #e11d48 !important;
-    color: white !important;
-    text-shadow: none !important;
+/* 1. ELIMINAR DUPLICACIÓN Y CONTROL DE VISIBILIDAD */
+.bloque-fecha-card {
+    display: none; /* Oculto en PC/Tablet */
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.label-rojo { color: #E11D48; font-weight: 600; }
+.modo-oscuro .label-rojo { color: #ff375f; }
+
+@media (max-width: 900px) {
+    .bloque-fecha-card { display: flex; }
+    
+    /* Evita que el CSS automático de cards cree un label para "Acciones" */
+    td.celda-acciones::before {
+        display: none !important;
+        content: none !important;
+    }
+}
+
+/* 1. Forzamos que la fila de "No hay pedidos" ocupe todo el ancho sin ser una card */
+#pedidosBody tr.fila-vacia-centrada {
+    display: block !important; /* En móvil/tablet necesitamos block para centrar el div interno */
+    width: 100% !important;
+    background: transparent !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 6px 12px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s ease !important;
-}
-
-.driverjs-theme .driver-popover-footer button:hover {
-    background-color: #be123c !important;
-    transform: scale(1.05);
-}
-
-/* Botón de cerrar (X) */
-.driverjs-theme .driver-popover-close-btn {
-    color: #9ca3af !important;
-}
-
-/* La flecha que apunta al elemento */
-.driverjs-theme .driver-popover-arrow-side-top { border-top-color: #e11d48 !important; }
-.driverjs-theme .driver-popover-arrow-side-bottom { border-bottom-color: #e11d48 !important; }
-
-/* Añade esto dentro del <style> en aplicarPantallaMantenimiento */
-.swal-sobre-bloqueo {
-    z-index: 100000000 !important; /* Un nivel más arriba que el bloqueo total */
-}
-/* Estilo para los inputs y selects dentro de SweetAlert */
-.swal2-input, .swal2-textarea, .swal2-select {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    color: grey !important;
-    border: 1px solid grey;
-    border-radius: 12px !important;
-    margin: 5px 0 !important;
     box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* Estilo para las opciones dentro del select */
-.swal2-input option {
-    background-color: #1c1c1e !important;
-    color: white !important;
+/* 2. Limpiamos el TD de cualquier label heredado (ID de pedido, etc.) */
+#pedidosBody tr.fila-vacia-centrada td {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 60px 0 !important; /* Espacio para que respire */
+    border: none !important;
+    background: transparent !important;
 }
 
-/* Quitar el borde azul al hacer clic */
-.swal2-input:focus {
+/* 3. ¡ESTO ES LO MÁS IMPORTANTE! Borra el "ID de pedido:" que sale arriba a la izquierda */
+#pedidosBody tr.fila-vacia-centrada td::before,
+#pedidosBody tr.fila-vacia-centrada td::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* 4. Aseguramos que el contenedor interno esté centrado horizontalmente */
+.contenedor-vacio-dinamico {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+.contenedor-vacio-dinamico i {
+    font-size: 5rem !important; /* Tamaño del icono */
+    color: #ff375f !important;
+    margin-bottom: 15px !important;
+}
+
+.contenedor-vacio-dinamico p {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: #a1a1a6 !important;
+    width: 100% !important;
+}
+
+
+
+
+
+/* 1. Reset Global para la tabla */
+table {
+    width: 100% !important;
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+    table-layout: auto; /* Permite que las columnas se ajusten al contenido */
+    border-collapse: collapse;
+}
+
+/* 2. Corregir el rango de 901px a 1100px */
+@media (min-width: 901px) and (max-width: 1100px) {
+    table {
+        display: table !important; /* Forzamos que vuelva a ser tabla, NO block */
+        width: 100% !important;
+        table-layout: fixed; /* Ayuda a que no se desborde en tablets */
+    }
+    
+    /* Ajustamos el padding de las celdas para que quepan los datos */
+    th, td {
+        padding: 10px 5px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* 3. Asegurar que el contenedor (wrapper) no limite el ancho */
+.tabla-wrapper {
+    width: 100% !important;
+    max-width: 1300px;
+    margin: 0 auto;
+    overflow-x: auto; /* Permite scroll solo si es estrictamente necesario */
+}
+
+/* 4. Reparar el centrado del mensaje "No hay pedidos" para este rango */
+.fila-vacia-centrada td {
+    display: table-cell !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+/* 1. Centrado del Título en SweetAlert */
+.swal2-title {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding-top: 20px !important;
+    font-size: 1.4rem !important;
+}
+
+/* 2. Contenedor del Formulario */
+#form-editar-pedido {
+    padding: 10px 15px !important;
+}
+
+/* 3. Estilo de Inputs y Selects dentro del Modal (Reset de SweetAlert) */
+.swal2-input, .swal2-select, .swal2-textarea {
+    margin: 8px 0 !important; /* Quitamos el margen automático de SweetAlert */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s;
+}
+
+/* Estilos específicos para Modo Claro */
+.modo-claro .swal2-input, 
+.modo-claro .swal2-select, 
+.modo-claro .swal2-textarea {
+    border: 1px solid #F3C1D9 !important;
+    background-color: white !important;
+    color: #374151 !important;
+}
+
+/* Estilos específicos para Modo Oscuro */
+.modo-oscuro .swal2-input, 
+.modo-oscuro .swal2-select, 
+.modo-oscuro .swal2-textarea {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #f5f5f7 !important;
+}
+
+/* Foco de los inputs */
+.swal2-input:focus, .swal2-select:focus, .swal2-textarea:focus {
     border-color: #E11D48 !important;
-    box-shadow: 0 0 0 1px #E11D48 !important;
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2) !important;
+}
+
+/* 4. Clase para bordes redondeados (la que usas en tu JS) */
+.mi-borde-redondeado {
+    border-radius: 20px !important;
+    padding: 10px !important;
+}
+
+/* 5. Ajuste para que el botón de carga (Loading) no se pegue al borde */
+.swal2-loader {
+    margin: 20px auto !important;
 }

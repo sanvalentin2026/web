@@ -13,7 +13,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 window.pedidosCache = []; // Usamos window desde el inicio
 let pedidosFiltrados = [];
 let paginaActual = Number(sessionStorage.getItem("paginaActual")) || 1;
-const PEDIDOS_POR_PAGINA = 20;
+const PEDIDOS_POR_PAGINA = 15;
 
 const dom = {
     form: document.getElementById("pedidoForm"),
@@ -51,7 +51,7 @@ function iniciarTutorial() {
         showProgress: true,
         nextBtnText: 'Siguiente',
         prevBtnText: 'Anterior',
-        doneBtnText: 'Finalizar tutorial',
+        doneBtnText: 'Terminar',
         popoverClass: 'driverjs-theme', 
         // Esta opción es clave: permite que el tutorial espere a que los elementos existan
         allowClose: false,
@@ -60,7 +60,7 @@ function iniciarTutorial() {
                 element: '#header', 
                 popover: { 
                     title: '¡Hola! Un breve tutorial', 
-                    description: 'En esta sección encontrará acciones importantes como reportar errores, descargar PDF y cambiar el tema, esta seccion lo acopañara por toda la web.',
+                    description: 'En esta sección encontrará botones con acciones importantes como reportar errores, descargar PDF, cambiar el tema de pantalla y cerrar sesion, este se mantendra siempre en la parte de arriba de su pantalla.',
                     side: "bottom", align: 'center' 
                 } 
             },
@@ -68,7 +68,7 @@ function iniciarTutorial() {
                 element: '#pedidoForm', 
                 popover: { 
                     title: 'Registro de Pedidos', 
-                    description: 'Utiliza este formulario para ingresar nuevos pedidos facilmente.',
+                    description: 'Utilice este formulario rellenando todos los campos requeridos para registrar pedidos rapidamente.',
                     side: "bottom", align: 'center' 
                 } 
             },
@@ -76,7 +76,7 @@ function iniciarTutorial() {
                 element: '.controls', 
                 popover: { 
                     title: 'Búsqueda y Filtros', 
-                    description: 'Su funcion es filtrar por secciones (7-1, 8-2, etc.) o busca por nombre.',
+                    description: 'Su funcion es filtrar por secciones o buscar los pedidos por sus caracteristicas.',
                     side: "top", align: 'center' 
                 } 
             },
@@ -84,7 +84,7 @@ function iniciarTutorial() {
                 element: '#pedidosBody', 
                 popover: { 
                     title: 'Pedidos', 
-                    description: 'Aqui se mostraran todos los pedidos disponibles, tienen sus botones de acciones para interactuar con ellos, cada 16 pedidos se creara una compaginacion para evitar un scroll largo.',
+                    description: 'Aqui se mostraran todos los pedidos disponibles, todos cuentan con botones para interactuar, ademas cada 16 pedidos se creara una compaginacion en la parte de abajo para no generar listas largas.',
                     side: "top", align: 'center' 
                 } 
             }
@@ -190,8 +190,16 @@ function aplicarFiltros() {
 
     pedidosFiltrados = pedidosCache.filter(p => {
         const cumpleSeccion = !seccion || p.seccion_receptor === seccion;
-        const cumpleBusqueda = !query || 
-            [p.nombre_comprador, p.nombre_receptor, p.producto, p.id.toString()].some(c => String(c || "").toLowerCase().includes(query));
+        const cumpleBusqueda = !query || [
+            p.id,
+            p.nombre_comprador,
+            p.seccion_comprador,
+            p.nombre_receptor,
+            p.seccion_receptor,
+            p.producto,
+            p.detalles
+        ].some(c => String(c || "").toLowerCase().includes(query));
+        
         return cumpleSeccion && cumpleBusqueda;
     });
 
@@ -199,76 +207,60 @@ function aplicarFiltros() {
 }
 
 function renderizarTabla() {
-    // Referencia a la tabla y su cabecera para control visual total
     const tabla = dom.body.closest('table');
     const thead = tabla ? tabla.querySelector("thead") : null;
-    
     dom.body.innerHTML = "";
     
-    // 1. CASO SIN PEDIDOS: Limpieza total de interfaz
+    // CASO SIN PEDIDOS
     if (!pedidosFiltrados || pedidosFiltrados.length === 0) {
-        // Ocultamos la cabecera roja para que no estorbe el centrado
         if (thead) thead.style.display = "none";
-
         const rowVacia = document.createElement("tr");
-        // data-label="" vacío evita que el CSS móvil inserte "ID de pedido:"
+        rowVacia.className = "fila-vacia-centrada"; // Clase para control total
         rowVacia.innerHTML = `
-            <td colspan="100%" data-label="" style="border: none !important;">
+            <td colspan="100%" data-label="">
                 <div class="contenedor-vacio-dinamico">
-                    <i class="fa-solid fa-folder-open"></i>
-                    <p>No hay pedidos para mostrar</p>
+                    <h3>No se encontraron pedidos</h3>
                 </div>
             </td>
         `;
         dom.body.appendChild(rowVacia);
-        
-        // Limpiamos paginación para que no queden botones huérfanos
         if (typeof renderizarPaginacion === "function") renderizarPaginacion();
         return;
     }
 
-    // 2. CASO CON PEDIDOS: Restaurar estructura
-    if (thead) {
-        // En tablets/móvil el CSS se encargará de ocultarla si es necesario, 
-        // pero aquí nos aseguramos que exista en el DOM.
-        thead.style.display = "table-header-group";
-    }
+    if (thead) thead.style.display = "table-header-group";
 
     const inicio = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
     const items = pedidosFiltrados.slice(inicio, inicio + PEDIDOS_POR_PAGINA);
-    const esMobile = window.innerWidth <= 900;
 
     items.forEach(p => {
-        const fechaHTML = esMobile 
-            ? `<div class="fecha-dinamica">${formatFechaMobile(p.created_at)}</div>` 
-            : "";
-
-        // Escapamos comillas simples en detalles para evitar errores de sintaxis en el onclick
         const detallesEscapados = (p.detalles || "").replace(/'/g, "\\'");
+        const fechaTexto = p.created_at ? formatFechaMobile(p.created_at) : 'Sin fecha';
 
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td data-label="ID del pedido:">${p.id}</td>
+            <td data-label="ID de pedido:">${p.id}</td>
             <td data-label="De:">${p.nombre_comprador} - (${p.seccion_comprador})</td>
             <td data-label="Para:">${p.nombre_receptor} - (${p.seccion_receptor})</td>
             <td data-label="Producto:">${p.producto}</td>
             <td data-label="Detalles:">${p.detalles || " - Sin detalles"}</td>
-            <td data-label="Estado:">${p.pagado ? "✅" : "❌"}</td>
-            <td data-label="Acciones:">
-                ${fechaHTML}
+            <td data-label="Estado de pago:">${p.pagado ? "✅" : "❌"}</td>
+            <td data-label="Acciones:" class="celda-acciones">
+                <div class="bloque-fecha-card">
+                    <span class="label-rojo">Fecha y hora:</span>
+                    <span class="texto-fecha">${fechaTexto}</span>
+                </div>
                 <div class="group-btns">
-                    <button onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
-                    <button onclick="editarPedidoCompleto(${p.id}, '${detallesEscapados}')">Editar</button>
-                    <button onclick="eliminarPedido(${p.id})">Borrar</button>
+                    <button class="btn-pago" onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
+                    <button class="btn-edit" onclick="editarPedidoCompleto(${p.id}, '${detallesEscapados}')">Editar</button>
+                    <button class="btn-del" onclick="eliminarPedido(${p.id})">Eliminar</button>
                 </div>
             </td>
         `;
         dom.body.appendChild(row);
     });
-
     renderizarPaginacion();
 }
-
 function renderizarPaginacion() {
     dom.paginacion.innerHTML = "";
     const paginas = Math.ceil(pedidosFiltrados.length / PEDIDOS_POR_PAGINA);
@@ -291,7 +283,7 @@ dom.form.addEventListener("submit", async (e) => {
     const tema = obtenerTema();
     
     // Bloqueo visual
-    Swal.fire({ title: 'Procesando...', background: tema.bg, color: tema.txt, toast:true, showConfirmButton:false, allowOutsideClick: false, didOpen: () => Swal.showLoading(), position:'top', customClass: { popup: 'mi-borde-redondeado'}, });
+    Swal.fire({ title: 'Procesando...', background: tema.bg, color: tema.txt, toast:true, showConfirmButton:false, didOpen: () => Swal.showLoading(), position:'top', customClass: { popup: 'mi-borde-redondeado'}, });
 
     const sesion = JSON.parse(localStorage.getItem("usuario"));
     const usuario = sesion ? sesion.username : "Desconocido";
@@ -332,7 +324,6 @@ window.togglePagado = async (id, estadoActual) => {
         title: 'Procesando...',
         background: tema.bg,
         color: tema.txt,
-        allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
         position: 'top',
         customClass: { popup: 'mi-borde-redondeado'},
@@ -396,7 +387,7 @@ window.editarPedidoCompleto = async (pedidoId) => {
     ).join('');
 
     const { value: camposNuevos } = await Swal.fire({
-        title: `Editar Pedido #${p.id}`,
+        title: `Editar Pedido id #${p.id}`,
         background: tema.bg,
         color: tema.txt,
         html: `
@@ -506,7 +497,7 @@ window.eliminarPedido = async (id) => {
             title: 'Procesando...',
             background: tema.bg,
             color: tema.txt,
-            allowOutsideClick: false,
+
             didOpen: () => Swal.showLoading(),
             position: 'top',
             customClass: { popup: 'mi-borde-redondeado'},
@@ -563,18 +554,15 @@ window.descargarPDF = function() {
         return;
     }
 
-    // --- PROCESAMIENTO DE DATOS POR DÍA ---
     const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const conteoPorDia = [0, 0, 0, 0, 0, 0, 0]; // Corresponde a los índices de diasSemana
+    const conteoPorDia = [0, 0, 0, 0, 0, 0, 0];
 
     datos.forEach(p => {
-        // Asumiendo que p.creado_en es la fecha de Supabase
         const fecha = new Date(p.creado_en);
-        const diaIndice = fecha.getDay(); // 0 para Domingo, 1 para Lunes...
+        const diaIndice = fecha.getDay();
         conteoPorDia[diaIndice]++;
     });
 
-    // Totales para las tarjetas
     const total = datos.length;
     const pagados = datos.filter(p => p.pagado).length;
     const pendientes = total - pagados;
@@ -587,14 +575,10 @@ window.descargarPDF = function() {
         <html>
         <head>
             <meta charset="UTF-8">
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <style>
-                body { font-family: 'Segoe UI', sans-serif; padding: 30px; color: #1e293b; }
+                body { font-family: 'Segoe UI', sans-serif; padding: 20px; color: #1e293b; }
                 .header { border-bottom: 3px solid #E11D48; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
-                
-                /* Layout de Estadísticas */
-                .stats-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
-                .cards-row { display: flex; gap: 15px; }
+                .stats-container { display: flex; gap: 15px; margin-bottom: 30px; }
                 .card { 
                     flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; 
                     text-align: center; border: 1px solid #e2e8f0;
@@ -602,42 +586,43 @@ window.descargarPDF = function() {
                 .card small { color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: bold; }
                 .card div { font-size: 22px; font-weight: 900; margin-top: 5px; }
 
-                .chart-section { background: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; }
-                .chart-container { height: 280px; width: 100%; }
-
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10px; }
-                th { background: #1e293b; color: white; padding: 10px; }
-                td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10px; table-layout: fixed; }
+                th { background: #1e293b; color: white; padding: 10px; text-transform: uppercase; }
+                td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; word-wrap: break-word; }
+                tr:nth-child(even) { background-color: #f8fafc; }
                 .footer { margin-top: 40px; font-size: 9px; text-align: center; color: #94a3b8; border-top: 1px solid #eee; padding-top: 10px; }
+                
+                @media print {
+                    .card { border: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; }
+                    th { background-color: #1e293b !important; -webkit-print-color-adjust: exact; }
+                }
             </style>
         </head>
         <body>
             <div class="header">
-                <h1 style="margin:0; color:#E11D48;">REPORTE DE PEDIDOS</h1>
+                <h1 style="margin:0; color:#E11D48;">REPORTE OFICIAL DE PEDIDOS</h1>
                 <p style="margin:5px 0;">Folio: ${folioUnico} | Emitido el: ${ahora.toLocaleString()}</p>
             </div>
 
             <div class="stats-container">
-                <div class="cards-row">
-                    <div class="card"><small>Total Pedidos</small><div style="color:#1e293b;">${total}</div></div>
-                    <div class="card"><small>Pagados</small><div style="color:#22c55e;">${pagados}</div></div>
-                    <div class="card"><small>Pendientes</small><div style="color:#e11d48;">${pendientes}</div></div>
-                </div>
+                <div class="card"><small>Total Pedidos</small><div style="color:#1e293b;">${total}</div></div>
+                <div class="card"><small>Pagados</small><div style="color:#22c55e;">${pagados}</div></div>
+                <div class="card"><small>Pendientes</small><div style="color:#e11d48;">${pendientes}</div></div>
+            </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="width: 40px;">ID</th>
                         <th>DE</th>
                         <th>PARA</th>
                         <th>PRODUCTO</th>
                         <th>DETALLES</th>
-                        <th>ESTADO</th>
-
+                        <th style="width: 80px;">ESTADO</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${datos.slice(0, 10).map(p => `
+                    ${datos.map(p => `
                         <tr>
                             <td>${p.id}</td>
                             <td>${p.nombre_comprador}</td>
@@ -652,35 +637,21 @@ window.descargarPDF = function() {
                 </tbody>
             </table>
 
-            <div class="footer">Emitido por el Sistema de Control de Pedidos - Documento Privado<br>
-            Cualquier edicion del documento invalidara el mismo en su totalidad.</div>
-
-            <script>
-                const ctx = document.getElementById('graficoDias').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
-                        datasets: [{
-                            label: 'Pedidos',
-                            data: [${conteoPorDia.join(',')}],
-                            backgroundColor: '#E11D48',
-                            borderRadius: 5,
-                            hoverBackgroundColor: '#be123c'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                            x: { grid: { display: false } }
-                        }
-                    }
-                });
-            </script>
+            <div class="footer">
+    <div class="clausula-legal">
+        Este documento es una representación íntegra y oficial de los registros contenidos en la base de datos del 
+        <strong>Sistema de Control de Pedidos</strong>.<br> La información aquí presentada ha sido cifrada y validada al momento de su emisión.
+    </div>
+    <div class="advertencia-seguridad">
+        <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
+        mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
+        Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y podrán ser reportados 
+        conforme a las políticas de seguridad informática de la organización.
+    </div>
+    <div class="info-emision">
+        ID de Transacción: ${folioUnico} | Verificado por: Sistema Automatizado de Seguridad
+    </div>
+</div>
         </body>
         </html>
     `;
@@ -697,7 +668,7 @@ window.descargarPDF = function() {
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
         setTimeout(() => { document.body.removeChild(iframe); }, 2000);
-    }, 1500);
+    }, 1000);
 };
 /* =================================================
    🚀 DISPARADOR DEL RESPALDO PDF
@@ -721,7 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 cancelButtonText: 'Cancelar',
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top', // Para que sea cómodo en móviles
                 customClass: { popup: 'mi-borde-redondeado'},
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -743,7 +713,7 @@ document.addEventListener("DOMContentLoaded", () => {
 supabase
   .channel('pedidos-db')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, (payload) => {
-      console.log("Cambio detectado, manteniendo orden...");
+      console.log("Cambio detectado, el orden se mantubo.");
       // Forzamos la recarga que ya tiene el .order("id")
       cargarPedidos(true); 
   })

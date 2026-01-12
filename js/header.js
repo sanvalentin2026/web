@@ -19,3 +19,13 @@ if (localStorage.getItem('tema') === 'oscuro') {
     document.body.classList.add('modo-oscuro');
     themeIcon.classList.replace('fa-moon', 'fa-sun');
 }
+
+const header = document.querySelector('.main-header');
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 0) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+});

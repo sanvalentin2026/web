@@ -147,18 +147,22 @@ export const verificarSesion = async function() {
             localStorage.removeItem("usuario");
             
             // Usamos SweetAlert como guardaste en tus instrucciones
-            await Swal.fire({
-                toast: true,
-                icon: 'error',
-                title: 'Acceso Denegado',
-                text: 'Tu acceso ha sido revocado.',
-                position: 'top',
-                timer: 6000,
-                showConfirmButton: false,
-                background: '#1c1c1e',
-                color: '#ffffff',
-                customClass: { popup: 'mi-borde-redondeado'}
-            });
+    const tema = obtenerTema();
+
+await Swal.fire({
+    toast: true,
+    icon: 'error',
+    title: 'Acceso Denegado',
+    text: 'Tu acceso ha sido revocado.',
+    position: 'top',
+    timer: 5000,
+    showConfirmButton: false,
+    background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
+    color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
+    customClass: {
+        popup: 'mi-borde-redondeado'
+    }
+});
 
             window.location.replace("login.html");
             return null;
@@ -202,7 +206,7 @@ window.register = async function() {
 
     if (!user || !pass || !pass2) {
 
-        Swal.fire({text: "Campos incompletos", icon: "warning",position:'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
+        Swal.fire({text: "Campos incompletos", icon: "warning",position:'top', toast:true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
 
         return;
 
@@ -210,7 +214,7 @@ window.register = async function() {
 
     if (pass !== pass2) {
 
-        Swal.fire({text: "Las contraseñas no coinciden", icon: "error", position:'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
+        Swal.fire({text: "Las contraseñas no coinciden", icon: "error", position:'top',toast:true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
 
         return;
 
@@ -218,7 +222,7 @@ window.register = async function() {
 
 
 
-    Swal.fire({ title: 'Creando cuenta...', ...tema, didOpen: () => Swal.showLoading(), position:'top',customClass: { popup: 'mi-borde-redondeado'}, });
+    Swal.fire({ title: 'Creando cuenta...', ...tema, didOpen: () => Swal.showLoading(),toast:true, showConfirmButton:false, position:'top',customClass: { popup: 'mi-borde-redondeado'}, });
 
 
 
@@ -238,12 +242,13 @@ window.register = async function() {
 
         const msg = error.code === "23505" ? "El usuario ya existe" : "Error al registrar";
 
-        Swal.fire({text: msg, icon: "error", showConfirmButton: false, timer:2500, customClass: { popup: 'mi-borde-redondeado'}, position: 'top', ...tema });
+        Swal.fire({text: msg, icon: "error", showConfirmButton: false,toast:true, timer:3000, customClass: { popup: 'mi-borde-redondeado'}, position: 'top', ...tema });
 
     } else {
 
         await Swal.fire({
-
+            toast:true,
+            showConfirmButton:false,
             text: "Cuenta enviada para aprobación",
 
             showConfirmButton: false,
@@ -279,113 +284,77 @@ window.register = async function() {
 // ==========================================
 
 window.login = async function() {
-
     const userInput = document.getElementById("username")?.value.trim();
-
     const passInput = document.getElementById("password")?.value;
-
     const tema = obtenerTema();
 
-
-
     if (!userInput || !passInput) {
-
-        Swal.fire({text: "Ingresa tus datos", icon: "warning", showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
-
+        Swal.fire({
+            text: "Ingresa tus datos", 
+            icon: "warning", 
+            showConfirmButton: false, 
+            toast: true, 
+            position: 'top', 
+            timer: 2500, 
+            customClass: { popup: 'mi-borde-redondeado' }, 
+            ...tema 
+        });
         return;
-
     }
-
-
 
     Swal.fire({
-
+        toast: true,
+        showConfirmButton: false,
         title: 'Verificando...',
-
         ...tema,
-
         didOpen: () => Swal.showLoading(),
-
         position: 'top',
-
-        customClass: { popup: 'mi-borde-redondeado'},
-
+        customClass: { popup: 'mi-borde-redondeado' },
     });
 
-
-
-    // 1. Buscamos al usuario en la DB
-
     const { data, error } = await supabase
-
         .from("usuarios")
-
         .select("*")
-
         .eq("username", userInput)
-
         .eq("password", passInput)
-
         .maybeSingle();
 
-
-
-    // 2. Si no existe o hay error, BORRAMOS cualquier rastro de intentos previos
-
     if (error || !data) {
-
-        localStorage.removeItem("usuario"); // SEGURIDAD: Limpiar ante error
-
-        Swal.fire({text: "La cuenta no existe o los datos son incorrectos.", icon: "error", position:'top', showConfirmButton: false, timer: 3000, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
-
-        return;
-
-    }
-
-
-
-    // 3. Verificamos permisos antes de dejarlo pasar
-
-    if (data.permisos === true) {
-
-        // RECIÉN AQUÍ, cuando estamos seguros, guardamos la sesión
-
-        localStorage.setItem("usuario", JSON.stringify({
-
-            id: data.id,
-
-            username: data.username,
-
-            permisos: true
-
-        }));
-
-        window.location.replace("index.html");
-
-    } else {
-
-        // Si no tiene permisos, NO GUARDAMOS NADA y limpiamos el storage
-
         localStorage.removeItem("usuario");
-
         Swal.fire({
-
-            title: "Acceso Pendiente",
-
-            text: "Tu cuenta debe ser aprobada por un administrador.",
-
-            icon: "info",
+            title: "Los datos son incorrectos o la cuenta no existe.",
+            icon: "error",
             position: 'top',
             showConfirmButton: false,
-            timer: 3000,
-            customClass: { popup: 'mi-borde-redondeado'},
-
-            ...tema
-
+            toast: true,
+            timer: 2500,
+            ...tema,
+            customClass: { popup: 'mi-borde-redondeado' }
         });
-
+        return;
     }
 
+    if (data.permisos === true) {
+        localStorage.setItem("usuario", JSON.stringify({
+            id: data.id,
+            username: data.username,
+            permisos: true
+        }));
+        window.location.replace("index.html");
+    } else {
+        localStorage.removeItem("usuario");
+        Swal.fire({
+            toast: true,
+            showConfirmButton: false,
+            title: "Acceso Pendiente",
+            text: "Tu cuenta debe ser aprobada por un administrador.",
+            icon: "info",
+            position: 'top',
+            timer: 3000,
+            customClass: { popup: 'mi-borde-redondeado' },
+            ...tema
+        });
+    }
 };
 
 
@@ -413,7 +382,6 @@ window.logout = function() {
         confirmButtonText: 'Confirmar',
 
         cancelButtonText: 'Cancelar',
-        position:'top',
         customClass: { popup: 'mi-borde-redondeado'},
 
         ...tema
