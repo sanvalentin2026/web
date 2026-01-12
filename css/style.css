@@ -716,7 +716,6 @@ tr{
 
   td:last-child {
     width: 100%;
-    margin-top: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1174,7 +1173,7 @@ h1 {
 }
 /* ===== HEADER STYLE ===== */
 .main-header {
-    background: #fae5ee;
+    background: #ffe7f0;
     backdrop-filter: blur(5px);
     position: sticky;
     top: 0;
@@ -1186,7 +1185,6 @@ h1 {
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;;
     border-bottom: none;
-    transition: border-radius 0.1s ease;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
     border-bottom-left-radius: 0px;
@@ -1654,6 +1652,7 @@ table {
     display: table-cell !important;
     text-align: center !important;
     width: 100% !important;
+    height: 100% !important;
 }
 /* 1. Centrado del Título en SweetAlert */
 .swal2-title {
@@ -1662,7 +1661,7 @@ table {
     align-items: center !important;
     text-align: center !important;
     padding-top: 20px !important;
-    font-size: 1.4rem !important;
+    font-size: 1.2rem !important;
 }
 
 /* 2. Contenedor del Formulario */

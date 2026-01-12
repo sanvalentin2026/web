@@ -44,6 +44,38 @@ export const obtenerTema = () => {
 
 };
 
+
+//SONIDOS
+const ReproductorSonidos = {
+    buffer: {},
+    rutas: {
+        exito: 'sounds/exito.mp3',
+        error: 'sounds/notificacion.mp3',
+        notificacion: 'sounds/notificacion.mp3',
+        eliminado: 'sounds/pop.mp3'
+    },
+
+    init() {
+        for (const [nombre, ruta] of Object.entries(this.rutas)) {
+            this.buffer[nombre] = new Audio(ruta);
+            this.buffer[nombre].preload = 'auto'; // Precarga en segundo plano
+            this.buffer[nombre].volume = 0.3;
+        }
+    },
+
+    play(nombre) {
+        const sonido = this.buffer[nombre];
+        if (sonido) {
+            // requestAnimationFrame asegura que el audio no interrumpa la animación de la alerta
+            requestAnimationFrame(() => {
+                sonido.currentTime = 0;
+                sonido.play().catch(() => {});
+            });
+        }
+    }
+};
+ReproductorSonidos.init();
+
 /* ======================================================
 
     🛡️ PARCHE DE SEGURIDAD: VALIDACIÓN ANTI-CONSOLA
@@ -148,7 +180,7 @@ export const verificarSesion = async function() {
             
             // Usamos SweetAlert como guardaste en tus instrucciones
     const tema = obtenerTema();
-
+ReproductorSonidos.play('notification');
 await Swal.fire({
     toast: true,
     icon: 'error',
@@ -205,14 +237,16 @@ window.register = async function() {
 
 
     if (!user || !pass || !pass2) {
+        ReproductorSonidos.play('notificacion');
 
-        Swal.fire({text: "Campos incompletos", icon: "warning",position:'top', toast:true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
+        Swal.fire({text: "Campos incompletos", icon: "warning",position:'top', toast:true, showConfirmButton: false, timer: 1500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
 
         return;
 
     }
 
     if (pass !== pass2) {
+        ReproductorSonidos.play('notificacion');
 
         Swal.fire({text: "Las contraseñas no coinciden", icon: "error", position:'top',toast:true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado'}, ...tema });
 
@@ -241,11 +275,11 @@ window.register = async function() {
     if (error) {
 
         const msg = error.code === "23505" ? "El usuario ya existe" : "Error al registrar";
-
+        ReproductorSonidos.play('notificacion');
         Swal.fire({text: msg, icon: "error", showConfirmButton: false,toast:true, timer:3000, customClass: { popup: 'mi-borde-redondeado'}, position: 'top', ...tema });
 
     } else {
-
+        ReproductorSonidos.play('exito');
         await Swal.fire({
             toast:true,
             showConfirmButton:false,
@@ -253,7 +287,7 @@ window.register = async function() {
 
             showConfirmButton: false,
 
-            timer: 2500,
+            timer: 1600,
 
             icon: "success",
 
@@ -289,13 +323,14 @@ window.login = async function() {
     const tema = obtenerTema();
 
     if (!userInput || !passInput) {
+        ReproductorSonidos.play('notificacion');
         Swal.fire({
             text: "Ingrese sus datos", 
             icon: "warning", 
             showConfirmButton: false, 
             toast: true, 
             position: 'top', 
-            timer: 2500, 
+            timer: 1500, 
             customClass: { popup: 'mi-borde-redondeado' }, 
             ...tema 
         });
@@ -321,13 +356,14 @@ window.login = async function() {
 
     if (error || !data) {
         localStorage.removeItem("usuario");
+        ReproductorSonidos.play('notificacion');
         Swal.fire({
             title: "Datos incorrectos o inexistentes",
             icon: "error",
             position: 'top',
             showConfirmButton: false,
             toast: true,
-            timer: 2500,
+            timer: 1500,
             ...tema,
             customClass: { popup: 'mi-borde-redondeado' }
         });
@@ -343,14 +379,15 @@ window.login = async function() {
         window.location.replace("index.html");
     } else {
         localStorage.removeItem("usuario");
+        ReproductorSonidos.play('notificacion');
         Swal.fire({
             toast: true,
             showConfirmButton: false,
             title: "Acceso Pendiente",
-            text: "Su cuenta no esta verificada aun por un administrador",
+            text: "Su cuenta aun no esta verificada por un administrador",
             icon: "info",
             position: 'top',
-            timer: 3500,
+            timer: 1500,
             customClass: { popup: 'mi-borde-redondeado' },
             ...tema
         });
@@ -376,8 +413,6 @@ window.logout = function() {
         icon: 'question',
 
         showCancelButton: true,
-
-        text: "Tendra que volver a iniciar sesion para interactuar.",
 
         confirmButtonText: 'Confirmar',
 

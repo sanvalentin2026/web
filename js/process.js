@@ -30,7 +30,35 @@ const dom = {
     detalles: document.getElementById("detalles")
 };
 
+const ReproductorSonidos = {
+    buffer: {},
+    rutas: {
+        exito: 'sounds/exito.mp3',
+        error: 'sounds/notificacion.mp3',
+        notificacion: 'sounds/notificacion.mp3',
+        eliminado: 'sounds/pop.mp3'
+    },
 
+    init() {
+        for (const [nombre, ruta] of Object.entries(this.rutas)) {
+            this.buffer[nombre] = new Audio(ruta);
+            this.buffer[nombre].preload = 'auto'; // Precarga en segundo plano
+            this.buffer[nombre].volume = 0.3;
+        }
+    },
+
+    play(nombre) {
+        const sonido = this.buffer[nombre];
+        if (sonido) {
+            // requestAnimationFrame asegura que el audio no interrumpa la animación de la alerta
+            requestAnimationFrame(() => {
+                sonido.currentTime = 0;
+                sonido.play().catch(() => {});
+            });
+        }
+    }
+};
+ReproductorSonidos.init();
 
 
 // TUTORIAL
@@ -301,12 +329,13 @@ dom.form.addEventListener("submit", async (e) => {
     };
 
     const { error } = await supabase.from("pedidos").insert([nuevoPedido]);
-
     if (error) {
+        ReproductorSonidos.play('error');
         Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false,toast:true, showConfirmButton:false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2500, });
     } else {
+        ReproductorSonidos.play('exito');
         dom.form.reset();
-        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 2500, showConfirmButton: false,toast:true, showConfirmButton:false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
+        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 1500, showConfirmButton: false,toast:true, showConfirmButton:false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
         // El Realtime actualizará la tabla solo
     }
 });
@@ -338,11 +367,12 @@ window.togglePagado = async (id, estadoActual) => {
     Swal.close();
 
     if (!error) {
+            ReproductorSonidos.play('exito');
         Swal.fire({
             toast:true,
             icon: 'success',
             title: 'Pago actualizado',
-            timer: 2500,
+            timer: 1500,
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
@@ -350,6 +380,7 @@ window.togglePagado = async (id, estadoActual) => {
             customClass: { popup: 'mi-borde-redondeado'},
     })
     } else {
+            ReproductorSonidos.play('error');
         Swal.fire({
             toast:true,
             icon: 'error',
@@ -455,12 +486,13 @@ window.editarPedidoCompleto = async (pedidoId) => {
 
         if (!error) {
             // Notificación tipo Toast (Superior y rápida)
+            ReproductorSonidos.play('exito');
             Swal.fire({
                 icon: 'success',
                 title: 'Cambios guardados',
                 toast: true,
                 position: 'top',
-                timer: 2500,
+                timer: 1500,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
@@ -477,7 +509,7 @@ window.eliminarPedido = async (id) => {
     // 1. Preguntar primero si está seguro
     const res = await Swal.fire({
         title: '¿Eliminar pedido?',
-        text: "Esta acción no se puede deshacer.",
+        text: "Esto no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ff375f',
@@ -507,11 +539,12 @@ window.eliminarPedido = async (id) => {
 
         if (!error) {
             // 3. Confirmación final y sonido
+            ReproductorSonidos.play('eliminado');
             Swal.fire({
                 toast:true,
                 icon: 'success',
                 title: 'Pedido eliminado',
-                timer: 2500,
+                timer: 1500,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
@@ -519,6 +552,7 @@ window.eliminarPedido = async (id) => {
                 customClass: { popup: 'mi-borde-redondeado'},
             });
         } else {
+            ReproductorSonidos.play('notificacion');
             Swal.fire({
                 toast:true,
                 icon: 'error',
@@ -540,11 +574,12 @@ window.descargarPDF = function() {
     const tema = obtenerTema();
 
     if (!datos || datos.length === 0) {
+        ReproductorSonidos.play('error');
         Swal.fire({
             toast:true,
             icon: 'error',
-            text: 'No hay datos para generar el PDF.',
-            timer: 2500,
+            title: 'No hay pedidos',
+            timer: 1500,
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
@@ -683,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             Swal.fire({
                 title: '¿Generar PDF?',
-                text: "Se descargará un documento oficial con los datos que existen actualmente.",
+                text: "Se generara un reporte de pedidos",
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonColor: '#ff375f',
@@ -735,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =================================================
     🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL v4.0
    ================================================= */
-const USUARIO_ADMIN = "Alexei";
+const USUARIO_ADMIN = "A";
 const tema = obtenerTema();
 
 // Colores del tema para las alertas
@@ -791,6 +826,7 @@ function iniciarCuentaRegresiva(mensajeDB) {
             popup: 'mi-borde-redondeado'
         },
         didOpen: () => {
+            ReproductorSonidos.play('notificacion');
             const b = Swal.getHtmlContainer().querySelector('b');
             const int = setInterval(() => {
                 segundos--;

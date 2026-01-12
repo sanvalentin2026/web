@@ -140,9 +140,9 @@
   <div class="container">
     <h1>Reportar un problema</h1>
     <div class="version-container">
-    Version actual: <span class="version-number">v1.4.0 | Patch-11</span>
+    Version actual: <span class="version-number">v1.4.0 | Patch-12</span>
     </div>
-    <p class="sub">Si algo no funciona bien, repórtelo aquí.</p>
+    <p class="sub">Si algo no funciona bien repórtelo aquí.</p>
 
     <form id="formReporte">
       <label for="tipo">Tipo de reporte</label>
@@ -158,7 +158,7 @@
       <textarea id="descripcion" placeholder="Describa lo que pasó aqui" required></textarea>
 
       <label for="version">Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.4.0 | Patch-11 (Actual)" required>
+      <input id="version" placeholder="Ej: v1.4.0 | Patch-12 (Actual)" required>
 
       <label for="entorno">Dispositivo y navegador</label>
       <input id="entorno" placeholder="Ej: iPhone · Safari" required>
@@ -187,6 +187,38 @@
       e.preventDefault();
       const tema = obtenerTema(); // Traemos el objeto completo de auth.js
 
+
+      //SONIDOS
+const ReproductorSonidos = {
+    buffer: {},
+    rutas: {
+        exito: 'sounds/exito.mp3',
+        error: 'sounds/notificacion.mp3',
+        notificacion: 'sounds/notificacion.mp3',
+        eliminado: 'sounds/pop.mp3'
+    },
+
+    init() {
+        for (const [nombre, ruta] of Object.entries(this.rutas)) {
+            this.buffer[nombre] = new Audio(ruta);
+            this.buffer[nombre].preload = 'auto'; // Precarga en segundo plano
+            this.buffer[nombre].volume = 0.3;
+        }
+    },
+
+    play(nombre) {
+        const sonido = this.buffer[nombre];
+        if (sonido) {
+            // requestAnimationFrame asegura que el audio no interrumpa la animación de la alerta
+            requestAnimationFrame(() => {
+                sonido.currentTime = 0;
+                sonido.play().catch(() => {});
+            });
+        }
+    }
+};
+ReproductorSonidos.init();
+
       btn.disabled = true;
       btn.textContent = "Reportando...";
 
@@ -199,11 +231,12 @@
       });
 
       if (error) {
+        ReproductorSonidos.play('notificacion');
         Swal.fire({
           toast:true,
           showConfirmButton:false,
           showConfirmButton:false,
-          timer:3000,
+          timer:1500,
           icon: 'error',
           title: 'Error',
           text: 'No se pudo enviar el reporte',
@@ -214,11 +247,12 @@
           ...tema // Pasamos background, color y customClass automáticos
         });
       } else {
+        ReproductorSonidos.play('exito');
         await Swal.fire({
           toast:true,
           icon: 'success',
           title: 'Reporte enviado',
-          timer: 2500,
+          timer: 1500,
           showConfirmButton: false,
           position: 'top',
           customClass: {
