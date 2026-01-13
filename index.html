@@ -63,6 +63,10 @@
     <button id="btnPDF" class="action-btn" title="Descargar Respaldo PDF">
         <i class="fa-solid fa-file-pdf"></i>
     </button>
+
+    <a href="stats.html" id="btn-stats" class="action-btn" title="Estadisticas">
+       <i class="fas fa-chart-line"></i>
+    </a>
     
      <button id="btn-tema" class="action-btn" title="Cambiar tema">
         <i class="fa-solid fa-moon" id="theme-icon"></i>
@@ -81,12 +85,44 @@
   <select id="seccion" required></select>
   <input type="text" id="receptor" placeholder="Nombre del receptor:" required>
   <select id="seccion_receptor" required></select>
-  <input type="text" id="producto" placeholder="Producto (Tipo):" required>
-  <textarea
-  id="detalles"
-  placeholder="Detalles o notas del pedido (opcional):"
-  rows="3"
-></textarea>
+  
+<select id="producto" required>
+    <option value="" disabled selected>Producto</option>
+    
+    <optgroup label="---- Principales ----">
+        <option value="Baile" data-precio="500">Baile</option>
+        <option value="Serenata" data-precio="300">Serenata</option>
+        <option value="Kiss or Slap" data-precio="250">Kiss or Slap</option>
+        <option value="Boda" data-precio="400">Boda</option>
+    </optgroup> 
+
+    <optgroup label="---- Comida ----">
+        <option value="Alfajor" data-precio="0">Alfajor</option>
+        <option value="Fresas con chocolate" data-precio="0">Fresas con chocolate</option>
+        <option value="Ramo de fresas" data-precio="0">Ramo fresas</option>
+        <option value="Bomba de chocolate" data-precio="0">Bomba de chocolate</option>
+        <option value="Brownie" data-precio="0">Brownie</option>
+        <option value="Galleta" data-precio="0">Galleta</option>
+        <option value="Cakepop" data-precio="0">Cakepop</option>
+        <option value="Dona" data-precio="0">Dona</option>
+        <option value="Oblea" data-precio="0">Oblea</option>
+    </optgroup> 
+
+       <optgroup label="---- Flores ----">
+        <option value="Flor sola" data-precio="0">Flor sola</option>
+        <option value="Ramo de 3" data-precio="0">Ramo de 3 flores</option>
+    </optgroup>
+
+    <optgroup label="---- Otros ----">
+        <option value="Globo" data-precio="0">Globo</option>
+        <option value="Pulsera" data-precio="0">Pulsera</option>
+        <option value="Buzon de confesiones" data-precio="150">Buzon de confesiones</option>
+        <option value="Foto con camara e impresion" data-precio="1000">Foto con camara e impresion</option>
+        <option value="Foto con camara" data-precio="600">Foto con camara</option>
+        <option value="Foto con telefono y fondo" data-precio="200">Foto con telefono y fondo</option>
+    </optgroup>
+</select>
+  <textarea id="detalles" placeholder="Detalles o notas del pedido (opcional):" rows="3"></textarea>
   <button type="submit">Crear pedido</button>
 </form>
 

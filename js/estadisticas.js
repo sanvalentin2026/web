@@ -1,0 +1,272 @@
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
+
+const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const PRECIOS = {
+    "Baile": 500, "Serenata": 300, "Kiss or Slap": 250, "Boda": 400,
+    "Alfajor": 500, "Fresas con chocolate": 1000, "Ramo fresas": 5000,
+    "Bomba de chocolate": 800, "Brownie": 700, "Galleta": 400,
+    "Cakepop": 600, "Dona": 800, "Oblea": 1000, "Foto con camara e impresion": 1500
+};
+
+let chartVentas = null;
+const dom = {
+    total: document.getElementById('totalRecaudado'),
+    cantidad: document.getElementById('ventasPagadas'),
+    estrella: document.getElementById('productoEstrella'),
+    ranking: document.getElementById('rankingUsuarios'),
+    root: document.documentElement
+};
+
+function obtenerMultiplicador(detalles) {
+    if (!detalles) return 1;
+    const texto = detalles.toLowerCase().trim();
+    
+    // Detecta patrones como x2, x 3, *4
+    const patronNumero = texto.match(/(?:x|\*)\s*(\d+)/);
+    if (patronNumero) return parseInt(patronNumero[1]);
+
+    // Detecta palabras clave comunes
+    if (texto.includes("doble") || texto.includes(" dos ") || texto.startsWith("dos ")) return 2;
+    if (texto.includes("triple") || texto.includes(" tres ") || texto.startsWith("tres ")) return 3;
+    
+    // Detecta números al inicio del texto
+    const numeroInicio = texto.match(/^(\d+)\s/);
+    if (numeroInicio) return parseInt(numeroInicio[1]);
+
+    return 1;
+}
+
+function aplicarTema() {
+    const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+    const esOscuro = tema === 'modo-oscuro';
+    
+    document.body.className = tema;
+
+    if (esOscuro) {
+        dom.root.style.setProperty('--bg', 'radial-gradient(circle at top, #1a1a1a 0%, #050505 100%)');
+        dom.root.style.setProperty('--card', 'rgba(28, 28, 30, 0.75)');
+        dom.root.style.setProperty('--text-main', '#f5f5f7');
+        dom.root.style.setProperty('--text-muted', '#a1a1a6');
+        dom.root.style.setProperty('--primary', '#ff375f');
+    } else {
+        dom.root.style.setProperty('--bg', '#f8f9fa');
+        dom.root.style.setProperty('--card', '#ffffff');
+        dom.root.style.setProperty('--text-main', '#333');
+        dom.root.style.setProperty('--text-muted', '#666');
+        dom.root.style.setProperty('--primary', '#d63384');
+    }
+
+    if (chartVentas) {
+        const colorTexto = esOscuro ? '#a1a1a6' : '#666';
+        const colorLineas = esOscuro ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+        
+        chartVentas.options.scales.x.ticks.color = colorTexto;
+        chartVentas.options.scales.y.ticks.color = colorTexto;
+        chartVentas.options.scales.x.grid.color = colorLineas;
+        chartVentas.options.scales.y.grid.color = colorLineas;
+        chartVentas.options.plugins.legend.labels.color = colorTexto;
+        chartVentas.update();
+    }
+}
+
+async function procesarEstadisticas() {
+    const { data: pedidos, error } = await supabase
+        .from("pedidos")
+        .select("producto, pagado, creado_por, created_at, detalles");
+
+    if (error || !pedidos) return;
+
+    let totalAproximado = 0;
+    const productosFrecuencia = {};
+    const rankingUsuarios = {}; 
+    const ventasSemana = new Array(7).fill(0);
+
+    for (let i = 0, len = pedidos.length; i < len; i++) {
+        const p = pedidos[i];
+        const precioBase = PRECIOS[p.producto] || 0;
+        const texto = (p.detalles || "").toLowerCase().trim();
+        
+        let multi = 1;
+
+        // --- LÓGICA INTELIGENTE DE MULTIPLICACIÓN ---
+        // 1. Prioridad: Patrones x2, x 3, *4 (rango 2-10)
+        const patronSimbolo = texto.match(/(?:x|\*)\s*([2-9]|10)\b/);
+        if (patronSimbolo) {
+            multi = parseInt(patronSimbolo[1]);
+        } 
+        // 2. Si no hay símbolos, buscar número suelto (2-10)
+else {
+    const numeroSuelto = texto.match(/\b([2-9]|10)\b/);
+    const esDeuda = ["debe", "paga", "falta", "vuelto"].some(word => texto.includes(word));
+    
+    if (numeroSuelto && !esDeuda) {
+        multi = parseInt(numeroSuelto[1]);
+    } else {
+        // Diccionario de palabras a números
+        const palabrasUnidades = {
+            "dos": 2, "doble": 2,
+            "tres": 3, "triple": 3,
+            "cuatro": 4, "cuadruple": 4,
+            "cinco": 5, "quintuple": 5,
+            "seis": 6,
+            "siete": 7,
+            "ocho": 8,
+            "nueve": 9,
+            "diez": 10
+        };
+
+        // Buscamos si alguna de esas palabras está en el texto
+        for (const [palabra, valor] of Object.entries(palabrasUnidades)) {
+            // Usamos una expresión regular simple para buscar la palabra exacta
+            const regexPalabra = new RegExp(`\\b${palabra}\\b`, 'i');
+            if (regexPalabra.test(texto)) {
+                multi = valor;
+                break; // Si encuentra una, deja de buscar
+            }
+        }
+    }
+}
+
+        const montoCalculado = precioBase * multi;
+        const usuario = p.creado_por || "Anónimo";
+        
+        // El ranking cuenta la cantidad de pedidos físicos (no multiplicados por precio)
+        rankingUsuarios[usuario] = (rankingUsuarios[usuario] || 0) + 1;
+
+        if (p.pagado) {
+            totalAproximado += montoCalculado;
+            // La frecuencia de producto estrella sí suma las unidades reales
+            productosFrecuencia[p.producto] = (productosFrecuencia[p.producto] || 0) + multi;
+            ventasSemana[new Date(p.created_at).getDay()] += montoCalculado;
+        }
+    }
+
+    // Actualizar Interfaz
+    dom.total.textContent = `₡${totalAproximado.toLocaleString('es-CR')}`;
+    dom.cantidad.textContent = pedidos.length;
+    
+    const estrella = Object.keys(productosFrecuencia).reduce((a, b) => 
+        productosFrecuencia[a] > productosFrecuencia[b] ? a : b, "N/A"
+    );
+    dom.estrella.textContent = estrella;
+
+    mostrarRanking(rankingUsuarios);
+    renderizarGrafico(ventasSemana);
+}
+
+function mostrarRanking(usuariosObj) {
+    if (!dom.ranking) return;
+
+    const fragment = document.createDocumentFragment();
+    const top3 = Object.entries(usuariosObj)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+    top3.forEach(([nombre, cantidad], index) => {
+        const div = document.createElement('div');
+        div.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;";
+        
+        let insignias = "";
+        if (nombre === "Alexei") {
+            insignias = `
+                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Staff</span>
+                <span style="background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Dev</span>
+            `;
+        } else {
+            insignias = `
+                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">Seller</span>
+                <span style="background: #efe80e; color: black; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Issuer</span>
+            `;
+        }
+
+        div.innerHTML = `
+            <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                <span style="font-weight: 500;">${index + 1}. ${nombre} - </span>
+                <div style="display: flex; gap: 2px; align-items: center;">${insignias}</div>
+            </div>
+            <span style="font-weight: bold; color: var(--primary);">${cantidad} pedidos</span>
+        `;
+        fragment.appendChild(div);
+    });
+
+    dom.ranking.replaceChildren(fragment);
+}
+
+function renderizarGrafico(datos) {
+    const ctx = document.getElementById('graficoVentas')?.getContext('2d');
+    if (!ctx) return;
+
+    const esOscuro = document.body.classList.contains('modo-oscuro');
+    const colorTexto = esOscuro ? '#a1a1a6' : '#666';
+    const colorLineas = esOscuro ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+
+    if (chartVentas) {
+        chartVentas.data.datasets[0].data = datos;
+        chartVentas.options.scales.x.ticks.color = colorTexto;
+        chartVentas.options.scales.y.ticks.color = colorTexto;
+        chartVentas.options.scales.x.grid.color = colorLineas;
+        chartVentas.options.scales.y.grid.color = colorLineas;
+        chartVentas.update();
+        return;
+    }
+
+    chartVentas = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+            datasets: [{
+                label: 'Ventas (₡)',
+                data: datos,
+                backgroundColor: '#ff375f',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animations: {
+                y: {
+                    from: 500,
+                    duration: 3500,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: {
+                legend: { labels: { color: colorTexto } }
+            },
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { color: colorTexto },
+                    grid: { color: colorLineas }
+                },
+                x: { 
+                    ticks: { color: colorTexto },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+let debounceTimer;
+const realtimeUpdate = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(procesarEstadisticas, 500);
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    aplicarTema();
+    procesarEstadisticas();
+});
+
+window.addEventListener('storage', (e) => {
+    if (e.key === 'tema-usuario') aplicarTema();
+});
+
+supabase.channel('live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, realtimeUpdate)
+    .subscribe();

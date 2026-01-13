@@ -541,13 +541,13 @@ window.eliminarPedido = async (id) => {
             // 3. Confirmación final y sonido
             ReproductorSonidos.play('eliminado');
             Swal.fire({
-                toast:true,
+                toast: true,
                 icon: 'success',
-                title: 'Pedido eliminado',
+                title: 'Pedido eliminado', // Corregido con backticks ``
                 timer: 1500,
                 showConfirmButton: false,
-                background: tema.bg,
-                color: tema.txt,
+                background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#ffffff',
+                color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#333',
                 position: 'top',
                 customClass: { popup: 'mi-borde-redondeado'},
             });
