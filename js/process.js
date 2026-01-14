@@ -88,7 +88,7 @@ function iniciarTutorial() {
                 element: '#header', 
                 popover: { 
                     title: '¡Hola! Un breve tutorial', 
-                    description: 'En esta sección encontrará botones con acciones importantes como reportar errores, descargar PDF, cambiar el tema de pantalla y cerrar sesion, este se mantendra siempre en la parte de arriba de su pantalla.',
+                    description: 'En esta sección encontrará botones con acciones importantes como reportar errores, descargar PDF, mirar estadisticas, cambiar el tema de pantalla y cerrar sesion, este se mantendra siempre en la parte de arriba de su pantalla.',
                     side: "bottom", align: 'center' 
                 } 
             },
@@ -417,30 +417,48 @@ window.editarPedidoCompleto = async (pedidoId) => {
         `<option value="${s}" ${p.seccion_receptor === s ? 'selected' : ''}>${s}</option>`
     ).join('');
 
+    const categorias = {
+    "Principales": ["Baile", "Serenata", "Kiss or Slap", "Boda"],
+    "Comida": ["Alfajor", "Fresas con chocolate", "Ramo de fresas", "Bomba de chocolate", "Brownie", "Galleta", "Cakepop", "Dona", "Oblea"],
+    "Flores": ["Flor sola", "Ramo de 3"],
+    "Otros": ["Globo", "Pulsera", "Buzon de confesiones", "Foto con camara e impresion", "Foto con camara", "Foto con telefono y fondo"]
+};
+
+// Generamos el HTML dinámico
+const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) => `
+    <optgroup label="---- ${grupo} ----">
+        ${productos.map(prod => `
+            <option value="${prod}" ${prod === p.producto ? 'selected' : ''}>${prod}</option>
+        `).join('')}
+    </optgroup>
+`).join('');
+
     const { value: camposNuevos } = await Swal.fire({
         title: `Editar Pedido id #${p.id}`,
         background: tema.bg,
         color: tema.txt,
         html: `
-            <div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
-                
-                <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
-                <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${p.nombre_comprador || ''}">
-                <select id="swal-seccion-c" class="swal2-input">
-                    ${opcionesSeccionC}
-                </select>
+<div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
+    
+    <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
+    <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${p.nombre_comprador || ''}">
+    <select id="swal-seccion-c" class="swal2-input">
+        ${opcionesSeccionC}
+    </select>
 
-                <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
-                <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${p.nombre_receptor || ''}">
-                <select id="swal-seccion-r" class="swal2-input">
-                    ${opcionesSeccionR}
-                </select>
+    <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
+    <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${p.nombre_receptor || ''}">
+    <select id="swal-seccion-r" class="swal2-input">
+        ${opcionesSeccionR}
+    </select>
 
-                <label style="font-size: 10px;color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y NOTAS:</label>
-                <input id="swal-producto" class="swal2-input" placeholder="Producto" value="${p.producto || ''}">
-                <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles...">${p.detalles || ''}</textarea>
-            </div>
-        `,
+    <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y DETALLES:</label>
+    <select id="swal-producto" class="swal2-input">
+        ${opcionesProductos} </select>
+    
+    <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles...">${p.detalles || ''}</textarea>
+</div>
+`,
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         confirmButtonText: 'Guardar',
@@ -770,7 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =================================================
     🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL v4.0
    ================================================= */
-const USUARIO_ADMIN = "A";
+const USUARIO_ADMIN = "Alexei";
 const tema = obtenerTema();
 
 // Colores del tema para las alertas

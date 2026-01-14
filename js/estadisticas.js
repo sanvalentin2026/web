@@ -6,9 +6,11 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PRECIOS = {
     "Baile": 500, "Serenata": 300, "Kiss or Slap": 250, "Boda": 400,
-    "Alfajor": 500, "Fresas con chocolate": 1000, "Ramo fresas": 5000,
+    "Alfajor": 500, "Fresas con chocolate": 1000, "Ramo de fresas": 5000,
     "Bomba de chocolate": 800, "Brownie": 700, "Galleta": 400,
-    "Cakepop": 600, "Dona": 800, "Oblea": 1000, "Foto con camara e impresion": 1500
+    "Cakepop": 600, "Dona": 800, "Oblea": 1000, "Foto con camara e impresion": 1500, 
+    "Flor sola": 1000, "Ramo de 3 flores": 3000, "Globo": 500, "Pulsera": 500, 
+    "Buzon de confesiones": 150, "Foto con camara": 2500, "Foto con telefono y fondo": 200,
 };
 
 let chartVentas = null;
@@ -29,8 +31,14 @@ function obtenerMultiplicador(detalles) {
     if (patronNumero) return parseInt(patronNumero[1]);
 
     // Detecta palabras clave comunes
-    if (texto.includes("doble") || texto.includes(" dos ") || texto.startsWith("dos ")) return 2;
-    if (texto.includes("triple") || texto.includes(" tres ") || texto.startsWith("tres ")) return 3;
+    if (texto.includes("doble") || texto.includes(" dos ") || texto.startsWith("dos ") || texto.startsWith(" dos")) return 2;
+    if (texto.includes("triple") || texto.includes(" tres ") || texto.startsWith("tres ") || texto.startsWith(" tres")) return 3;
+    if (texto.includes("cuadruple") || texto.includes(" cuatro ") || texto.startsWith("cuatro ") || texto.startsWith(" cuatro")) return 4;
+    if (texto.includes("quintuple") || texto.includes(" cinco ") || texto.startsWith("cinco ") || texto.startsWith(" cinco")) return 5;
+    if (texto.includes("sextuple") || texto.includes(" seis ") || texto.startsWith("seis ") || texto.startsWith(" seis")) return 6;
+    if (texto.includes("septuple") || texto.includes(" siete ") || texto.startsWith("seite ") || texto.startsWith(" siete")) return 7;
+    if (texto.includes("octuple") || texto.includes(" ocho ") || texto.startsWith("ocho ") || texto.startsWith(" ocho")) return 8;
+    if (texto.includes("nonuple") || texto.includes(" nueve ") || texto.startsWith("nueve ") || texto.startsWith(" nueve")) return 9;
     
     // Detecta números al inicio del texto
     const numeroInicio = texto.match(/^(\d+)\s/);
@@ -56,7 +64,6 @@ function aplicarTema() {
         dom.root.style.setProperty('--card', '#ffffff');
         dom.root.style.setProperty('--text-main', '#333');
         dom.root.style.setProperty('--text-muted', '#666');
-        dom.root.style.setProperty('--primary', '#d63384');
     }
 
     if (chartVentas) {
@@ -160,8 +167,20 @@ else {
 function mostrarRanking(usuariosObj) {
     if (!dom.ranking) return;
 
+    dom.ranking.innerHTML = "";
+
+    const entries = Object.entries(usuariosObj);
+
+    if (entries.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style = "text-align: left; margin:8px; color:#ff375f; font-weight: 800; font-size: 1.4rem;";
+        emptyDiv.textContent = "N/A";
+        dom.ranking.appendChild(emptyDiv);
+        return;
+    }
+
     const fragment = document.createDocumentFragment();
-    const top3 = Object.entries(usuariosObj)
+    const top3 = entries
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3);
 

@@ -1,48 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script>
-        // BLOQUEO INMEDIATO: Si el usuario no tiene permisos en el storage, 
-        // ni siquiera dejamos que el navegador descargue el resto de la página.
+    <script>
+        // BLOQUEO INMEDIATO
         const session = JSON.parse(localStorage.getItem("usuario") || "{}");
         if (!session.permisos || session.permisos === "false") {
-            window.stop(); // Detiene la carga de la página
+            window.stop();
             window.location.replace("login.html");
         }
     </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos San Valentin</title>
+    
+    <meta name="theme-color" content="#E11D48">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="apple-touch-icon" href="icon-180.png">
-<meta name="theme-color" content="#E11D48">
-
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-
-<title>Pedidos San Valentin</title>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" href="css/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
-
-<link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
-
-<link rel="apple-touch-icon" href="https://fav.farm/❤️">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
 </head>
+
 <div id="pantalla-carga">
     <div class="spinner"></div>
     <p>Cargando...</p>
 </div>
 
 <body style="display: none;">
-   <script>
-        // Si no hay usuario en el storage, ni siquiera cargues el resto del HTML
+    <script>
         if (!localStorage.getItem("usuario")) {
             window.location.replace("login.html");
         } else {
@@ -50,159 +39,140 @@
         }
     </script>
 
-<header class="main-header" id="header">
-    <div class="header-container">
-        <div class="header-logo">
-            <h1>San Valentín</h1>
+    <header class="main-header" id="header">
+        <div class="header-container">
+            <div class="header-logo">
+                <h1>San Valentín</h1>
+            </div>
+            <nav class="header-actions">
+                <a href="reportar.html" class="action-btn report-btn" title="Reportar un error">
+                    <i class="fa-solid fa-bug"></i>
+                </a>
+                <button id="btnPDF" class="action-btn" title="Descargar Respaldo PDF">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </button>
+                <a href="stats.html" id="btn-stats" class="action-btn" title="Estadisticas">
+                   <i class="fas fa-chart-line"></i>
+                </a>
+                 <button id="btn-tema" class="action-btn" title="Cambiar tema">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i>
+                </button>
+                <button onclick="logout()" class="action-btn logout" title="Cerrar Sesión">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </nav>
         </div>
-<nav class="header-actions">
-    <a href="reportar.html"  class="action-btn report-btn" title="Reportar un error">
-        <i class="fa-solid fa-bug"></i>
-    </a>
+    </header>
 
-    <button id="btnPDF" class="action-btn" title="Descargar Respaldo PDF">
-        <i class="fa-solid fa-file-pdf"></i>
-    </button>
+    <main class="content-wrapper">
+        <form id="pedidoForm">
+            <input type="text" id="nombre" placeholder="Nombre del comprador:" required>
+            <select id="seccion" required></select>
+            <input type="text" id="receptor" placeholder="Nombre del receptor:" required>
+            <select id="seccion_receptor" required></select>
+            
+            <select id="producto" required>
+                <option value="" disabled selected>Producto</option>
+                
+                <optgroup label="---- Principales ----">
+                    <option value="Baile" data-precio="0">Baile</option>
+                    <option value="Serenata" data-precio="0">Serenata</option>
+                    <option value="Kiss or Slap" data-precio="0">Kiss or Slap</option>
+                    <option value="Boda" data-precio="0">Boda</option>
+                </optgroup> 
 
-    <a href="stats.html" id="btn-stats" class="action-btn" title="Estadisticas">
-       <i class="fas fa-chart-line"></i>
-    </a>
-    
-     <button id="btn-tema" class="action-btn" title="Cambiar tema">
-        <i class="fa-solid fa-moon" id="theme-icon"></i>
-    </button>
+                <optgroup label="---- Comida ----">
+                    <option value="Alfajor" data-precio="0">Alfajor</option>
+                    <option value="Fresas con chocolate" data-precio="0">Fresas con chocolate</option>
+                    <option value="Ramo de fresas" data-precio="0">Ramo de fresas</option>
+                    <option value="Bomba de chocolate" data-precio="0">Bomba de chocolate</option>
+                    <option value="Brownie" data-precio="0">Brownie</option>
+                    <option value="Galleta" data-precio="0">Galleta</option>
+                    <option value="Cakepop" data-precio="0">Cakepop</option>
+                    <option value="Dona" data-precio="0">Dona</option>
+                    <option value="Oblea" data-precio="0">Oblea</option>
+                </optgroup> 
 
-    <button onclick="logout()" class="action-btn logout" title="Cerrar Sesión">
-        <i class="fa-solid fa-right-from-bracket"></i>
-    </button>
-</nav>
-    </div>
-</header>
+                <optgroup label="---- Flores ----">
+                    <option value="Flor sola" data-precio="0">Flor sola</option>
+                    <option value="Ramo de 3 flores" data-precio="0">Ramo de 3 flores</option>
+                </optgroup>
 
+                <optgroup label="---- Otros ----">
+                    <option value="Globo" data-precio="0">Globo</option>
+                    <option value="Pulsera" data-precio="0">Pulsera</option>
+                    <option value="Buzon de confesiones" data-precio="0">Buzon de confesiones</option>
+                    <option value="Foto con camara e impresion" data-precio="0">Foto con camara e impresion</option>
+                    <option value="Foto con camara" data-precio="0">Foto con camara</option>
+                    <option value="Foto con telefono y fondo" data-precio="0">Foto con telefono y fondo</option>
+                </optgroup>
+            </select>
 
-<form id="pedidoForm">
-  <input type="text" id="nombre" placeholder="Nombre del comprador:" required>
-  <select id="seccion" required></select>
-  <input type="text" id="receptor" placeholder="Nombre del receptor:" required>
-  <select id="seccion_receptor" required></select>
-  
-<select id="producto" required>
-    <option value="" disabled selected>Producto</option>
-    
-    <optgroup label="---- Principales ----">
-        <option value="Baile" data-precio="500">Baile</option>
-        <option value="Serenata" data-precio="300">Serenata</option>
-        <option value="Kiss or Slap" data-precio="250">Kiss or Slap</option>
-        <option value="Boda" data-precio="400">Boda</option>
-    </optgroup> 
+            <textarea id="detalles" placeholder="Detalles o notas del pedido (opcional):" rows="3"></textarea>
+            <button class="crear" type="submit">Crear pedido</button>
+        </form>
 
-    <optgroup label="---- Comida ----">
-        <option value="Alfajor" data-precio="0">Alfajor</option>
-        <option value="Fresas con chocolate" data-precio="0">Fresas con chocolate</option>
-        <option value="Ramo de fresas" data-precio="0">Ramo fresas</option>
-        <option value="Bomba de chocolate" data-precio="0">Bomba de chocolate</option>
-        <option value="Brownie" data-precio="0">Brownie</option>
-        <option value="Galleta" data-precio="0">Galleta</option>
-        <option value="Cakepop" data-precio="0">Cakepop</option>
-        <option value="Dona" data-precio="0">Dona</option>
-        <option value="Oblea" data-precio="0">Oblea</option>
-    </optgroup> 
+        <div class="controls">
+            <div class="orden-container">
+                <ul id="menuOrdenar" class="menu-oculto">
+                    <li data-orden="created_at_desc">Fecha descendente</li>
+                    <li data-orden="seccion_asc">Sección ascendente</li>
+                    <li data-orden="seccion_desc">Sección descendente</li>
+                    <li data-orden="seccion_custom">Secciones personalizadas</li>
+                    <li data-orden="id_asc">ID ascendente</li>
+                    <li data-orden="id_desc">ID descendente</li>
+                </ul>
+            </div>
+            <input type="text" id="buscador" placeholder="Buscar pedido por sus caracteristicas">
+            <select id="filtroSeccion">
+                <option value="">Filtrar busqueda por secciones</option>
+                <option value="7-1">7-1</option> <option value="7-2">7-2</option>
+                <option value="8-1">8-1</option> <option value="8-2">8-2</option>
+                <option value="9-1">9-1</option> <option value="9-2">9-2</option>
+                <option value="10-1">10-1</option> <option value="10-2">10-2</option>
+                <option value="11-1">11-1</option> <option value="11-2">11-2</option>
+            </select>
+        </div>
 
-       <optgroup label="---- Flores ----">
-        <option value="Flor sola" data-precio="0">Flor sola</option>
-        <option value="Ramo de 3" data-precio="0">Ramo de 3 flores</option>
-    </optgroup>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID pedido:</th>
+                        <th>De:</th>
+                        <th>Para:</th>
+                        <th>Producto:</th>
+                        <th>Detalles:</th>
+                        <th>Pago:</th>
+                        <th>Acciones:</th>
+                    </tr>
+                </thead>
+                <tbody id="pedidosBody"></tbody>
+            </table>
+        </div>
 
-    <optgroup label="---- Otros ----">
-        <option value="Globo" data-precio="0">Globo</option>
-        <option value="Pulsera" data-precio="0">Pulsera</option>
-        <option value="Buzon de confesiones" data-precio="150">Buzon de confesiones</option>
-        <option value="Foto con camara e impresion" data-precio="1000">Foto con camara e impresion</option>
-        <option value="Foto con camara" data-precio="600">Foto con camara</option>
-        <option value="Foto con telefono y fondo" data-precio="200">Foto con telefono y fondo</option>
-    </optgroup>
-</select>
-  <textarea id="detalles" placeholder="Detalles o notas del pedido (opcional):" rows="3"></textarea>
-  <button type="submit">Crear pedido</button>
-</form>
+        <div id="paginacion" class="paginacion">
+            <button id="prevPage">⬅ Anterior</button>
+            <span id="infoPagina"></span>
+            <button id="nextPage">Siguiente ➡</button>
+        </div>
+    </main>
 
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p class="copyright">&copy; 2026 Todos los derechos reservados</p>
+        </div>
+    </footer>
 
-<div class="controls">
-  <div class="orden-container">
-    <ul id="menuOrdenar" class="menu-oculto">
-      <li data-orden="created_at_desc">Fecha descendente</li>
-      <li data-orden="seccion_asc">Sección ascendente</li>
-      <li data-orden="seccion_desc">Sección descendente</li>
-      <li data-orden="seccion_custom">Secciones personalizadas</li>
-      <li data-orden="id_asc">ID ascendente</li>
-      <li data-orden="id_desc">ID descendente</li>
-    </ul>
-  </div>
-  <input type="text" id="buscador" placeholder="Buscar pedido por sus caracteristicas">
-  <select id="filtroSeccion">
-    <option value="">Filtrar busqueda por secciones</option>
-    <option value="7-1">7-1</option>
-    <option value="7-2">7-2</option>
-    <option value="7-3">7-3</option>
-    <option value="7-4">7-4</option>
-    <option value="8-1">8-1</option>
-    <option value="8-2">8-2</option>
-    <option value="8-3">8-3</option>
-    <option value="8-4">8-4</option>
-    <option value="9-1">9-1</option>
-    <option value="9-2">9-2</option>
-    <option value="9-3">9-3</option>
-    <option value="9-4">9-4</option>
-    <option value="10-1">10-1</option>
-    <option value="10-2">10-2</option>
-    <option value="10-3">10-3</option>
-    <option value="10-4">10-4</option>
-    <option value="11-1">11-1</option>
-    <option value="11-2">11-2</option>
-    <option value="11-3">11-3</option>
-    <option value="11-4">11-4</option>
-  </select>
-</div>
-
-<table>
-  <thead>
-    <tr>
-      <th>ID pedido:</th>
-      <th>De:</th>
-      <th>Para:</th>
-      <th>Producto:</th>
-      <th>Detalles:</th>
-      <th>Pago:</th>
-      <th>Acciones:</th>
-    </tr>
-  </thead>
-  <tbody id="pedidosBody"></tbody>
-</table>
-<div id="paginacion" class="paginacion">
-  <button id="prevPage">⬅ Anterior</button>
-  <span id="infoPagina"></span>
-  <button id="nextPage">Siguiente ➡</button>
-</div>
-<footer class="main-footer">
-    <div class="footer-content">
-        <p class="copyright">&copy; 2026 Todos los derechos reservados</p>
-    </div>
-</footer>
-<script type="module">
-    import { verificarSesion } from './js/auth.js';
-    
-    // Al cargar index.html, verificamos sesión
-    verificarSesion().catch(err => {
-        console.error("Sesión no válida:", err);
-        // IMPORTANTE: Redirigir fuera de aquí
-        window.location.replace("login.html");
-    });
-</script>
-<script src="js/header.js"></script>
+    <script type="module">
+        import { verificarSesion } from './js/auth.js';
+        verificarSesion().catch(err => {
+            window.location.replace("login.html");
+        });
+    </script>
+    <script src="js/header.js"></script>
     <script src="js/themes.js"></script>
     <script type="module" src="js/process.js"></script>
     <script type="module" src="js/diagnostico.js"></script>
-</body>
-</html>
 </body>
 </html>

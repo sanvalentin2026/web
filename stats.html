@@ -16,13 +16,13 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
 
 <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
-
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 <link rel="apple-touch-icon" href="https://fav.farm/❤️">
 </head>
 <body class="modo-oscuro"> <div class="container">
     <header class="header">
         <button class="btn-volver" onclick="history.back()">
-            <i class="fas fa-arrow-left"></i> Volver atrás
+        ← Volver atrás
         </button>
         <h1><i class="fas fa-chart-line"></i> Estadísticas</h1>
     </header>
@@ -50,7 +50,7 @@
     </main>
 
     <section class="chart-container">
-        <h3><i class="fas fa-chart-bar"></i> Grafico Semanal</h3>
+        <h3><i class="fas fa-chart-bar"></i> Estadisticas de ventas</h3>
         <div style="height: 280px; position: relative;">
             <canvas id="graficoVentas"></canvas>
         </div>

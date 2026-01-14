@@ -64,7 +64,7 @@ form input:focus,
 form select:focus,
 form textarea:focus {
   outline: none;
-  border-color: #e91e63;
+  border-color: #ff375f;
 }
 
 form button {
@@ -79,9 +79,6 @@ form button {
   cursor: pointer;
 }
 
-form button:hover {
-  background: #ff375f;
-}
 
 /* ===== Controles ===== */
 .controls {
@@ -136,9 +133,6 @@ form button:hover {
   cursor: pointer;
 }
 
-#btnOrdenar:hover {
-  background-color: #e91e63;
-}
 
 #menuOrdenar {
   list-style: none;
@@ -216,7 +210,7 @@ table button {
 }
 
 table button:hover {
-  background-color: #E11D48;
+  background-color: #ff375f;
 }
 
 table td button {
@@ -377,9 +371,6 @@ table {
 
  }
 
- #btnOrdenar:hover {
-  background-color: #e91e63;
-}
 
  #menuOrdenar {
   background: #fff;
@@ -423,7 +414,7 @@ table button {
 }
 
 table button:hover {
-  background-color: #E11D48;
+  background-color: #ff375f;
 }
 
   thead th {
@@ -512,10 +503,6 @@ table button:hover {
     transition: 0.3s;
   }
 
-  form button:hover, #btnOrdenar:hover {
-    filter: brightness(1.2);
-    transform: translateY(-1px);
-  }
 
   /* Tabla estilo Vidrio Oscuro */
   table {
@@ -556,9 +543,6 @@ table button:hover {
     color: white;
   }
 
-  #menuOrdenar li:hover {
-    background: rgba(255, 55, 95, 0.2);
-  }
 
   /* Paginación */
   .paginacion button {
@@ -1168,9 +1152,7 @@ h1 {
     }
 }
 
-.modo-oscuro form button{
-  background-color: #ff375f;
-}
+
 /* ===== HEADER STYLE ===== */
 .main-header {
     background: #ffe7f0;
@@ -1695,7 +1677,10 @@ table {
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     background-color: rgba(255, 255, 255, 0.05) !important;
     color: #f5f5f7 !important;
-    font-size: 16px;
+    font-size: 16px !important;
+}
+input, textarea, select {
+    -webkit-text-size-adjust: 100%;
 }
 
 /* Foco de los inputs */
@@ -1713,4 +1698,34 @@ table {
 /* 5. Ajuste para que el botón de carga (Loading) no se pegue al borde */
 .swal2-loader {
     margin: 20px auto !important;
+}
+.modo-oscuro optgroup{
+  color: black;
+}
+.modo-oscuro .crear:hover{
+   background-color: #ff375f !important;
+}
+.modo-oscuro form button, 
+.modo-oscuro #btnOrdenar, 
+.modo-oscuro .btn-reportar {
+    background-color: #ff375f;
+    color: white;
+    border: none;
+    transition: 0.3s;
+    
+    /* Agrega estas líneas para matar el efecto */
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Fuerza a que el estado hover sea idéntico al normal */
+.modo-oscuro form button:hover, 
+.modo-oscuro #btnOrdenar:hover, 
+.modo-oscuro .btn-reportar:hover {
+    background-color: #ff375f !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
 }
