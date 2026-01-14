@@ -4,6 +4,20 @@ const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+//seguridad
+import { verificarSesion } from './auth.js'; 
+
+    const init = async () => {
+      try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    };
+    init();
+
 const PRECIOS = {
     "Baile": 500, "Serenata": 300, "Kiss or Slap": 250, "Boda": 400,
     "Alfajor": 500, "Fresas con chocolate": 1000, "Ramo de fresas": 5000,
@@ -90,78 +104,76 @@ async function procesarEstadisticas() {
     const productosFrecuencia = {};
     const rankingUsuarios = {}; 
     const ventasSemana = new Array(7).fill(0);
+    const cantidadPedidosSemana = new Array(7).fill(0);
+
+    const preciosNormalizados = {};
+    for (let key in PRECIOS) {
+        const keyLimpia = key.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        preciosNormalizados[keyLimpia] = PRECIOS[key];
+    }
 
     for (let i = 0, len = pedidos.length; i < len; i++) {
         const p = pedidos[i];
-        const precioBase = PRECIOS[p.producto] || 0;
+        const nombreProductoLimpio = (p.producto || "").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const precioBase = preciosNormalizados[nombreProductoLimpio] || 0;
         const texto = (p.detalles || "").toLowerCase().trim();
         
         let multi = 1;
 
-        // --- LÓGICA INTELIGENTE DE MULTIPLICACIÓN ---
-        // 1. Prioridad: Patrones x2, x 3, *4 (rango 2-10)
         const patronSimbolo = texto.match(/(?:x|\*)\s*([2-9]|10)\b/);
         if (patronSimbolo) {
             multi = parseInt(patronSimbolo[1]);
-        } 
-        // 2. Si no hay símbolos, buscar número suelto (2-10)
-else {
-    const numeroSuelto = texto.match(/\b([2-9]|10)\b/);
-    const esDeuda = ["debe", "paga", "falta", "vuelto"].some(word => texto.includes(word));
-    
-    if (numeroSuelto && !esDeuda) {
-        multi = parseInt(numeroSuelto[1]);
-    } else {
-        // Diccionario de palabras a números
-        const palabrasUnidades = {
-            "dos": 2, "doble": 2,
-            "tres": 3, "triple": 3,
-            "cuatro": 4, "cuadruple": 4,
-            "cinco": 5, "quintuple": 5,
-            "seis": 6,
-            "siete": 7,
-            "ocho": 8,
-            "nueve": 9,
-            "diez": 10
-        };
-
-        // Buscamos si alguna de esas palabras está en el texto
-        for (const [palabra, valor] of Object.entries(palabrasUnidades)) {
-            // Usamos una expresión regular simple para buscar la palabra exacta
-            const regexPalabra = new RegExp(`\\b${palabra}\\b`, 'i');
-            if (regexPalabra.test(texto)) {
-                multi = valor;
-                break; // Si encuentra una, deja de buscar
+        } else {
+            const numeroSuelto = texto.match(/\b([2-9]|10)\b/);
+            const esDeuda = ["debe", "paga", "falta", "vuelto"].some(word => texto.includes(word));
+            
+            if (numeroSuelto && !esDeuda) {
+                multi = parseInt(numeroSuelto[1]);
+            } else {
+                const palabrasUnidades = {
+                    "dos": 2, "doble": 2, "tres": 3, "triple": 3, "cuatro": 4, 
+                    "cuadruple": 4, "cinco": 5, "quintuple": 5, "seis": 6, 
+                    "siete": 7, "ocho": 8, "nueve": 9, "diez": 10
+                };
+                for (const [palabra, valor] of Object.entries(palabrasUnidades)) {
+                    if (new RegExp(`\\b${palabra}\\b`, 'i').test(texto)) {
+                        multi = valor;
+                        break;
+                    }
+                }
             }
         }
-    }
-}
 
         const montoCalculado = precioBase * multi;
         const usuario = p.creado_por || "Anónimo";
         
-        // El ranking cuenta la cantidad de pedidos físicos (no multiplicados por precio)
         rankingUsuarios[usuario] = (rankingUsuarios[usuario] || 0) + 1;
 
-        if (p.pagado) {
-            totalAproximado += montoCalculado;
-            // La frecuencia de producto estrella sí suma las unidades reales
-            productosFrecuencia[p.producto] = (productosFrecuencia[p.producto] || 0) + multi;
-            ventasSemana[new Date(p.created_at).getDay()] += montoCalculado;
+        const fecha = new Date(p.created_at);
+        if (!isNaN(fecha)) {
+            const dia = fecha.getDay();
+            
+            // LA CANTIDAD SE SUMA SIEMPRE (PAGADO O NO)
+            cantidadPedidosSemana[dia] += multi;
+
+            // LAS GANANCIAS SOLO SI ESTÁ PAGADO
+            if (p.pagado) {
+                totalAproximado += montoCalculado;
+                ventasSemana[dia] += montoCalculado;
+                productosFrecuencia[p.producto] = (productosFrecuencia[p.producto] || 0) + multi;
+            }
         }
     }
 
-    // Actualizar Interfaz
-    dom.total.textContent = `₡${totalAproximado.toLocaleString('es-CR')}`;
-    dom.cantidad.textContent = pedidos.length;
+    if (dom.total) dom.total.textContent = `₡${totalAproximado.toLocaleString('es-CR')}`;
+    if (dom.cantidad) dom.cantidad.textContent = pedidos.length;
     
-    const estrella = Object.keys(productosFrecuencia).reduce((a, b) => 
-        productosFrecuencia[a] > productosFrecuencia[b] ? a : b, "N/A"
-    );
-    dom.estrella.textContent = estrella;
+    const entries = Object.entries(productosFrecuencia);
+    const estrella = entries.length > 0 ? entries.reduce((a, b) => a[1] > b[1] ? a : b)[0] : "N/A";
+    if (dom.estrella) dom.estrella.textContent = estrella;
 
     mostrarRanking(rankingUsuarios);
-    renderizarGrafico(ventasSemana);
+    renderizarGrafico(ventasSemana, cantidadPedidosSemana);
 }
 
 function mostrarRanking(usuariosObj) {
@@ -214,21 +226,18 @@ function mostrarRanking(usuariosObj) {
     dom.ranking.replaceChildren(fragment);
 }
 
-function renderizarGrafico(datos) {
-    const ctx = document.getElementById('graficoVentas')?.getContext('2d');
-    if (!ctx) return;
-
+function renderizarGrafico(datosGanancias, datosPedidos) {
+    const canvas = document.getElementById('graficoVentas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     const esOscuro = document.body.classList.contains('modo-oscuro');
     const colorTexto = esOscuro ? '#a1a1a6' : '#666';
     const colorLineas = esOscuro ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
 
     if (chartVentas) {
-        chartVentas.data.datasets[0].data = datos;
-        chartVentas.options.scales.x.ticks.color = colorTexto;
-        chartVentas.options.scales.y.ticks.color = colorTexto;
-        chartVentas.options.scales.x.grid.color = colorLineas;
-        chartVentas.options.scales.y.grid.color = colorLineas;
-        chartVentas.update();
+        chartVentas.data.datasets[0].data = datosGanancias;
+        chartVentas.data.datasets[1].data = datosPedidos;
+        chartVentas.update('active');
         return;
     }
 
@@ -236,31 +245,52 @@ function renderizarGrafico(datos) {
         type: 'bar',
         data: {
             labels: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
-            datasets: [{
-                label: 'Ventas (₡)',
-                data: datos,
-                backgroundColor: '#ff375f',
-                borderRadius: 5
-            }]
+            datasets: [
+                {
+                    label: 'Ganancias (₡)',
+                    data: datosGanancias,
+                    backgroundColor: '#ff375f',
+                    borderRadius: 5,
+                    yAxisID: 'y' // Usa el eje izquierdo
+                },
+                {
+                    label: 'Cant. Pedidos',
+                    data: datosPedidos,
+                    backgroundColor: '#007aff',
+                    borderRadius: 5,
+                    yAxisID: 'y1' // Usa el eje derecho independiente
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animations: {
-                y: {
-                    from: 500,
-                    duration: 3500,
-                    easing: 'easeOutQuart'
-                }
-            },
             plugins: {
                 legend: { labels: { color: colorTexto } }
             },
-            scales: { 
-                y: { 
-                    beginAtZero: true, 
-                    ticks: { color: colorTexto },
+            scales: {
+                y: { // EJE IZQUIERDO (COLONES)
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    ticks: { 
+                        color: colorTexto,
+                        callback: v => '₡' + v.toLocaleString() 
+                    },
                     grid: { color: colorLineas }
+                },
+                y1: { // EJE DERECHO (CANTIDADES)
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    // Esto evita que las líneas de cuadrícula se crucen y se vea feo
+                    grid: { drawOnChartArea: false }, 
+                    ticks: { 
+                        color: '#007aff', // Color azul para identificarlo con su barra
+                        stepSize: 1 
+                    }
                 },
                 x: { 
                     ticks: { color: colorTexto },

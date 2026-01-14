@@ -119,6 +119,7 @@
         border-radius: 8px;
         display: flex;
         align-items: center;
+        font-size: 15px;
         gap: 8px;
         transition: background 0.2s;
     }

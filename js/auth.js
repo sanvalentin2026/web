@@ -184,8 +184,8 @@ ReproductorSonidos.play('notification');
 await Swal.fire({
     toast: true,
     icon: 'error',
-    title: 'Acceso Denegado',
-    text: 'Tu acceso ha sido revocado.',
+    title: 'Sesion revocada',
+    text: 'Su sesion vencio.',
     position: 'top',
     timer: 5000,
     showConfirmButton: false,
