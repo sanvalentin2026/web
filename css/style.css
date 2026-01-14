@@ -1668,6 +1668,7 @@ table {
     border: 1px solid #F3C1D9 !important;
     background-color: white !important;
     color: #374151 !important;
+    font-size: 16px !important;
 }
 
 /* Estilos específicos para Modo Oscuro */
@@ -1728,13 +1729,4 @@ input, textarea, select {
     opacity: 1 !important;
     filter: none !important;
     transform: none !important;
-}
-
-.swal2-input, 
-.swal2-select, 
-.swal2-textarea {
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    color: #050505 !important;
-    font-size: 16px !important;
 }
