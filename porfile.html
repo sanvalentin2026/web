@@ -44,9 +44,9 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-h1 {
+.title{
     font-family: 'Dancing Script', cursive;
-    color: var(--text-main);
+    color: var(--primary);
 }
 
 /* --- GRID Y CONTENEDORES --- */
@@ -222,7 +222,7 @@ h1 {
 }
 
 @media (max-width: 400px){
-    .main-header { width: 90%; }
+    .main-header { width: 89%; }
     .card-perfil { padding: 20px; }
 }
 /* --- MENÚ DE ACCIONES (RESTABLECIDO) --- */
@@ -231,6 +231,9 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+h2{
+    color: #ff375f;
 }
 
 .menu-btn {
@@ -302,18 +305,66 @@ h1 {
     background: grey;
     border-radius: 10px;
 }
+.volver {
+    /* Reseteo y transparencia */
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    
+    /* Diseño y espaciado */
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    
+    /* Alineación interna */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    /* Centrado */
+    margin: 0 auto 20px auto; 
+    width: fit-content;
+    position: relative;
+    
+    /* Transiciones */
+    transition: all 0.3s ease;
+    outline: none;
+
+    /* Evitar que el texto se parta en dos líneas */
+    white-space: nowrap; 
+}
+
+.volver i {
+    font-size: 1rem;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    .volver {
+        padding: 8px 18px;    /* Un poco más pequeño en móviles */
+        font-size: 0.85rem;   /* Reducción ligera de la fuente */
+        margin-bottom: 15px;  /* Menos margen inferior */
+    }
+
+    .volver i {
+        font-size: 0.9rem;
+    }
+}
     </style>
 </head>
 <body class="modo-oscuro">
 
-    <header class="main-header">
+<header class="main-header">
         <div class="header-container">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a href="index.html" style="color: white; font-size: 1.2rem;"><i class="fa-solid fa-chevron-left"></i></a>
-                <h1>Perfil</h1>
+                <h2 class="title">Perfil</h2>
             </div>
             <div class="header-right">
-               <span style="font-weight: 600; opacity: 0.8;">CRC |</span> <span id="reloj" style="font-weight: 600; opacity: 0.8;">00:00:00</span>
+               <span style="font-weight: 600; opacity: 0.8;">CRC | </span> <span id="reloj" style="font-weight: 600; opacity: 0.8;">00:00:00</span>
             </div>
         </div>
     </header>

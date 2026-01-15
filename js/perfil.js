@@ -117,24 +117,45 @@ Swal.fire({
 window.verDetalleUsuario = function(username, foto, hora) {
     const fotoFinal = (foto && foto !== "undefined") ? foto : FOTO_DEFAULT;
     
+    // 1. Detectar tema
+    const esClaro = localStorage.getItem('tema-usuario') === 'modo-claro';
+    const colorTexto = esClaro ? '#1c1c1e' : '#ffffff';
+
     let insigniasHtml = '';
     if (username === "Alexei Chaves") {
-        insigniasHtml = '<span class="insignia dev">Desarollador</span><span class="insignia admin">Soporte</span>';
+        insigniasHtml = '<span class="insignia dev">Desarrollador</span><span class="insignia admin">Soporte</span>';
     } else {
         insigniasHtml = '<span class="insignia vendedor">Vendedor</span>';
     }
 
     Swal.fire({
         html: `
-            <div style="padding: 20px; text-align: center;">
-                <img src="${fotoFinal}" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #ff375f; margin-bottom:15px;">
-                <div style="font-size:1.5rem; font-weight:bold; color:white;">${username}</div>
+            <div style="padding: 10px; text-align: center;">
+                <img src="${fotoFinal}" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #ff375f; margin-bottom:15px; box-shadow: 0 4px 15px rgba(255, 55, 95, 0.3);">
+                <div style="font-size:1.5rem; font-weight:bold; color: ${colorTexto}; margin-bottom: 10px;">${username}</div>
                 <div class="badges-list" style="display:flex; justify-content:center; gap:8px;">${insigniasHtml}</div>
+                <div style="margin-top: 15px; font-size: 0.85rem; color: ${esClaro ? '#636366' : '#8e8e93'};">
+                    <i class="fa-regular fa-clock"></i> Última conexión: ${hora}
+                </div>
             </div>
         `,
         showConfirmButton: false,
         showCloseButton: true,
-        background: '#1a1a1a'
+        // 2. Aplicar colores de tema al contenedor
+        background: esClaro ? '#ffffff' : '#1c1c1e',
+        color: colorTexto,
+        didOpen: (popup) => {
+            // 3. Forzar radio de 20px
+            popup.style.borderRadius = '20px';
+            
+            // Ajustar el color del botón de cerrar (X) según el tema
+            const closeButton = popup.querySelector('.swal2-close');
+            if (closeButton) {
+                closeButton.style.color = colorTexto;
+                closeButton.style.outline = 'none';
+                closeButton.style.boxShadow = 'none';
+            }
+        }
     });
 };
 
