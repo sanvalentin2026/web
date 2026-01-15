@@ -86,7 +86,7 @@ document.getElementById('inputFoto')?.addEventListener('change', async function(
 
         Swal.fire({
             icon: 'success',
-            title: 'Foto actualizada',
+            title: 'Foto guardada',
             toast: true,
             position: 'top',
             showConfirmButton: false,
@@ -104,7 +104,6 @@ window.verDetalleUsuario = function(username, foto, hora) {
     const esClaro = localStorage.getItem('tema-usuario') === 'modo-claro';
     const colorTexto = esClaro ? '#1c1c1e' : '#ffffff';
 
-    // Insignias en el modal según el usuario clicado
     let insigniasModal = (username === "Alexei Chaves") 
         ? '<span class="insignia dev">Desarrollador</span><span class="insignia admin">Soporte</span>'
         : '<span class="insignia vendedor">Vendedor/a</span>';
@@ -124,7 +123,16 @@ window.verDetalleUsuario = function(username, foto, hora) {
         showCloseButton: true,
         background: esClaro ? '#ffffff' : '#1c1c1e',
         color: colorTexto,
-        didOpen: (popup) => popup.style.borderRadius = '20px'
+        didOpen: (popup) => {
+            popup.style.borderRadius = '20px';
+            
+            // --- ESTO ELIMINA EL CUADRADO DE LA X ---
+            const closeButton = popup.querySelector('.swal2-close');
+            if (closeButton) {
+                closeButton.style.boxShadow = 'none'; // Quita la sombra de enfoque
+                closeButton.style.outline = 'none';    // Quita el borde azul/negro
+            }
+        }
     });
 };
 

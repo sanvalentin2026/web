@@ -11,6 +11,9 @@ const canal = supabase.channel('online-users', {
     config: { presence: { key: sesion.username } }
 });
 
+// Almacén temporal para mantener usuarios que "salieron" por 5 segundos
+let usuariosBuffer = new Map();
+
 async function reportarPresencia() {
     if (!sesion.username) return;
     const fotoParaTrack = localStorage.getItem("foto-perfil") || sesion.foto || FOTO_DEFAULT;
@@ -27,35 +30,59 @@ document.addEventListener('visibilitychange', () => {
 });
 
 canal.on('presence', { event: 'sync' }, () => {
-    const estado = canal.presenceState();
+    const estadoReal = canal.presenceState();
     const contenedor = document.getElementById('listaUsuarios');
-    
-    if (contenedor) {
-        contenedor.innerHTML = "";
-        const unicos = new Map();
-        Object.keys(estado).forEach(userKey => {
-            const info = estado[userKey][0];
-            if (info.username) unicos.set(info.username, info);
-        });
+    if (!contenedor) return;
 
-        unicos.forEach((info, nombre) => {
-            const hora = info.conectado_el ? new Date(info.conectado_el).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
-            const foto = info.foto || FOTO_DEFAULT;
+    // 1. Obtener usuarios actualmente reportados por Supabase
+    const usuariosActivos = new Map();
+    Object.keys(estadoReal).forEach(userKey => {
+        const info = estadoReal[userKey][0];
+        if (info.username) usuariosActivos.set(info.username, info);
+    });
 
-            contenedor.innerHTML += `
-                <div class="usuario-item" onclick="window.verDetalleUsuario ? verDetalleUsuario('${nombre}', '${foto}', '${hora}') : null">
-                    <div class="punto-estado online"></div>
-                    <div class="detalles-user">
-                        <span class="nombre">${nombre}</span>
-                        <span class="conexion">En línea ahora</span>
-                    </div>
-                    <img src="${foto}" style="width: 35px; height: 35px; border-radius: 50%; margin-left: auto; object-fit: cover; border: 2px solid var(--primary);">
-                </div>
-            `;
-        });
-    }
+    // 2. Actualizar el buffer: Si el usuario está activo, lo guardamos/actualizamos
+    usuariosActivos.forEach((info, nombre) => {
+        if (usuariosBuffer.has(nombre)) {
+            clearTimeout(usuariosBuffer.get(nombre).timeout);
+        }
+        usuariosBuffer.set(nombre, { ...info, timeout: null });
+    });
+
+    // 3. Revisar quiénes estaban en el buffer pero ya no están en Supabase (salida detectada)
+    usuariosBuffer.forEach((info, nombre) => {
+        if (!usuariosActivos.has(nombre) && !info.timeout) {
+            // Le damos 5 segundos de "vida extra" antes de borrarlo
+            const timeout = setTimeout(() => {
+                usuariosBuffer.delete(nombre);
+                dibujarHTML(contenedor);
+            }, 5000); 
+            usuariosBuffer.get(nombre).timeout = timeout;
+        }
+    });
+
+    dibujarHTML(contenedor);
 }).subscribe(async (status) => {
     if (status === 'SUBSCRIBED') await reportarPresencia();
 });
+
+function dibujarHTML(contenedor) {
+    contenedor.innerHTML = "";
+    usuariosBuffer.forEach((info, nombre) => {
+        const hora = info.conectado_el ? new Date(info.conectado_el).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
+        const foto = info.foto || FOTO_DEFAULT;
+
+        contenedor.innerHTML += `
+            <div class="usuario-item" onclick="window.verDetalleUsuario ? verDetalleUsuario('${nombre}', '${foto}', '${hora}') : null">
+                <div class="punto-estado online"></div>
+                <div class="detalles-user">
+                    <span class="nombre">${nombre}</span>
+                    <span class="conexion">En línea</span>
+                </div>
+                <img src="${foto}" style="width: 35px; height: 35px; border-radius: 50%; margin-left: auto; object-fit: cover; border: 2px solid var(--primary);">
+            </div>
+        `;
+    });
+}
 
 window.actualizarPresenciaGlobal = reportarPresencia;

@@ -201,15 +201,14 @@ function mostrarRanking(usuariosObj) {
         div.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;";
         
         let insignias = "";
-        if (nombre === "Alexei") {
+        if (nombre === "Alexei Chaves") {
             insignias = `
-                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Staff</span>
-                <span style="background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Dev</span>
+                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Soporte</span>
+                <span style="background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">DESARROLLADOR</span>
             `;
         } else {
             insignias = `
-                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">Seller</span>
-                <span style="background: #efe80e; color: black; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Issuer</span>
+                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">VENDEDOR</span>
             `;
         }
 
