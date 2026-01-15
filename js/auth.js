@@ -192,7 +192,8 @@ await Swal.fire({
     background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
     color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151',
     customClass: {
-        popup: 'mi-borde-redondeado'
+        popup: 'mi-borde-redondeado',
+        title: ''
     }
 });
 

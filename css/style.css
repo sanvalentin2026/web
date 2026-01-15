@@ -1637,14 +1637,6 @@ table {
     height: 100% !important;
 }
 /* 1. Centrado del Título en SweetAlert */
-.swal2-title {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    text-align: center !important;
-    padding-top: 20px !important;
-    font-size: 1.2rem !important;
-}
 
 /* 2. Contenedor del Formulario */
 #form-editar-pedido {
