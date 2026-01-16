@@ -310,33 +310,93 @@ dom.form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const tema = obtenerTema();
     
-    // Bloqueo visual
-    Swal.fire({ title: 'Procesando...', background: tema.bg, color: tema.txt, toast:true, showConfirmButton:false, didOpen: () => Swal.showLoading(), position:'top', customClass: { popup: 'mi-borde-redondeado'}, });
+    Swal.fire({ 
+        title: 'Procesando...', 
+        background: tema.bg, 
+        color: tema.txt, 
+        toast: true, 
+        showConfirmButton: false, 
+        didOpen: () => Swal.showLoading(), 
+        position: 'top', 
+        customClass: { popup: 'mi-borde-redondeado' }, 
+    });
 
     const sesion = JSON.parse(localStorage.getItem("usuario"));
     const usuario = sesion ? sesion.username : "Desconocido";
+    const productoSeleccionado = dom.producto.value;
 
+    // 1. Verificar Stock en Supabase
+    const { data: prodInfo, error: errorStock } = await supabase
+        .from("productos")
+        .select("*")
+        .eq("nombre", productoSeleccionado)
+        .single();
+
+    if (errorStock || !prodInfo) {
+        ReproductorSonidos.play('error');
+        Swal.fire({ icon: 'error', text: 'Producto no encontrado en inventario', toast: true, position: 'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
+        return;
+    }
+
+    // 2. Validar si es físico y tiene stock (Los servicios tienen 999999)
+    if (prodInfo.tipo === 'fisico' && prodInfo.stock_disponible <= 0) {
+        ReproductorSonidos.play('error');
+Swal.fire({ 
+    icon: 'warning', 
+    title: 'Sin Stock', 
+    html: `No queda stock de: <strong>${productoSeleccionado}.</strong>`, 
+    toast: true, 
+    position: 'top', 
+    showConfirmButton: false, 
+    timer: 3000, 
+    background: tema.bg, 
+    color: tema.txt,
+    customClass: { popup: 'mi-borde-redondeado' } 
+});
+        return;
+    }
+
+    // 3. Preparar el pedido
     const nuevoPedido = {
         nombre_comprador: dom.nombre.value.trim(),
         seccion_comprador: dom.seccion.value,
         nombre_receptor: dom.receptor.value.trim(),
         seccion_receptor: dom.seccion_receptor.value,
-        producto: dom.producto.value,
+        producto: productoSeleccionado,
         detalles: dom.detalles.value.trim(),
         pagado: false,
-        creado_por: usuario,         // <--- AQUÍ LO REGISTRAMOS
+        creado_por: usuario,
         ultima_edicion_por: usuario
     };
 
-    const { error } = await supabase.from("pedidos").insert([nuevoPedido]);
-    if (error) {
+    // 4. Insertar pedido y actualizar stock (si es físico)
+    const { error: errorInsert } = await supabase.from("pedidos").insert([nuevoPedido]);
+
+    if (errorInsert) {
         ReproductorSonidos.play('error');
-        Swal.fire({ icon: 'error', text: error.message, position: 'top', showConfirmButton: false,toast:true, showConfirmButton:false, customClass: { popup: 'mi-borde-redondeado'}, timer: 2500, });
+        Swal.fire({ icon: 'error', text: errorInsert.message, position: 'top', toast: true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
     } else {
+        // Si el producto es físico, restamos 1 del stock
+        if (prodInfo.tipo === 'fisico') {
+            await supabase
+                .from("productos")
+                .update({ stock_disponible: prodInfo.stock_disponible - 1 })
+                .eq("nombre", productoSeleccionado);
+        }
+
         ReproductorSonidos.play('exito');
         dom.form.reset();
-        Swal.fire({ icon: 'success', title: 'Pedido Creado', timer: 1500, showConfirmButton: false,toast:true, showConfirmButton:false, background: tema.bg, color: tema.txt, position: 'top', customClass: { popup: 'mi-borde-redondeado'}, });
-        // El Realtime actualizará la tabla solo
+        Swal.fire({ 
+            icon: 'success', 
+            title: 'Pedido Creado', 
+            timer: 1500, 
+            showConfirmButton: false, 
+            toast: true, 
+            background: tema.bg, 
+            color: tema.txt, 
+            position: 'top', 
+            customClass: { popup: 'mi-borde-redondeado' }, 
+        });
     }
 });
 

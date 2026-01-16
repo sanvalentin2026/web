@@ -18,9 +18,25 @@ async function reportarPresencia() {
     if (!sesion.username) return;
     const fotoParaTrack = localStorage.getItem("foto-perfil") || sesion.foto || FOTO_DEFAULT;
     
+    // Convertimos la URL a minúsculas para evitar errores
+    const path = window.location.pathname.toLowerCase();
+
+    // Detección mejorada
+    let paginaActual = 'Navegando';
+    if (path.includes('profile.') || path.includes('perfil')) {
+        paginaActual = 'En Perfil';
+    } else if (path.includes('index.') || path === '/' || path.endsWith('.html') === false) {
+        paginaActual = 'En Inicio';
+    } else if (path.includes('stats') || path.includes('estadistica')) {
+        paginaActual = 'En Estadísticas';
+    } else if (path.includes('reportar') || path.includes('pedido')) {
+        paginaActual = 'En Reportes';
+    }
+
     await canal.track({
         username: sesion.username,
         foto: fotoParaTrack,
+        estado_web: paginaActual,
         conectado_el: new Date().toISOString()
     });
 }
@@ -71,13 +87,17 @@ function dibujarHTML(contenedor) {
     usuariosBuffer.forEach((info, nombre) => {
         const hora = info.conectado_el ? new Date(info.conectado_el).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
         const foto = info.foto || FOTO_DEFAULT;
+        
+        // Usamos info.estado_web que es lo que envías en canal.track
+        // Si por alguna razón no existe, ponemos 'En línea' por defecto
+        const ubicacionActual = info.estado_web || 'En línea';
 
         contenedor.innerHTML += `
             <div class="usuario-item" onclick="window.verDetalleUsuario ? verDetalleUsuario('${nombre}', '${foto}', '${hora}') : null">
                 <div class="punto-estado online"></div>
                 <div class="detalles-user">
                     <span class="nombre">${nombre}</span>
-                    <span class="conexion">En línea</span>
+                    <span class="conexion">${ubicacionActual}</span>
                 </div>
                 <img src="${foto}" style="width: 35px; height: 35px; border-radius: 50%; margin-left: auto; object-fit: cover; border: 2px solid var(--primary);">
             </div>
