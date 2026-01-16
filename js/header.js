@@ -1,31 +1,19 @@
-const btnTema = document.getElementById('btn-tema');
-const themeIcon = document.getElementById('theme-icon');
-
-btnTema.addEventListener('click', () => {
-    document.body.classList.toggle('modo-oscuro');
-    
-    // Cambiar el icono según el modo
-    if (document.body.classList.contains('modo-oscuro')) {
-        themeIcon.classList.replace('fa-moon', 'fa-sun');
-        localStorage.setItem('tema', 'oscuro');
-    } else {
-        themeIcon.classList.replace('fa-sun', 'fa-moon');
-        localStorage.setItem('tema', 'claro');
-    }
-});
-
-// Cargar tema guardado al iniciar
-if (localStorage.getItem('tema') === 'oscuro') {
-    document.body.classList.add('modo-oscuro');
-    themeIcon.classList.replace('fa-moon', 'fa-sun');
-}
-
 const header = document.querySelector('.main-header');
 
+// 1. CARGAR TEMA (Solo lectura para aplicar colores al iniciar)
+const aplicarTemaAlInicio = () => {
+    const temaGuardado = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+    document.body.className = temaGuardado;
+};
+
+// 2. EFECTO DE HEADER CON SCROLL
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 25) {
+    if (window.scrollY > 20) {
         header.classList.add('scrolled');
     } else {
         header.classList.remove('scrolled');
     }
 });
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', aplicarTemaAlInicio);

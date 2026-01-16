@@ -1240,7 +1240,7 @@ h1 {
 /* RESPONSIVE MÓVIL */
 @media (max-width: 600px) {
     .header-logo h1 {
-        font-size: 1.1rem;
+        font-size: 1.5rem;
     }
     
     .header-actions {

@@ -275,7 +275,7 @@ h2{
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     
     /* ESTO ES LO NUEVO: */
-    height: 544px;           /* Altura fija para que no crezca más */
+    height: 480px;           /* Altura fija para que no crezca más */
     display: flex;           /* Usamos flex para organizar el header y la lista */
     flex-direction: column;  /* Uno arriba del otro */
 }
@@ -385,9 +385,9 @@ h2{
             </div>
 
             <nav class="perfil-menu">
-                <a href="stats.html" class="menu-btn"><i class="fa-solid fa-chart-line"></i> Estadisticas</a>
-                <a href="stock.html" class="menu-btn"><i class="fa-solid fa-list-check"></i>Inventario</a>
-                <button onclick="cambiarTema()" class="menu-btn"><i class="fa-solid fa-palette"></i> Cambiar Tema</button>
+                                <button onclick="cambiarTema()" class="menu-btn"><i class="fa-solid fa-palette"></i> Cambiar Tema</button>
+                <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
+                    <i class="fa-solid fa-headset"></i>Soporte</a>
                 <button onclick="confirmarSalida()" class="menu-btn logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
             </nav>
         </aside>
