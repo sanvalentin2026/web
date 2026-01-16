@@ -203,12 +203,12 @@ function mostrarRanking(usuariosObj) {
         let insignias = "";
         if (nombre === "Alexei Chaves") {
             insignias = `
-                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Soporte</span>
                 <span style="background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">DESARROLLADOR</span>
+                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Soporte</span>
             `;
         } else {
             insignias = `
-                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">VENDEDOR</span>
+                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">VENDEDOR/A</span>
             `;
         }
 

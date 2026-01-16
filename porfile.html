@@ -275,7 +275,7 @@ h2{
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     
     /* ESTO ES LO NUEVO: */
-    height: 480px;           /* Altura fija para que no crezca más */
+    height: 606px;           /* Altura fija para que no crezca más */
     display: flex;           /* Usamos flex para organizar el header y la lista */
     flex-direction: column;  /* Uno arriba del otro */
 }
@@ -353,6 +353,24 @@ h2{
         font-size: 0.9rem;
     }
 }
+.perfil-menu p {
+    color: var(--text-muted, #888); /* Color suave para que no compita con los botones */
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase; /* Estilo profesional tipo categoría */
+    letter-spacing: 1px;
+    margin: 1.5rem 0 0.5rem 0.5rem; /* Más espacio arriba para separar grupos */
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border, #333); /* Línea divisoria sutil */
+    width: 90%;
+}
+
+/* Ajuste para el primer título para que no tenga tanto espacio arriba */
+.perfil-menu p:first-child {
+    margin-top: 0.5rem;
+}
+
+/* Estilo base para los botones del menú (asegurando coherencia) */
     </style>
 </head>
 <body class="modo-oscuro">
@@ -385,7 +403,9 @@ h2{
             </div>
 
             <nav class="perfil-menu">
+                <p>Preferencias</p>
                                 <button onclick="cambiarTema()" class="menu-btn"><i class="fa-solid fa-palette"></i> Cambiar Tema</button>
+                                <p>Acciones</p>
                 <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
                     <i class="fa-solid fa-headset"></i>Soporte</a>
                 <button onclick="confirmarSalida()" class="menu-btn logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
