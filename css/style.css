@@ -1722,3 +1722,14 @@ input, textarea, select {
     filter: none !important;
     transform: none !important;
 }
+i.fa-solid {
+    /* Mejora el suavizado de bordes en navegadores basados en Webkit (Chrome/Safari) */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* Evita que el navegador intente optimizar la velocidad por encima de la calidad */
+    text-rendering: optimizeLegibility;
+    
+    /* Evita variaciones extrañas al transformar/escalar */
+    transform: translateZ(0);
+}
