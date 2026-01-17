@@ -1,4 +1,4 @@
-const VERSION_SISTEMA = '1.3.0';
+const VERSION_SISTEMA = '1.4.0 | SAE-1';
 
 const limpiarLocalStorageAntiguo = () => {
     const versionGuardada = localStorage.getItem('seenChangelogVersion');
@@ -15,14 +15,6 @@ const limpiarLocalStorageAntiguo = () => {
         });
 
         localStorage.setItem('seenChangelogVersion', VERSION_SISTEMA);
-        
-        Swal.fire({
-            title: 'Perfil Optimizado',
-            text: 'Se han limpiado los datos antiguos del sistema.',
-            icon: 'success',
-            timer: 2500,
-            showConfirmButton: false
-        });
     }
 };
 

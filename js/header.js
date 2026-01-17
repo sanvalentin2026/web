@@ -8,7 +8,7 @@ const aplicarTemaAlInicio = () => {
 
 // 2. EFECTO DE HEADER CON SCROLL
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 20) {
+    if (window.scrollY > 25) {
         header.classList.add('scrolled');
     } else {
         header.classList.remove('scrolled');

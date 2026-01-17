@@ -1,25 +1,5 @@
 // ==========================================
 
-// 🔐 CONFIGURACIÓN ÚNICA DE SUPABASE
-
-// ==========================================
-
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-
-
-const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
-
-const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
-
-
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-
-// ==========================================
-
 // 🎨 UTILIDAD DE TEMAS (Lectura de LocalStorage)
 
 // ==========================================
@@ -108,7 +88,7 @@ export async function validarSeguridadReal() {
 
         // CONSULTA DE VERDAD: Le preguntamos a la DB por ese ID
 
-        const { data, error } = await supabase
+        const { data, error } = await db
 
             .from("usuarios")
 
@@ -168,7 +148,7 @@ export const verificarSesion = async function() {
 
     try {
         const sesion = JSON.parse(sesionLocal);
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from("usuarios")
             .select("id, permisos")
             .eq("id", sesion.id)
@@ -261,7 +241,7 @@ window.register = async function() {
 
 
 
-    const { error } = await supabase.from("usuarios").insert({
+    const { error } = await db.from("usuarios").insert({
 
         username: user,
 
@@ -348,7 +328,7 @@ window.login = async function() {
         customClass: { popup: 'mi-borde-redondeado' },
     });
 
-    const { data, error } = await supabase
+    const { data, error } = await db
         .from("usuarios")
         .select("*")
         .eq("username", userInput)
@@ -452,7 +432,7 @@ if (localStorage.getItem("usuario")) {
 
         await verificarSesion();
 
-    }, 30000); // 30000ms = 30 segundos
+    }, 2000); // 30000ms = 30 segundos
 
 
 
@@ -460,7 +440,7 @@ if (localStorage.getItem("usuario")) {
 
     const sesion = JSON.parse(localStorage.getItem("usuario"));
 
-    supabase
+    db
 
         .channel('cambios-permisos')
 

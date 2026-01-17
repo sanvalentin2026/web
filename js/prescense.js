@@ -1,13 +1,7 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
-
-const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
 const FOTO_DEFAULT = "./imgs/usuario.png";
 
-const canal = supabase.channel('online-users', {
+const canal = db.channel('online-users', {
     config: { presence: { key: sesion.username } }
 });
 

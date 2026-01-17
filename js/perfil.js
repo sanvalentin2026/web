@@ -1,3 +1,15 @@
+import { verificarSesion } from './auth.js'; 
+
+    const init = async () => {
+      try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    };
+    init();
+
 const FOTO_DEFAULT = "./imgs/usuario.png";
 const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
 const fotoPersistente = localStorage.getItem("foto-perfil");

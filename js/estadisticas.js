@@ -1,10 +1,3 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
-
-const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
 //seguridad
 import { verificarSesion } from './auth.js'; 
 
@@ -94,7 +87,7 @@ function aplicarTema() {
 }
 
 async function procesarEstadisticas() {
-    const { data: pedidos, error } = await supabase
+    const { data: pedidos, error } = await db
         .from("pedidos")
         .select("producto, pagado, creado_por, created_at, detalles");
 
@@ -315,6 +308,6 @@ window.addEventListener('storage', (e) => {
     if (e.key === 'tema-usuario') aplicarTema();
 });
 
-supabase.channel('live')
+db.channel('live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, realtimeUpdate)
     .subscribe();

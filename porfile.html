@@ -354,7 +354,8 @@ h2{
     }
 }
 .perfil-menu p {
-    color: var(--text-muted, #888); /* Color suave para que no compita con los botones */
+    color: var(--text-muted, #888);
+    text-align: left; /* Color suave para que no compita con los botones */
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase; /* Estilo profesional tipo categoría */
@@ -403,9 +404,9 @@ h2{
             </div>
 
             <nav class="perfil-menu">
-                <p>Preferencias</p>
+                <p>• Preferencias</p>
                                 <button onclick="cambiarTema()" class="menu-btn"><i class="fa-solid fa-palette"></i> Cambiar Tema</button>
-                                <p>Acciones</p>
+                                <p>• Acciones</p>
                 <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
                     <i class="fa-solid fa-headset"></i>Soporte</a>
                 <button onclick="confirmarSalida()" class="menu-btn logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
@@ -421,7 +422,8 @@ h2{
                 </div>
         </section>
     </main>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script type="module" src="js/perfil.js"></script>
     <script type="module" src="js/prescense.js"></script>
 

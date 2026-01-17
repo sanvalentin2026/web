@@ -1,12 +1,3 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
-
-/* =========================
-   🔗 CONFIGURACIÓN SUPABASE
-========================= */
-const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 /* =========================
    📦 ESTADO GLOBAL Y DOM
 ========================= */
@@ -205,7 +196,7 @@ function formatFechaMobile(fechaStr) {
 ========================= */
 
 async function cargarPedidos(silencioso = false) {
-    const { data, error } = await supabase.from("pedidos").select("*").order("id", { ascending: true });
+    const { data, error } = await db.from("pedidos").select("*").order("id", { ascending: true });
     if (!error) {
         window.pedidosCache = data || [];
         aplicarFiltros();
@@ -326,7 +317,7 @@ dom.form.addEventListener("submit", async (e) => {
     const productoSeleccionado = dom.producto.value;
 
     // 1. Verificar Stock en Supabase
-    const { data: prodInfo, error: errorStock } = await supabase
+    const { data: prodInfo, error: errorStock } = await db
         .from("productos")
         .select("*")
         .eq("nombre", productoSeleccionado)
@@ -370,7 +361,7 @@ Swal.fire({
     };
 
     // 4. Insertar pedido y actualizar stock (si es físico)
-    const { error: errorInsert } = await supabase.from("pedidos").insert([nuevoPedido]);
+    const { error: errorInsert } = await db.from("pedidos").insert([nuevoPedido]);
 
     if (errorInsert) {
         ReproductorSonidos.play('error');
@@ -378,7 +369,7 @@ Swal.fire({
     } else {
         // Si el producto es físico, restamos 1 del stock
         if (prodInfo.tipo === 'fisico') {
-            await supabase
+            await db
                 .from("productos")
                 .update({ stock_disponible: prodInfo.stock_disponible - 1 })
                 .eq("nombre", productoSeleccionado);
@@ -445,7 +436,7 @@ window.togglePagado = async (id, estadoActual) => {
         customClass: { popup: 'mi-borde-redondeado'},
     });
 
-    const { error } = await supabase
+    const { error } = await db
         .from("pedidos")
         .update({ pagado: !estadoActual })
         .eq("id", id);
@@ -485,7 +476,7 @@ window.togglePagado = async (id, estadoActual) => {
 window.editarPedidoCompleto = async (pedidoId) => {
     const tema = obtenerTema();
 
-    const { data: p, error: errFetch } = await supabase
+    const { data: p, error: errFetch } = await db
         .from("pedidos")
         .select("*")
         .eq("id", pedidoId)
@@ -582,7 +573,7 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
         const sesion = JSON.parse(localStorage.getItem("usuario"));
         const usuarioNombre = sesion ? sesion.username : "Desconocido";
 
-        const { error } = await supabase
+        const { error } = await db
             .from("pedidos")
             .update({ ...camposNuevos, ultima_edicion_por: usuarioNombre })
             .eq("id", pedidoId);
@@ -640,7 +631,7 @@ window.eliminarPedido = async (id) => {
             customClass: { popup: 'mi-borde-redondeado'},
         });
 
-        const { error } = await supabase.from("pedidos").delete().eq("id", id);
+        const { error } = await db.from("pedidos").delete().eq("id", id);
 
         if (!error) {
             // 3. Confirmación final y sonido
@@ -850,7 +841,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =========================
    🔴 REALTIME & INIT
 ========================= */
-supabase
+db
   .channel('pedidos-db')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, (payload) => {
       console.log("Cambio detectado, el orden se mantubo.");
@@ -881,7 +872,7 @@ const tema = obtenerTema();
 // Colores del tema para las alertas
 
 async function escucharMantenimiento() {
-    supabase
+    db
         .channel('mantenimiento-realtime')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sistema_control' }, payload => {
             procesarEstadoMantenimiento(payload.new.en_mantenimiento, payload.new.mensaje);
@@ -890,7 +881,7 @@ async function escucharMantenimiento() {
 }
 
 async function verificarBloqueoMantenimiento() {
-    const { data } = await supabase.from('sistema_control').select('en_mantenimiento, mensaje').eq('id', 1).maybeSingle();
+    const { data } = await db.from('sistema_control').select('en_mantenimiento, mensaje').eq('id', 1).maybeSingle();
     if (data) procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
 }
 
@@ -1079,7 +1070,7 @@ async function escucharNotificaciones() {
     const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
     const miUsuario = (sesion.username || "").trim().toLowerCase();
 
-    supabase
+    db
         .channel('canal-notificaciones')
         .on('postgres_changes', { 
             event: 'INSERT', 

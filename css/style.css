@@ -1733,3 +1733,6 @@ i.fa-solid {
     /* Evita variaciones extrañas al transformar/escalar */
     transform: translateZ(0);
 }
+.table-container {
+    min-height: 1000px; /* Ajusta según tu diseño */
+}
