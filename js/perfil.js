@@ -41,6 +41,22 @@ const ReproductorSonidos = {
 };
 ReproductorSonidos.init();
 
+// Pequeñas utilidades locales para evitar XSS
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function validarCampo(valor, maxLen = 200) {
+    if (!valor) return '';
+    const v = String(valor).trim();
+    return v.length > maxLen ? v.slice(0, maxLen) : v;
+}
 function inicializarPerfil() {
     if (!sesion.username) {
         window.location.replace("login.html");
@@ -52,14 +68,22 @@ function inicializarPerfil() {
     
     const contenedor = document.getElementById('contenedorInsignias');
     if (contenedor) {
-        let html = '';
-        // Lógica estricta de insignias
-        if (sesion.username === "Alexei Chaves") {
-            html = '<span class="insignia dev">Desarrollador</span><span class="insignia admin">Soporte</span>';
+        contenedor.innerHTML = '';
+        if ((sesion.username || '').trim() === "Alexei Chaves") {
+            const s1 = document.createElement('span');
+            s1.className = 'insignia dev';
+            s1.textContent = 'Desarrollador';
+            const s2 = document.createElement('span');
+            s2.className = 'insignia admin';
+            s2.textContent = 'Soporte';
+            contenedor.appendChild(s1);
+            contenedor.appendChild(s2);
         } else {
-            html = '<span class="insignia vendedor">Vendedor/a</span>';
+            const s = document.createElement('span');
+            s.className = 'insignia vendedor';
+            s.textContent = 'Vendedor/a';
+            contenedor.appendChild(s);
         }
-        contenedor.innerHTML = html;
     }
 }
 
@@ -116,34 +140,74 @@ window.verDetalleUsuario = function(username, foto, hora) {
     const esClaro = localStorage.getItem('tema-usuario') === 'modo-claro';
     const colorTexto = esClaro ? '#1c1c1e' : '#ffffff';
 
-    let insigniasModal = (username === "Alexei Chaves") 
-        ? '<span class="insignia dev">Desarrollador</span><span class="insignia admin">Soporte</span>'
-        : '<span class="insignia vendedor">Vendedor/a</span>';
+    const safeName = validarCampo(username, 100);
+    const safeHora = validarCampo(hora, 50);
+    const safeFoto = (typeof foto === 'string' && (foto.startsWith('data:') || foto.startsWith('http') || foto.startsWith('./') || foto.startsWith('/imgs'))) ? foto : FOTO_DEFAULT;
 
     Swal.fire({
-        html: `
-            <div style="padding: 10px; text-align: center;">
-                <img src="${foto}" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #ff375f; margin-bottom:15px; box-shadow: 0 4px 15px rgba(255, 55, 95, 0.3);">
-                <div style="font-size:1.5rem; font-weight:bold; color: ${colorTexto}; mb: 10px;">${username}</div>
-                <div style="display:flex; justify-content:center; gap:8px; margin-top:10px;">${insigniasModal}</div>
-                <div style="margin-top: 15px; font-size: 0.85rem; color: ${esClaro ? '#636366' : '#8e8e93'};">
-                    <i class="fa-regular fa-clock"></i> Última actividad: ${hora}
-                </div>
-            </div>
-        `,
+        html: '<div id="swal-perfil-placeholder"></div>',
         showConfirmButton: false,
         showCloseButton: true,
         background: esClaro ? '#ffffff' : '#1c1c1e',
         color: colorTexto,
         didOpen: (popup) => {
             popup.style.borderRadius = '20px';
-            
-            // --- ESTO ELIMINA EL CUADRADO DE LA X ---
-            const closeButton = popup.querySelector('.swal2-close');
-            if (closeButton) {
-                closeButton.style.boxShadow = 'none'; // Quita la sombra de enfoque
-                closeButton.style.outline = 'none';    // Quita el borde azul/negro
+            const container = Swal.getHtmlContainer();
+
+            const wrapper = document.createElement('div');
+            wrapper.style.padding = '10px';
+            wrapper.style.textAlign = 'center';
+
+            const img = document.createElement('img');
+            img.src = safeFoto;
+            img.style.width = '120px';
+            img.style.height = '120px';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            img.style.border = '3px solid #ff375f';
+            img.style.marginBottom = '15px';
+            img.style.boxShadow = '0 4px 15px rgba(255, 55, 95, 0.3)';
+            img.loading = 'lazy';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.style.fontSize = '1.5rem';
+            nameDiv.style.fontWeight = 'bold';
+            nameDiv.style.color = colorTexto;
+            nameDiv.textContent = safeName;
+
+            const insigniasWrap = document.createElement('div');
+            insigniasWrap.style.display = 'flex';
+            insigniasWrap.style.justifyContent = 'center';
+            insigniasWrap.style.gap = '8px';
+            insigniasWrap.style.marginTop = '10px';
+
+            if (safeName === 'Alexei Chaves') {
+                const d = document.createElement('span'); d.className = 'insignia dev'; d.textContent = 'Desarrollador';
+                const a = document.createElement('span'); a.className = 'insignia admin'; a.textContent = 'Soporte';
+                insigniasWrap.appendChild(d); insigniasWrap.appendChild(a);
+            } else {
+                const v = document.createElement('span'); v.className = 'insignia vendedor'; v.textContent = 'Vendedor/a';
+                insigniasWrap.appendChild(v);
             }
+
+            const lastDiv = document.createElement('div');
+            lastDiv.style.marginTop = '15px';
+            lastDiv.style.fontSize = '0.85rem';
+            lastDiv.style.color = esClaro ? '#636366' : '#8e8e93';
+            const icon = document.createElement('i');
+            icon.className = 'fa-regular fa-clock';
+            lastDiv.appendChild(icon);
+            lastDiv.appendChild(document.createTextNode(' Última actividad: ' + escapeHTML(safeHora)));
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(nameDiv);
+            wrapper.appendChild(insigniasWrap);
+            wrapper.appendChild(lastDiv);
+
+            if (container) container.appendChild(wrapper);
+
+            const closeButton = popup.querySelector('.swal2-close');
+            if (closeButton) { closeButton.style.boxShadow = 'none'; closeButton.style.outline = 'none'; }
         }
     });
 };

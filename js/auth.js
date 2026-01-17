@@ -426,13 +426,23 @@ window.logout = function() {
 
 if (localStorage.getItem("usuario")) {
 
-    // Opción A: Revisar cada 30 segundos (Muy estable y no consume recursos)
-
-    setInterval(async () => {
-
-        await verificarSesion();
-
-    }, 2000); // 30000ms = 30 segundos
+    // Opción A: Verificación periódica reducida para mejorar estabilidad de red
+    let sesionInterval = null;
+    function startSesionWatcher() {
+        if (sesionInterval) return;
+        sesionInterval = setInterval(async () => {
+            if (document.visibilityState === 'visible') await verificarSesion();
+        }, 30000); // 30s
+    }
+    function stopSesionWatcher() {
+        if (sesionInterval) { clearInterval(sesionInterval); sesionInterval = null; }
+    }
+    // Arrancamos el watcher y lo disparamos al foco/visibilidad para respuesta rápida
+    startSesionWatcher();
+    window.addEventListener('focus', () => { verificarSesion(); startSesionWatcher(); });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') stopSesionWatcher(); else startSesionWatcher();
+    });
 
 
 

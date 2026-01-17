@@ -51,6 +51,27 @@ const ReproductorSonidos = {
 };
 ReproductorSonidos.init();
 
+/* =========================
+   🔐 UTILIDADES DE SEGURIDAD
+   - escapeHTML: evita XSS al insertar texto en HTML
+   - validarCampo: límites simples para proteger la DB
+========================= */
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function validarCampo(valor, maxLen = 500) {
+    if (!valor) return '';
+    const v = String(valor).trim();
+    return v.length > maxLen ? v.slice(0, maxLen) : v;
+}
+
 
 // TUTORIAL
 
@@ -168,11 +189,20 @@ function inicializarSecciones() {
     const selects = [dom.seccion, dom.seccion_receptor, dom.filtroSeccion];
     selects.forEach(select => {
         if (!select) return;
-        select.innerHTML = `<option value="">${select.id === 'filtroSeccion' ? 'Filtrar busqueda por una seccion' : 'Seleccione una seccion'}</option>`;
+        // Limpiar y crear opciones de forma segura
+        while (select.firstChild) select.removeChild(select.firstChild);
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = select.id === 'filtroSeccion' ? 'Filtrar busqueda por una seccion' : 'Seleccione una seccion';
+        select.appendChild(placeholder);
+
         for (let i = 7; i <= 11; i++) {
             for (let j = 1; j <= 4; j++) {
                 let v = `${i}-${j}`;
-                select.innerHTML += `<option value="${v}">${v}</option>`;
+                const opt = document.createElement('option');
+                opt.value = v;
+                opt.textContent = v;
+                select.appendChild(opt);
             }
         }
     });
@@ -229,19 +259,22 @@ function renderizarTabla() {
     const tabla = dom.body.closest('table');
     const thead = tabla ? tabla.querySelector("thead") : null;
     dom.body.innerHTML = "";
-    
+
     // CASO SIN PEDIDOS
     if (!pedidosFiltrados || pedidosFiltrados.length === 0) {
         if (thead) thead.style.display = "none";
         const rowVacia = document.createElement("tr");
-        rowVacia.className = "fila-vacia-centrada"; // Clase para control total
-        rowVacia.innerHTML = `
-            <td colspan="100%" data-label="">
-                <div class="contenedor-vacio-dinamico">
-                    <h3>No se encontraron pedidos</h3>
-                </div>
-            </td>
-        `;
+        rowVacia.className = "fila-vacia-centrada";
+        const td = document.createElement('td');
+        td.setAttribute('colspan', '100%');
+        td.setAttribute('data-label', '');
+        const cont = document.createElement('div');
+        cont.className = 'contenedor-vacio-dinamico';
+        const h3 = document.createElement('h3');
+        h3.textContent = 'No se encontraron pedidos';
+        cont.appendChild(h3);
+        td.appendChild(cont);
+        rowVacia.appendChild(td);
         dom.body.appendChild(rowVacia);
         if (typeof renderizarPaginacion === "function") renderizarPaginacion();
         return;
@@ -252,32 +285,93 @@ function renderizarTabla() {
     const inicio = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
     const items = pedidosFiltrados.slice(inicio, inicio + PEDIDOS_POR_PAGINA);
 
+    const fragment = document.createDocumentFragment();
     items.forEach(p => {
-        const detallesEscapados = (p.detalles || "").replace(/'/g, "\\'");
         const fechaTexto = p.created_at ? formatFechaMobile(p.created_at) : 'Sin fecha';
 
         const row = document.createElement("tr");
-        row.innerHTML = `
-            <td data-label="ID de pedido:">${p.id}</td>
-            <td data-label="De:">${p.nombre_comprador} - (${p.seccion_comprador})</td>
-            <td data-label="Para:">${p.nombre_receptor} - (${p.seccion_receptor})</td>
-            <td data-label="Producto:">${p.producto}</td>
-            <td data-label="Detalles:">${p.detalles || " - Sin detalles"}</td>
-            <td data-label="Estado de pago:">${p.pagado ? "✅" : "❌"}</td>
-            <td data-label="Acciones:" class="celda-acciones">
-                <div class="bloque-fecha-card">
-                    <span class="label-rojo">Fecha y hora:</span>
-                    <span class="texto-fecha">${fechaTexto}</span>
-                </div>
-                <div class="group-btns">
-                    <button class="btn-pago" onclick="togglePagado(${p.id}, ${p.pagado})">Pago</button>
-                    <button class="btn-edit" onclick="editarPedidoCompleto(${p.id}, '${detallesEscapados}')">Editar</button>
-                    <button class="btn-del" onclick="eliminarPedido(${p.id})">Eliminar</button>
-                </div>
-            </td>
-        `;
-        dom.body.appendChild(row);
+
+        // ID
+        const tdId = document.createElement('td');
+        tdId.setAttribute('data-label', 'ID de pedido:');
+        tdId.textContent = p.id;
+        row.appendChild(tdId);
+
+        // De
+        const tdDe = document.createElement('td');
+        tdDe.setAttribute('data-label', 'De:');
+        tdDe.textContent = `${validarCampo(p.nombre_comprador,100)} - (${validarCampo(p.seccion_comprador,20)})`;
+        row.appendChild(tdDe);
+
+        // Para
+        const tdPara = document.createElement('td');
+        tdPara.setAttribute('data-label', 'Para:');
+        tdPara.textContent = `${validarCampo(p.nombre_receptor,100)} - (${validarCampo(p.seccion_receptor,20)})`;
+        row.appendChild(tdPara);
+
+        // Producto
+        const tdProd = document.createElement('td');
+        tdProd.setAttribute('data-label', 'Producto:');
+        tdProd.textContent = validarCampo(p.producto,200);
+        row.appendChild(tdProd);
+
+        // Detalles (sanitize)
+        const tdDet = document.createElement('td');
+        tdDet.setAttribute('data-label', 'Detalles:');
+        tdDet.textContent = validarCampo(p.detalles || ' - Sin detalles', 500);
+        row.appendChild(tdDet);
+
+        // Pagado
+        const tdPag = document.createElement('td');
+        tdPag.setAttribute('data-label', 'Estado de pago:');
+        tdPag.textContent = p.pagado ? '✅' : '❌';
+        row.appendChild(tdPag);
+
+        // Acciones
+        const tdAcc = document.createElement('td');
+        tdAcc.setAttribute('data-label', 'Acciones:');
+        tdAcc.className = 'celda-acciones';
+
+        const bloqueFecha = document.createElement('div');
+        bloqueFecha.className = 'bloque-fecha-card';
+        const label = document.createElement('span');
+        label.className = 'label-rojo';
+        label.textContent = 'Fecha y hora:';
+        const spanFecha = document.createElement('span');
+        spanFecha.className = 'texto-fecha';
+        spanFecha.textContent = fechaTexto;
+        bloqueFecha.appendChild(label);
+        bloqueFecha.appendChild(spanFecha);
+
+        const botones = document.createElement('div');
+        botones.className = 'group-btns';
+
+        const btnPago = document.createElement('button');
+        btnPago.className = 'btn-pago';
+        btnPago.textContent = 'Pago';
+        btnPago.addEventListener('click', () => { try { window.togglePagado(p.id, p.pagado); } catch (e) { console.error(e); } });
+
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'btn-edit';
+        btnEdit.textContent = 'Editar';
+        btnEdit.addEventListener('click', () => { try { window.editarPedidoCompleto(p.id); } catch (e) { console.error(e); } });
+
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn-del';
+        btnDel.textContent = 'Eliminar';
+        btnDel.addEventListener('click', () => { try { window.eliminarPedido(p.id); } catch (e) { console.error(e); } });
+
+        botones.appendChild(btnPago);
+        botones.appendChild(btnEdit);
+        botones.appendChild(btnDel);
+
+        tdAcc.appendChild(bloqueFecha);
+        tdAcc.appendChild(botones);
+        row.appendChild(tdAcc);
+
+        fragment.appendChild(row);
     });
+    dom.body.appendChild(fragment);
     renderizarPaginacion();
 }
 function renderizarPaginacion() {
@@ -312,9 +406,20 @@ dom.form.addEventListener("submit", async (e) => {
         customClass: { popup: 'mi-borde-redondeado' }, 
     });
 
-    const sesion = JSON.parse(localStorage.getItem("usuario"));
+    // Sanitizar y validar campos cliente-side (no sustituye validación server-side)
+    const nombreVal = validarCampo(dom.nombre.value, 100);
+    const receptorVal = validarCampo(dom.receptor.value, 100);
+    const productoSeleccionado = validarCampo(dom.producto.value, 200);
+    const detallesVal = validarCampo(dom.detalles.value, 500);
+
+    if (!nombreVal || !receptorVal || !productoSeleccionado) {
+        ReproductorSonidos.play('notificacion');
+        Swal.fire({ icon: 'warning', text: 'Complete los campos requeridos', toast:true, position:'top', showConfirmButton:false, timer:2000, background: tema.bg, color: tema.txt, customClass: { popup: 'mi-borde-redondeado' } });
+        return;
+    }
+
+    const sesion = JSON.parse(localStorage.getItem("usuario") || 'null');
     const usuario = sesion ? sesion.username : "Desconocido";
-    const productoSeleccionado = dom.producto.value;
 
     // 1. Verificar Stock en Supabase
     const { data: prodInfo, error: errorStock } = await db
@@ -349,12 +454,12 @@ Swal.fire({
 
     // 3. Preparar el pedido
     const nuevoPedido = {
-        nombre_comprador: dom.nombre.value.trim(),
+        nombre_comprador: nombreVal,
         seccion_comprador: dom.seccion.value,
-        nombre_receptor: dom.receptor.value.trim(),
+        nombre_receptor: receptorVal,
         seccion_receptor: dom.seccion_receptor.value,
         producto: productoSeleccionado,
-        detalles: dom.detalles.value.trim(),
+        detalles: detallesVal,
         pagado: false,
         creado_por: usuario,
         ultima_edicion_por: usuario
@@ -516,27 +621,27 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
         background: tema.bg,
         color: tema.txt,
         html: `
-<div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
+    <div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
     
-    <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
-    <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${p.nombre_comprador || ''}">
-    <select id="swal-seccion-c" class="swal2-input">
-        ${opcionesSeccionC}
-    </select>
+        <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
+        <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${escapeHTML(validarCampo(p.nombre_comprador || '',100))}">
+        <select id="swal-seccion-c" class="swal2-input">
+            ${opcionesSeccionC}
+        </select>
 
-    <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
-    <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${p.nombre_receptor || ''}">
-    <select id="swal-seccion-r" class="swal2-input">
-        ${opcionesSeccionR}
-    </select>
+        <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
+        <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${escapeHTML(validarCampo(p.nombre_receptor || '',100))}">
+        <select id="swal-seccion-r" class="swal2-input">
+            ${opcionesSeccionR}
+        </select>
 
-    <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y DETALLES:</label>
-    <select id="swal-producto" class="swal2-input">
-        ${opcionesProductos} </select>
+        <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y DETALLES:</label>
+        <select id="swal-producto" class="swal2-input">
+            ${opcionesProductos} </select>
     
-    <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles...">${p.detalles || ''}</textarea>
-</div>
-`,
+        <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles...">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
+    </div>
+    `,
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         confirmButtonText: 'Guardar',
@@ -601,8 +706,8 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
 
 window.eliminarPedido = async (id) => {
     const tema = obtenerTema();
-    
-    // 1. Preguntar primero si está seguro
+    const sesion = JSON.parse(localStorage.getItem("usuario"));
+
     const res = await Swal.fire({
         title: '¿Eliminar pedido?',
         text: "Esto no se puede deshacer.",
@@ -618,28 +723,57 @@ window.eliminarPedido = async (id) => {
     });
 
     if (res.isConfirmed) {
-        // 2. Mostrar carga mientras borra en la DB
         Swal.fire({
-            toast:true,
-            showConfirmButton:false,
-            title: 'Procesando...',
+            toast: true,
+            showConfirmButton: false,
+            title: 'Verificando credenciales...',
             background: tema.bg,
             color: tema.txt,
-
             didOpen: () => Swal.showLoading(),
             position: 'top',
             customClass: { popup: 'mi-borde-redondeado'},
         });
 
+        // 1. VALIDACIÓN REAL: Consultamos la DB usando el `id` de la sesión
+        // No confiar en password o valores proporcionados desde localStorage
+        if (!sesion || !sesion.id) {
+            ReproductorSonidos.play('notificacion');
+            Swal.fire({ toast: true, icon: 'error', title: 'Acceso Denegado', text: 'Sesión inválida.', showConfirmButton: false, timer: 3000, position: 'top', background: tema.bg, color: tema.txt, customClass: { popup: 'mi-borde-redondeado'}, });
+            return;
+        }
+
+        const { data: adminReal, error: errorAuth } = await db
+            .from("usuarios")
+            .select("permisos")
+            .eq("id", sesion.id)
+            .single();
+
+        if (errorAuth || !adminReal || adminReal.permisos !== true) {
+            ReproductorSonidos.play('notificacion');
+            Swal.fire({
+                toast: true,
+                icon: 'error',
+                title: 'Acceso Denegado',
+                text: 'No tienes permisos reales en la base de datos.',
+                showConfirmButton: false,
+                timer: 3000,
+                position: 'top',
+                background: tema.bg,
+                color: tema.txt,
+                customClass: { popup: 'mi-borde-redondeado'},
+            });
+            return;
+        }
+
+        // 2. EJECUCIÓN DEL BORRADO (Solo si pasó el check de arriba)
         const { error } = await db.from("pedidos").delete().eq("id", id);
 
         if (!error) {
-            // 3. Confirmación final y sonido
             ReproductorSonidos.play('eliminado');
             Swal.fire({
                 toast: true,
                 icon: 'success',
-                title: 'Pedido eliminado', // Corregido con backticks ``
+                title: 'Pedido eliminado',
                 timer: 1500,
                 showConfirmButton: false,
                 background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#ffffff',
@@ -647,17 +781,19 @@ window.eliminarPedido = async (id) => {
                 position: 'top',
                 customClass: { popup: 'mi-borde-redondeado'},
             });
+            if (window.cargarPedidos) window.cargarPedidos();
         } else {
             ReproductorSonidos.play('notificacion');
             Swal.fire({
-                toast:true,
+                toast: true,
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo eliminar el pedido: ' + error.message,
+                text: 'No se pudo eliminar: ' + error.message,
                 showConfirmButton: false,
+                timer: 2500,
+                position: 'top',
                 background: tema.bg,
                 color: tema.txt,
-                position: 'top',
                 customClass: { popup: 'mi-borde-redondeado'},
             });
         }
@@ -755,11 +891,11 @@ window.descargarPDF = function() {
                 <tbody>
                     ${datos.map(p => `
                         <tr>
-                            <td>${p.id}</td>
-                            <td>${p.nombre_comprador}</td>
-                            <td>${p.nombre_receptor}</td>
-                            <td>${p.producto}</td>
-                            <td>${p.detalles || '- Sin detalles'}</td>
+                            <td>${escapeHTML(validarCampo(p.id,20))}</td>
+                            <td>${escapeHTML(validarCampo(p.nombre_comprador || '-',100))}</td>
+                            <td>${escapeHTML(validarCampo(p.nombre_receptor || '-',100))}</td>
+                            <td>${escapeHTML(validarCampo(p.producto || '-',200))}</td>
+                            <td>${escapeHTML(validarCampo(p.detalles || '- Sin detalles',500))}</td>
                             <td style="font-weight:bold; color: ${p.pagado ? '#16a34a' : '#dc2626'}">
                                 ${p.pagado ? 'PAGADO' : 'PENDIENTE'}
                             </td>
@@ -852,12 +988,21 @@ db
 
 dom.buscador.addEventListener("input", () => { paginaActual = 1; aplicarFiltros(); });
 dom.filtroSeccion.addEventListener("change", () => { paginaActual = 1; aplicarFiltros(); });
+// Mejora: usamos debounce para evitar recalculos frecuentes mientras el usuario escribe
+if (window.utils && dom.buscador) {
+    dom.buscador.removeEventListener('input', () => {});
+    dom.buscador.addEventListener('input', window.utils.debounce(() => { paginaActual = 1; aplicarFiltros(); }, 250));
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     inicializarSecciones();
-    cargarPedidos();
-    verificarBloqueoMantenimiento();
-    escucharMantenimiento();
+      // Cambio detectado; uso debounce para evitar ráfagas
+      if (window.utils && window.utils.debounce) {
+          if (!window.__debouncedCargarPedidos) window.__debouncedCargarPedidos = window.utils.debounce(cargarPedidos, 400);
+          window.__debouncedCargarPedidos(true);
+      } else {
+          cargarPedidos(true);
+      }
     setTimeout(() => {
         iniciarTutorial();
     }, 1500);

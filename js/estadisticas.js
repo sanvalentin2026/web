@@ -29,6 +29,23 @@ const dom = {
     root: document.documentElement
 };
 
+// Seguridad local: evitar XSS cuando se construyen etiquetas
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function validarCampo(valor, maxLen = 200) {
+    if (!valor) return '';
+    const v = String(valor).trim();
+    return v.length > maxLen ? v.slice(0, maxLen) : v;
+}
+
 function obtenerMultiplicador(detalles) {
     if (!detalles) return 1;
     const texto = detalles.toLowerCase().trim();
@@ -192,26 +209,40 @@ function mostrarRanking(usuariosObj) {
     top3.forEach(([nombre, cantidad], index) => {
         const div = document.createElement('div');
         div.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;";
-        
-        let insignias = "";
+
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.alignItems = 'center';
+        left.style.flexWrap = 'wrap';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.style.fontWeight = '500';
+        titleSpan.textContent = `${index + 1}. ${validarCampo(nombre, 80)} - `;
+
+        const insigniasDiv = document.createElement('div');
+        insigniasDiv.style.display = 'flex';
+        insigniasDiv.style.gap = '2px';
+        insigniasDiv.style.alignItems = 'center';
+
         if (nombre === "Alexei Chaves") {
-            insignias = `
-                <span style="background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">DESARROLLADOR</span>
-                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Soporte</span>
-            `;
+            const s1 = document.createElement('span'); s1.style.cssText = 'background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;'; s1.textContent = 'DESARROLLADOR';
+            const s2 = document.createElement('span'); s2.style.cssText = 'background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;'; s2.textContent = 'Soporte';
+            insigniasDiv.appendChild(s1); insigniasDiv.appendChild(s2);
         } else {
-            insignias = `
-                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">VENDEDOR/A</span>
-            `;
+            const s = document.createElement('span'); s.style.cssText = 'background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;'; s.textContent = 'VENDEDOR/A';
+            insigniasDiv.appendChild(s);
         }
 
-        div.innerHTML = `
-            <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                <span style="font-weight: 500;">${index + 1}. ${nombre} - </span>
-                <div style="display: flex; gap: 2px; align-items: center;">${insignias}</div>
-            </div>
-            <span style="font-weight: bold; color: var(--primary);">${cantidad} pedidos</span>
-        `;
+        left.appendChild(titleSpan);
+        left.appendChild(insigniasDiv);
+
+        const right = document.createElement('span');
+        right.style.fontWeight = 'bold';
+        right.style.color = 'var(--primary)';
+        right.textContent = `${cantidad} pedidos`;
+
+        div.appendChild(left);
+        div.appendChild(right);
         fragment.appendChild(div);
     });
 
@@ -226,71 +257,78 @@ function renderizarGrafico(datosGanancias, datosPedidos) {
     const colorTexto = esOscuro ? '#a1a1a6' : '#666';
     const colorLineas = esOscuro ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
 
-    if (chartVentas) {
-        chartVentas.data.datasets[0].data = datosGanancias;
-        chartVentas.data.datasets[1].data = datosPedidos;
-        chartVentas.update('active');
-        return;
-    }
+    const crearOModificar = () => {
+        if (chartVentas) {
+            chartVentas.data.datasets[0].data = datosGanancias;
+            chartVentas.data.datasets[1].data = datosPedidos;
+            chartVentas.update('active');
+            return;
+        }
 
-    chartVentas = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
-            datasets: [
-                {
-                    label: 'Ganancias (₡)',
-                    data: datosGanancias,
-                    backgroundColor: '#ff375f',
-                    borderRadius: 5,
-                    yAxisID: 'y' // Usa el eje izquierdo
-                },
-                {
-                    label: 'Cant. Pedidos',
-                    data: datosPedidos,
-                    backgroundColor: '#007aff',
-                    borderRadius: 5,
-                    yAxisID: 'y1' // Usa el eje derecho independiente
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: colorTexto } }
-            },
-            scales: {
-                y: { // EJE IZQUIERDO (COLONES)
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    beginAtZero: true,
-                    ticks: { 
-                        color: colorTexto,
-                        callback: v => '₡' + v.toLocaleString() 
+        chartVentas = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+                datasets: [
+                    {
+                        label: 'Ganancias (₡)',
+                        data: datosGanancias,
+                        backgroundColor: '#ff375f',
+                        borderRadius: 5,
+                        yAxisID: 'y'
                     },
-                    grid: { color: colorLineas }
-                },
-                y1: { // EJE DERECHO (CANTIDADES)
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    beginAtZero: true,
-                    // Esto evita que las líneas de cuadrícula se crucen y se vea feo
-                    grid: { drawOnChartArea: false }, 
-                    ticks: { 
-                        color: '#007aff', // Color azul para identificarlo con su barra
-                        stepSize: 1 
+                    {
+                        label: 'Cant. Pedidos',
+                        data: datosPedidos,
+                        backgroundColor: '#007aff',
+                        borderRadius: 5,
+                        yAxisID: 'y1'
                     }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: colorTexto } }
                 },
-                x: { 
-                    ticks: { color: colorTexto },
-                    grid: { display: false }
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        ticks: {
+                            color: colorTexto,
+                            callback: v => '₡' + v.toLocaleString()
+                        },
+                        grid: { color: colorLineas }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false },
+                        ticks: {
+                            color: '#007aff',
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        ticks: { color: colorTexto },
+                        grid: { display: false }
+                    }
                 }
             }
-        }
-    });
+        });
+    };
+
+    if (window.utils && window.utils.runIdle) {
+        window.utils.runIdle(crearOModificar);
+    } else {
+        crearOModificar();
+    }
 }
 
 let debounceTimer;

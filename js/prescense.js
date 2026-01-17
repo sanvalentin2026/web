@@ -1,6 +1,12 @@
 const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
 const FOTO_DEFAULT = "./imgs/usuario.png";
 
+function validarCampo(valor, maxLen = 200) {
+    if (!valor) return '';
+    const v = String(valor).trim();
+    return v.length > maxLen ? v.slice(0, maxLen) : v;
+}
+
 const canal = db.channel('online-users', {
     config: { presence: { key: sesion.username } }
 });
@@ -12,19 +18,29 @@ async function reportarPresencia() {
     if (!sesion.username) return;
     const fotoParaTrack = localStorage.getItem("foto-perfil") || sesion.foto || FOTO_DEFAULT;
     
-    // Convertimos la URL a minúsculas para evitar errores
+    // Mejor detección de página actual
     const path = window.location.pathname.toLowerCase();
-
-    // Detección mejorada
+    const page = path.replace(/^\/+|\/+$/g, ''); // quita / inicial/final
     let paginaActual = 'Navegando';
-    if (path.includes('profile.') || path.includes('perfil')) {
-        paginaActual = 'En Perfil';
-    } else if (path.includes('index.') || path === '/' || path.endsWith('.html') === false) {
+    if (page === '' || page === 'index.html') {
         paginaActual = 'En Inicio';
-    } else if (path.includes('stats') || path.includes('estadistica')) {
+    } else if (page === 'login.html') {
+        paginaActual = 'En Login';
+    } else if (page === 'register.html') {
+        paginaActual = 'En Registro';
+    } else if (page === 'porfile.html' || page === 'perfil.html' || page.includes('perfil') || page.includes('profile')) {
+        paginaActual = 'En Perfil';
+    } else if (page === 'stats.html' || page.includes('estadistica') || page.includes('stats')) {
         paginaActual = 'En Estadísticas';
-    } else if (path.includes('reportar') || path.includes('pedido')) {
+    } else if (page === 'stock.html') {
+        paginaActual = 'En Inventario';
+    } else if (page === 'reportar.html' || page.includes('reportar')) {
         paginaActual = 'En Reportes';
+    } else if (page === 'mantenimiento.html') {
+        paginaActual = 'En Mantenimiento';
+    } else if (page.endsWith('.html')) {
+        // Si es otra página html, muestra el nombre base
+        paginaActual = 'En ' + page.replace('.html','').replace(/\b\w/g, l => l.toUpperCase());
     }
 
     await canal.track({
@@ -48,7 +64,7 @@ canal.on('presence', { event: 'sync' }, () => {
     const usuariosActivos = new Map();
     Object.keys(estadoReal).forEach(userKey => {
         const info = estadoReal[userKey][0];
-        if (info.username) usuariosActivos.set(info.username, info);
+        if (info && info.username) usuariosActivos.set(info.username, info);
     });
 
     // 2. Actualizar el buffer: Si el usuario está activo, lo guardamos/actualizamos
@@ -62,7 +78,6 @@ canal.on('presence', { event: 'sync' }, () => {
     // 3. Revisar quiénes estaban en el buffer pero ya no están en Supabase (salida detectada)
     usuariosBuffer.forEach((info, nombre) => {
         if (!usuariosActivos.has(nombre) && !info.timeout) {
-            // Le damos 5 segundos de "vida extra" antes de borrarlo
             const timeout = setTimeout(() => {
                 usuariosBuffer.delete(nombre);
                 dibujarHTML(contenedor);
@@ -77,25 +92,38 @@ canal.on('presence', { event: 'sync' }, () => {
 });
 
 function dibujarHTML(contenedor) {
-    contenedor.innerHTML = "";
+    // Limpiar de forma segura
+    while (contenedor.firstChild) contenedor.removeChild(contenedor.firstChild);
+
     usuariosBuffer.forEach((info, nombre) => {
         const hora = info.conectado_el ? new Date(info.conectado_el).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
         const foto = info.foto || FOTO_DEFAULT;
-        
-        // Usamos info.estado_web que es lo que envías en canal.track
-        // Si por alguna razón no existe, ponemos 'En línea' por defecto
         const ubicacionActual = info.estado_web || 'En línea';
 
-        contenedor.innerHTML += `
-            <div class="usuario-item" onclick="window.verDetalleUsuario ? verDetalleUsuario('${nombre}', '${foto}', '${hora}') : null">
-                <div class="punto-estado online"></div>
-                <div class="detalles-user">
-                    <span class="nombre">${nombre}</span>
-                    <span class="conexion">${ubicacionActual}</span>
-                </div>
-                <img src="${foto}" style="width: 35px; height: 35px; border-radius: 50%; margin-left: auto; object-fit: cover; border: 2px solid var(--primary);">
-            </div>
-        `;
+        const item = document.createElement('div');
+        item.className = 'usuario-item';
+        item.tabIndex = 0;
+        item.addEventListener('click', () => { if (window.verDetalleUsuario) window.verDetalleUsuario(nombre, foto, hora); });
+
+        const punto = document.createElement('div');
+        punto.className = 'punto-estado online';
+
+        const detalles = document.createElement('div');
+        detalles.className = 'detalles-user';
+        const spanNombre = document.createElement('span'); spanNombre.className = 'nombre'; spanNombre.textContent = validarCampo(nombre, 60);
+        const spanConexion = document.createElement('span'); spanConexion.className = 'conexion'; spanConexion.textContent = validarCampo(ubicacionActual, 60);
+        detalles.appendChild(spanNombre); detalles.appendChild(spanConexion);
+
+        const img = document.createElement('img');
+        try { img.src = (typeof foto === 'string' && (foto.startsWith('data:') || foto.startsWith('http') || foto.startsWith('./') || foto.startsWith('/imgs'))) ? foto : FOTO_DEFAULT; } catch (e) { img.src = FOTO_DEFAULT; }
+        img.style.width = '35px'; img.style.height = '35px'; img.style.borderRadius = '50%'; img.style.marginLeft = 'auto'; img.style.objectFit = 'cover'; img.style.border = '2px solid var(--primary)';
+        img.loading = 'lazy';
+
+        item.appendChild(punto);
+        item.appendChild(detalles);
+        item.appendChild(img);
+
+        contenedor.appendChild(item);
     });
 }
 

@@ -5,17 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <link rel="apple-touch-icon" href="https://fav.farm/❤️">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
-    <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-config.js"></script>
-    <script type="module">
-        import { verificarSesion } from './js/auth.js';
-        verificarSesion().catch(err => {
-            window.location.replace("login.html");
-        });
-    </script>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
     <style>
         :root {
             --status-ok: #10b981;
@@ -123,7 +114,7 @@
 
     <div class="container">
         <header class="nav-header">
-        <button onclick="window.history.back()" class="btn-back">← Volver atras</button>
+        <button onclick="window.history.back()" class="btn-back">← Volver</button>
             <div class="header-info">
                 <h1>Inventario</h1>
             </div>
@@ -144,6 +135,12 @@
     </div>
 
     <script type="module">
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
+
+        const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const nombresPlurales = {
             "Alfajor": "Alfajores",
             "Fresa con chocolate": "Fresas con chocolate",
@@ -165,7 +162,7 @@
             const tbody = document.getElementById('inventoryBody');
             if (!tbody) return;
 
-            const { data, error } = await db
+            const { data, error } = await supabase
                 .from('productos')
                 .select('nombre, stock_disponible')
                 .eq('tipo', 'fisico')
@@ -206,7 +203,7 @@
             aplicarTema();
             updateTable();
             
-            db.channel('stock-realtime')
+            supabase.channel('stock-realtime')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, updateTable)
                 .subscribe();
         }
