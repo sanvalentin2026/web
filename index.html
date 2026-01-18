@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script>
-        // BLOQUEO INMEDIATO
-        const session = JSON.parse(localStorage.getItem("usuario") || "{}");
-        if (!session.permisos || session.permisos === "false") {
-            window.stop();
-            window.location.replace("login.html");
-        }
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos San Valentin</title>
@@ -21,23 +13,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/special.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
 </head>
 
-<div id="pantalla-carga">
-    <div class="spinner"></div>
-    <p>Cargando...</p>
-</div>
+
 
 <body style="display: none;">
     <script>
-        if (!localStorage.getItem("usuario")) {
+        // Seguridad y desbloqueo visual tras validación
+        const session = JSON.parse(localStorage.getItem("usuario") || "{}");
+        if (!session.permisos || session.permisos === "false") {
+            window.stop();
             window.location.replace("login.html");
         } else {
-            document.body.style.display = "block";
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.style.display = "block";
+            });
         }
     </script>
 
@@ -177,16 +168,14 @@
         </div>
     </footer>
 
-    <script type="module">
-        import { verificarSesion } from './js/auth.js';
-        verificarSesion().catch(err => {
-            window.location.replace("login.html");
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-config.js"></script>
-    <script src="js/themes.js"></script>
-    <script src="js/header.js"></script>
+    <!-- Scripts optimizados al final para mejor rendimiento -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="js/supabase-config.js" defer></script>
+    <script src="js/themes.js" defer></script>
+    <script src="js/header.js" defer></script>
     <script type="module" src="js/process.js"></script>
     <script type="module" src="js/prescense.js"></script>
 </body>

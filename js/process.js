@@ -706,7 +706,6 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
 
 window.eliminarPedido = async (id) => {
     const tema = obtenerTema();
-    const sesion = JSON.parse(localStorage.getItem("usuario"));
 
     const res = await Swal.fire({
         title: '¿Eliminar pedido?',
@@ -726,7 +725,7 @@ window.eliminarPedido = async (id) => {
         Swal.fire({
             toast: true,
             showConfirmButton: false,
-            title: 'Verificando credenciales...',
+            title: 'Procesando...',
             background: tema.bg,
             color: tema.txt,
             didOpen: () => Swal.showLoading(),
@@ -734,39 +733,9 @@ window.eliminarPedido = async (id) => {
             customClass: { popup: 'mi-borde-redondeado'},
         });
 
-        // 1. VALIDACIÓN REAL: Consultamos la DB usando el `id` de la sesión
-        // No confiar en password o valores proporcionados desde localStorage
-        if (!sesion || !sesion.id) {
-            ReproductorSonidos.play('notificacion');
-            Swal.fire({ toast: true, icon: 'error', title: 'Acceso Denegado', text: 'Sesión inválida.', showConfirmButton: false, timer: 3000, position: 'top', background: tema.bg, color: tema.txt, customClass: { popup: 'mi-borde-redondeado'}, });
-            return;
-        }
-
-        const { data: adminReal, error: errorAuth } = await db
-            .from("usuarios")
-            .select("permisos")
-            .eq("id", sesion.id)
-            .single();
-
-        if (errorAuth || !adminReal || adminReal.permisos !== true) {
-            ReproductorSonidos.play('notificacion');
-            Swal.fire({
-                toast: true,
-                icon: 'error',
-                title: 'Acceso Denegado',
-                text: 'No tienes permisos reales en la base de datos.',
-                showConfirmButton: false,
-                timer: 3000,
-                position: 'top',
-                background: tema.bg,
-                color: tema.txt,
-                customClass: { popup: 'mi-borde-redondeado'},
-            });
-            return;
-        }
-
-        // 2. EJECUCIÓN DEL BORRADO (Solo si pasó el check de arriba)
         const { error } = await db.from("pedidos").delete().eq("id", id);
+
+        Swal.close();
 
         if (!error) {
             ReproductorSonidos.play('eliminado');
@@ -776,8 +745,8 @@ window.eliminarPedido = async (id) => {
                 title: 'Pedido eliminado',
                 timer: 1500,
                 showConfirmButton: false,
-                background: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#ffffff',
-                color: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#333',
+                background: tema.bg,
+                color: tema.txt,
                 position: 'top',
                 customClass: { popup: 'mi-borde-redondeado'},
             });

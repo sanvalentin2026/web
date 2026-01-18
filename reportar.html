@@ -10,168 +10,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
 
 <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Scripts moved to end of body for better performance -->
   <link rel="stylesheet" href="css/common.css">
-  <style>
-    html { background-color: #050505; } 
-    * { box-sizing: border-box; }
-
-    /* --- ESTILO PARA LAS ALERTAS REDONDEADAS --- */
-    .mi-borde-redondeado {
-      border-radius: 20px !important;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #ffe4f1, #fff);
-      min-height: 100vh;
-      padding: 20px;
-      color: #333;
-      transition: background 0.3s ease;
-      display: none; 
-    }
-
-    .container { max-width: 600px; margin: 0 auto; }
-    h1 { text-align: center; font-size: 32px; margin-bottom: 8px; color: #ff375f; }
-    .sub { text-align: center; color: #666; margin-bottom: 24px; font-size: 15px; }
-    
-    form {
-      background: #fff;
-      padding: 22px;
-      border-radius: 16px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
-      display: grid;
-      gap: 14px;
-    }
-
-    label { font-weight: 600; font-size: 14px; color: #444; }
-    input, textarea, select {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #F3C1D9;
-      font-size: 16px;
-      width: 100%;
-    }
-
-    textarea { min-height: 120px; resize: vertical; }
-    button {
-      margin-top: 10px;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      background: #ff375f;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .swal2-title {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    text-align: center !important;
-    padding-top: 20px !important;
-    font-size: 1.2rem !important;
-}
-    button:active { transform: scale(0.98); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .btn-volver {
-      background: none; border: none; color: #ff375f;
-      font-size: 15px; font-weight: 600; cursor: pointer;
-      margin-bottom: 14px;
-    }
-
-    /* MODO OSCURO */
-    body.modo-oscuro {
-      background: radial-gradient(circle at top, #050505 0%, #050505 100%) !important;
-      color: #f5f5f7;
-    }
-    .modo-oscuro h1 { color: #ff375f; }
-    .modo-oscuro .sub { color: #a1a1a6; }
-    .modo-oscuro form {
-      background: rgba(28, 28, 30, 0.75);
-      backdrop-filter: blur(25px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .modo-oscuro label { color: #e5e5e7; }
-    .modo-oscuro input, .modo-oscuro textarea, .modo-oscuro select {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-    }
-    option{
-      color: black;
-    }
-
-    @media (max-width: 600px) {
-      body { padding: 14px; }
-      h1 { font-size: 24px; }
-    }
-/* Asegúrate de que tu contenedor principal tenga esto */
-.container {
-    position: relative; 
-    padding-top: 40px; /* Deja espacio arriba para que no choque con el título */
-    /* ... tus otros estilos de container ... */
-}
-
-/* Estilo para moverlo arriba a la derecha */
-.version-container {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 11px; /* Tamaño pequeño */
-    opacity: 0.6;    /* Un toque elegante para que no resalte tanto */
-    font-weight: 500;
-    color: inherit;  /* Mantiene el color según el tema (oscuro/claro) */
-}
-
-.version-number {
-    font-weight: bold;
-    margin-left: 3px;
-}
-/* Pantalla de bloqueo total hasta que la seguridad valide */
-#pantalla-carga {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #08080a; /* Fondo oscuro igual que el login */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s;
-}
-
-/* El Spinner estilo aro con tu color rosado */
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 55, 95, 0.1);
-    border-top: 4px solid #ff375f;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-#pantalla-carga p {
-    color: #ff375f;
-    font-weight: 600;
-    letter-spacing: 1px;
-    animation: latido 1.5s ease-in-out infinite;
-}
-  </style>
+  <link rel="stylesheet" href="css/reportar.css">
 </head>
 <body>
   <div id="pantalla-carga">
@@ -179,19 +20,14 @@
     <p>Cargando...</p>
 </div>
 
-  <script>
-    (function() {
-      const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
-      document.body.classList.add(tema);
-    })();
-  </script>
+  <!-- Scripts moved to end of body for better performance -->
 
   <button class="btn-volver" onclick="history.back()">← Volver atrás</button>
   
   <div class="container">
     <h1>Reportar un problema</h1>
     <div class="version-container">
-    Version actual: <span class="version-number">v1.4.0 | SAE-1</span>
+    Version actual: <span class="version-number">v1.4.0 | SAE-4</span>
     </div>
     <p class="sub">Si algo no funciona bien repórtelo aquí.</p>
 
@@ -209,7 +45,7 @@
       <textarea id="descripcion" placeholder="Describa lo que pasó aqui" required></textarea>
 
       <label for="version">Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.4.0 | SAE-1 (Actual)" required>
+      <input id="version" placeholder="Ej: v1.4.0 | SAE-4 (Actual)" required>
 
       <label for="entorno">Dispositivo y navegador</label>
       <input id="entorno" placeholder="Ej: iPhone · Safari" required>
@@ -218,106 +54,10 @@
     </form>
   </div>
 
-  <script type="module">
-    import { verificarSesion, obtenerTema } from './js/auth.js'; 
-
-    const init = async () => {
-      try {
-        await verificarSesion();
-        document.body.style.display = 'block';
-      } catch (e) {
-        window.location.replace("login.html");
-      }
-    };
-    init();
-
-    const form = document.getElementById("formReporte");
-    const btn = document.getElementById("btnEnviar");
-
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      const tema = obtenerTema(); // Traemos el objeto completo de auth.js
-
-
-      //SONIDOS
-const ReproductorSonidos = {
-    buffer: {},
-    rutas: {
-        exito: 'sounds/exito.mp3',
-        error: 'sounds/notificacion.mp3',
-        notificacion: 'sounds/notificacion.mp3',
-        eliminado: 'sounds/pop.mp3'
-    },
-
-    init() {
-        for (const [nombre, ruta] of Object.entries(this.rutas)) {
-            this.buffer[nombre] = new Audio(ruta);
-            this.buffer[nombre].preload = 'auto'; // Precarga en segundo plano
-            this.buffer[nombre].volume = 0.3;
-        }
-    },
-
-    play(nombre) {
-        const sonido = this.buffer[nombre];
-        if (sonido) {
-            // requestAnimationFrame asegura que el audio no interrumpa la animación de la alerta
-            requestAnimationFrame(() => {
-                sonido.currentTime = 0;
-                sonido.play().catch(() => {});
-            });
-        }
-    }
-};
-ReproductorSonidos.init();
-
-      btn.disabled = true;
-      btn.textContent = "Reportando...";
-
-      const { error } = await db.from("reportes_web").insert({
-        tipo: document.getElementById("tipo").value,
-        descripcion: document.getElementById("descripcion").value.trim(),
-        version: document.getElementById("version").value.trim(),
-        entorno: document.getElementById("entorno").value.trim(),
-        user_agent: navigator.userAgent
-      });
-
-      if (error) {
-        ReproductorSonidos.play('notificacion');
-        Swal.fire({
-          toast:true,
-          showConfirmButton:false,
-          showConfirmButton:false,
-          timer:1500,
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo enviar el reporte',
-          position: 'top',
-          customClass: {
-            popup: 'mi-borde-redondeado'
-          },
-          ...tema // Pasamos background, color y customClass automáticos
-        });
-      } else {
-        ReproductorSonidos.play('exito');
-        await Swal.fire({
-          toast:true,
-          icon: 'success',
-          title: 'Reporte enviado',
-          timer: 1500,
-          showConfirmButton: false,
-          position: 'top',
-          customClass: {
-            popup: 'mi-borde-redondeado'
-          },
-          ...tema
-        });
-        form.reset();
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Enviar reporte";
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/supabase-config.js" defer></script>
+  <script src="js/reportar_extra.js" type="module"></script>
   <script type="module" src="js/prescense.js"></script>
 </body>
 </html>

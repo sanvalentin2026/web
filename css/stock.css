@@ -1,0 +1,99 @@
+/* Extraído de stock.html */
+:root {
+    --status-ok: #10b981;
+    --status-warn: #f59e0b;
+    --status-crit: #ef4444;
+    --accent: #ff375f;
+}
+
+body.modo-oscuro {
+    --bg: #0a0a0a;
+    --border: #262626;
+    --card: #111111;
+    --text-main: #ededed;
+    --text-muted: #a1a1a1;
+    --header-bg: #161616;
+}
+
+body.modo-claro {
+    --bg: #FFF0F6;
+    --border: #e5e5e5;
+    --card: #f9f9f9;
+    --text-main: #1a1a1a;
+    --text-muted: white;
+    --header-bg: #ff375f;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    margin: 0;
+    padding: 15px;
+    transition: background 0.2s ease;
+}
+
+.container { max-width: 800px; margin: 0 auto; }
+
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.header-info h1 { font-size: 1.1rem; margin: 0; font-weight: 700; color:#ff375f ; }
+
+.btn-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.table-container {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.inventory-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+th {
+    background: var(--header-bg);
+    padding: 12px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-dot { height: 7px; width: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.dot-ok { background: var(--status-ok); }
+.dot-warn { background: var(--status-warn); }
+.dot-crit { background: var(--status-crit); }
+
+.qty-box { font-family: monospace; font-weight: 700; text-align: right; display: block; }
+.out-text { color: var(--status-crit); font-weight: 800; }
+
+.col-name { width: 50%; }
+.col-status { width: 30%; }
+.col-qty { width: 20%; text-align: right; }
