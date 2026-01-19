@@ -19,18 +19,21 @@ async function reportarPresencia() {
     if (!sesion.username) return;
     const fotoParaTrack = localStorage.getItem("foto-perfil") || sesion.foto || FOTO_DEFAULT;
     
-    // Mejor detección de página actual
-    const path = window.location.pathname.toLowerCase();
-    const page = path.replace(/^\/+|\/+$/g, ''); // quita / inicial/final
+    // Obtener solo el nombre del archivo (ej: "porfile.html" -> "porfile")
+    const path = window.location.pathname;
+    const page = path.split("/").pop().toLowerCase(); 
+
     let paginaActual = 'Navegando';
-    if (page === '' || page === 'index.html') {
+
+    // Lógica de detección mejorada y corregida
+    if (page === '' || page === 'index.html' || page === '/') {
         paginaActual = 'En Inicio';
     } else if (page === 'login.html') {
         paginaActual = 'En Login';
     } else if (page === 'register.html') {
         paginaActual = 'En Registro';
-    } else if (page === 'porfile.html' || page === 'perfil.html' || page.includes('perfil') || page.includes('profile')) {
-        paginaActual = 'En Perfil';
+    } else if (page === 'porfile.html' || page === 'perfil.html' || page.includes('perfil') || page.includes('profile') || page.includes('porfile')) {
+        paginaActual = 'En Perfil'; // <--- Aquí corregimos el texto visual
     } else if (page === 'stats.html' || page.includes('estadistica') || page.includes('stats')) {
         paginaActual = 'En Estadísticas';
     } else if (page === 'stock.html') {
@@ -40,7 +43,6 @@ async function reportarPresencia() {
     } else if (page === 'mantenimiento.html') {
         paginaActual = 'En Mantenimiento';
     } else if (page.endsWith('.html')) {
-        // Si es otra página html, muestra el nombre base
         paginaActual = 'En ' + page.replace('.html','').replace(/\b\w/g, l => l.toUpperCase());
     }
 

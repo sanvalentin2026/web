@@ -1,4 +1,4 @@
-const VERSION_SISTEMA = '1.4.0 | SAE-1';
+const VERSION_SISTEMA = '1.4.0 | SAE-7';
 
 const limpiarLocalStorageAntiguo = () => {
     const versionGuardada = localStorage.getItem('seenChangelogVersion');

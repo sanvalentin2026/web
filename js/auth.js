@@ -53,13 +53,79 @@ const ReproductorSonidos = {
 };
 ReproductorSonidos.init();
 
-/* ======================================================
-    🛡️ PARCHE DE SEGURIDAD: VALIDACIÓN ANTI-CONSOLA
-====================================================== */
+// ==========================================
+// 🛡️ GUARDIA DE ACCESO PERFECCIONADA
+// ==========================================
+
+export const verificarSesion = async function() {
+    const sesionLocal = localStorage.getItem("usuario");
+
+    if (!sesionLocal) {
+        window.location.replace("login.html");
+        return null;
+    }
+
+    try {
+        const sesion = JSON.parse(sesionLocal);
+
+        // Pedir solo lo necesario y con un tiempo límite implícito
+        const { data, error } = await db
+            .from("usuarios")
+            .select("id, permisos")
+            .eq("id", sesion.id)
+            .maybeSingle();
+
+        // ⚠️ CAMBIO CLAVE: Solo expulsar si el servidor responde explícitamente que NO tiene permisos.
+        // Si hay un error de red (error != null) o no hay data temporalmente, NO expulsamos.
+        if (data && data.permisos === false) {
+            localStorage.removeItem("usuario");
+            const tema = obtenerTema();
+            ReproductorSonidos.play('notificacion');
+
+            await Swal.fire({
+                title: 'Sesión Inválidada',
+                text: 'Su cuenta ha sido desactivada por un administrador.',
+                icon: 'error',
+                timer: 4000,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                ...tema,
+                customClass: { popup: 'mi-borde-redondeado' }
+            });
+
+            window.location.replace("login.html");
+            return null;
+        }
+
+        // Si hubo un error de conexión pero tenemos sesión local, permitimos continuar
+        if (error) {
+            console.warn("Error de conexión con seguridad, manteniendo sesión local.");
+            return sesion; 
+        }
+
+        // Ocultar loader si todo está bien
+        const loader = document.getElementById("loader-global") || document.getElementById("pantalla-carga");
+        if (loader) {
+            loader.style.opacity = "0";
+            setTimeout(() => loader.style.visibility = "hidden", 500);
+        }
+
+        document.body.style.display = 'block';
+        return data || sesion;
+
+    } catch (e) {
+        // Solo en caso de error crítico de parseo de JSON
+        console.error("Error crítico en verificación:", e);
+        return null;
+    }
+};
+
+// ======================================================
+// 🛡️ PARCHE DE SEGURIDAD: VALIDACIÓN ANTI-CONSOLA
+// ======================================================
 
 export async function validarSeguridadReal() {
     const sesionRaw = localStorage.getItem("usuario");
-
     if (!sesionRaw) {
         window.location.replace("login.html");
         return false;
@@ -71,82 +137,21 @@ export async function validarSeguridadReal() {
             .from("usuarios")
             .select("permisos")
             .eq("id", sesion.id)
-            .single();
+            .maybeSingle();
 
-        if (error || !data || data.permisos !== true) {
+        // Si la base de datos dice CLARAMENTE que es false, expulsar.
+        if (data && data.permisos === false) {
             localStorage.removeItem("usuario");
             window.location.replace("login.html");
             return false;
         }
-        return true;
+        
+        // Si hay error de red o no hay data, no hacemos nada (evitamos expulsión injusta)
+        return true; 
     } catch (e) {
-        window.location.replace("login.html");
         return false;
     }
 }
-
-// ==========================================
-// 🛡️ GUARDIA DE ACCESO (ACTUALIZADO CON EXPULSIÓN)
-// ==========================================
-
-export const verificarSesion = async function() {
-    const loader = document.getElementById("pantalla-carga") || document.getElementById("loader-global");
-    const sesionLocal = localStorage.getItem("usuario");
-
-    if (!sesionLocal) {
-        window.location.replace("login.html");
-        return null;
-    }
-
-    try {
-        const sesion = JSON.parse(sesionLocal);
-        const { data, error } = await db
-            .from("usuarios")
-            .select("id, permisos")
-            .eq("id", sesion.id)
-            .single();
-
-        if (error || !data || data.permisos !== true) {
-            localStorage.removeItem("usuario");
-            
-            const tema = obtenerTema();
-            ReproductorSonidos.play('notificacion');
-
-            let timerInterval;
-            await Swal.fire({
-                title: 'Sesión Inválidada',
-                html: 'Su cuenta ha sido invalidada.',
-                icon: 'error',
-                timer: 5000,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                ...tema,
-                customClass: { popup: 'mi-borde-redondeado' },
-                willClose: () => {
-                    clearInterval(timerInterval);
-                }
-            });
-
-            window.location.replace("login.html");
-            return null;
-        }
-
-        if (loader) {
-            loader.style.opacity = "0";
-            setTimeout(() => {
-                loader.style.visibility = "hidden";
-            }, 500);
-        }
-
-        document.body.style.display = 'block';
-        return data;
-
-    } catch (e) {
-        window.location.replace("login.html");
-        return null;
-    }
-};
 
 // ==========================
 // 🟢 REGISTRO

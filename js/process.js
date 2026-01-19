@@ -414,8 +414,16 @@ function renderizarPaginacion() {
 /* =========================
    📝 CREAR PEDIDO (NUEVO)
 ========================= */
+// Variable de control fuera del evento
+let estaProcesando = false;
+
 dom.form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // 1. BLOQUEO DE SEGURIDAD
+    if (estaProcesando) return; 
+    estaProcesando = true;
+
     const tema = obtenerTema();
     
     Swal.fire({ 
@@ -429,7 +437,6 @@ dom.form.addEventListener("submit", async (e) => {
         customClass: { popup: 'mi-borde-redondeado' }, 
     });
 
-    // Sanitizar y validar campos cliente-side (no sustituye validación server-side)
     const nombreVal = validarCampo(dom.nombre.value, 100);
     const receptorVal = validarCampo(dom.receptor.value, 100);
     const productoSeleccionado = validarCampo(dom.producto.value, 200);
@@ -438,13 +445,13 @@ dom.form.addEventListener("submit", async (e) => {
     if (!nombreVal || !receptorVal || !productoSeleccionado) {
         ReproductorSonidos.play('notificacion');
         Swal.fire({ icon: 'warning', text: 'Complete los campos requeridos', toast:true, position:'top', showConfirmButton:false, timer:2000, background: tema.bg, color: tema.txt, customClass: { popup: 'mi-borde-redondeado' } });
+        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
         return;
     }
 
     const sesion = JSON.parse(localStorage.getItem("usuario") || 'null');
     const usuario = sesion ? sesion.username : "Desconocido";
 
-    // 1. Verificar Stock en Supabase
     const { data: prodInfo, error: errorStock } = await db
         .from("productos")
         .select("*")
@@ -454,28 +461,28 @@ dom.form.addEventListener("submit", async (e) => {
     if (errorStock || !prodInfo) {
         ReproductorSonidos.play('error');
         Swal.fire({ icon: 'error', text: 'Producto no encontrado en inventario', toast: true, position: 'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
+        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
         return;
     }
 
-    // 2. Validar si es físico y tiene stock (Los servicios tienen 999999)
     if (prodInfo.tipo === 'fisico' && prodInfo.stock_disponible <= 0) {
         ReproductorSonidos.play('error');
-Swal.fire({ 
-    icon: 'warning', 
-    title: 'Sin disponibilidad', 
-    html: `Todas las unidades de: <strong>${productoSeleccionado}.</strong> fueron vendidas.`, 
-    toast: true, 
-    position: 'top', 
-    showConfirmButton: false, 
-    timer: 3000, 
-    background: tema.bg, 
-    color: tema.txt,
-    customClass: { popup: 'mi-borde-redondeado' } 
-});
+        Swal.fire({ 
+            icon: 'warning', 
+            title: 'Sin disponibilidad', 
+            html: `Todas las unidades de: <strong>${productoSeleccionado}.</strong> fueron vendidas.`, 
+            toast: true, 
+            position: 'top', 
+            showConfirmButton: false, 
+            timer: 3000, 
+            background: tema.bg, 
+            color: tema.txt,
+            customClass: { popup: 'mi-borde-redondeado' } 
+        });
+        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
         return;
     }
 
-    // 3. Preparar el pedido
     const nuevoPedido = {
         nombre_comprador: nombreVal,
         seccion_comprador: dom.seccion.value,
@@ -488,14 +495,13 @@ Swal.fire({
         ultima_edicion_por: usuario
     };
 
-    // 4. Insertar pedido y actualizar stock (si es físico)
     const { error: errorInsert } = await db.from("pedidos").insert([nuevoPedido]);
 
     if (errorInsert) {
         ReproductorSonidos.play('error');
         Swal.fire({ icon: 'error', text: errorInsert.message, position: 'top', toast: true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
+        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
     } else {
-        // Si el producto es físico, restamos 1 del stock
         if (prodInfo.tipo === 'fisico') {
             await db
                 .from("productos")
@@ -505,7 +511,7 @@ Swal.fire({
 
         ReproductorSonidos.play('exito');
         dom.form.reset();
-        Swal.fire({ 
+        await Swal.fire({ 
             icon: 'success', 
             title: 'Pedido Creado', 
             timer: 1500, 
@@ -516,33 +522,10 @@ Swal.fire({
             position: 'top', 
             customClass: { popup: 'mi-borde-redondeado' }, 
         });
+        
+        estaProcesando = false; // <--- LIBERAR AL FINALIZAR ÉXITO
     }
 });
-
-//limpiador
-const VERSION_SISTEMA = '1.4.0 | SAE-5';
-
-const limpiarLocalStorageAntiguo = () => {
-    const versionGuardada = localStorage.getItem('seenChangelogVersion');
-
-    if (versionGuardada !== VERSION_SISTEMA) {
-        // Solo estos 4 se salvan de la eliminación
-        const camposAKeep = ['usuario', 'tutorialVisto', 'tema-usuario', 'foto-perfil'];
-        const llavesActuales = Object.keys(localStorage);
-
-        llavesActuales.forEach(llave => {
-            if (!camposAKeep.includes(llave)) {
-                localStorage.removeItem(llave);
-            }
-        });
-
-        localStorage.setItem('seenChangelogVersion', VERSION_SISTEMA);
-    }
-};
-
-document.addEventListener('DOMContentLoaded', limpiarLocalStorageAntiguo);
-
-
 
 
 
@@ -911,11 +894,11 @@ window.descargarPDF = function() {
                 <div class="advertencia-seguridad">
                     <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
                     mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
-                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y en su totalidad
-                    el documento.
+                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y el documento en su
+                    totalidad.
                 </div>
                 <div class="info-emision">
-                    NÚMERO DE EMISIÓN: ${folioUnico} | Validado por: Sistema Automatizado de Pedidos
+                    NÚMERO DE EMISIÓN: ${folioUnico} | VALIDADO POR: Sistema Automatizado de Pedidos.
                 </div>
             </div>
         </body>
