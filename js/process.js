@@ -139,7 +139,7 @@ function iniciarTutorial() {
                 element: '.controls', 
                 popover: { 
                     title: 'Búsqueda y Filtros', 
-                    description: 'Su funcion es filtrar por secciones o buscar los pedidos por sus caracteristicas, ya se nombres, secciones, productos o detalles.',
+                    description: 'Su funcion es filtrar por secciones o buscar los pedidos por sus caracteristicas, ya sea nombres, secciones, productos o detalles.',
                     side: "top", align: 'center' 
                 } 
             },
@@ -800,7 +800,7 @@ window.descargarPDF = function() {
     if (!datos || datos.length === 0) {
         ReproductorSonidos.play('error');
         Swal.fire({
-            toast:true,
+            toast: true,
             icon: 'error',
             title: 'Aun no hay pedidos',
             timer: 1500,
@@ -813,21 +813,22 @@ window.descargarPDF = function() {
         return;
     }
 
-    const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const conteoPorDia = [0, 0, 0, 0, 0, 0, 0];
-
-    datos.forEach(p => {
-        const fecha = new Date(p.creado_en);
-        const diaIndice = fecha.getDay();
-        conteoPorDia[diaIndice]++;
-    });
-
     const total = datos.length;
     const pagados = datos.filter(p => p.pagado).length;
     const pendientes = total - pagados;
 
     const ahora = new Date();
     const folioUnico = `FOL-${ahora.getTime()}`;
+    
+    // FIX: Forzamos el formato Día/Mes/Año usando es-ES
+    const fechaEmision = ahora.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
 
     const contenidoHTML = `
         <!DOCTYPE html>
@@ -846,21 +847,21 @@ window.descargarPDF = function() {
                 .card div { font-size: 22px; font-weight: 900; margin-top: 5px; }
 
                 table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10px; table-layout: fixed; }
-                th { background: #1e293b; color: white; padding: 10px; text-transform: uppercase; }
+                th { background: #ff375f; color: white; padding: 10px; text-transform: uppercase; }
                 td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; word-wrap: break-word; }
                 tr:nth-child(even) { background-color: #f8fafc; }
                 .footer { margin-top: 40px; font-size: 9px; text-align: center; color: #94a3b8; border-top: 1px solid #eee; padding-top: 10px; }
                 
                 @media print {
                     .card { border: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; }
-                    th { background-color: #1e293b !important; -webkit-print-color-adjust: exact; }
+                    th { background-color: #ff375f !important; -webkit-print-color-adjust: exact; }
                 }
             </style>
         </head>
         <body>
             <div class="header">
                 <h1 style="margin:0; color:#E11D48;">REPORTE DE PEDIDOS</h1>
-                <p style="margin:5px 0;">Folio: ${folioUnico} | Emitido el: ${ahora.toLocaleString()}</p>
+                <p style="margin:5px 0;">Folio: ${folioUnico} | Emitido el: ${fechaEmision}</p>
             </div>
 
             <div class="stats-container">
@@ -882,35 +883,41 @@ window.descargarPDF = function() {
                 </thead>
                 <tbody>
                     ${datos.map(p => `
-                        <tr>
-                            <td>${escapeHTML(validarCampo(p.id,20))}</td>
-                            <td>${escapeHTML(validarCampo(p.nombre_comprador || '-',100))}</td>
-                            <td>${escapeHTML(validarCampo(p.nombre_receptor || '-',100))}</td>
-                            <td>${escapeHTML(validarCampo(p.producto || '-',200))}</td>
-                            <td>${escapeHTML(validarCampo(p.detalles || '- Sin detalles',500))}</td>
-                            <td style="font-weight:bold; color: ${p.pagado ? '#16a34a' : '#dc2626'}">
-                                ${p.pagado ? 'COMPLETO' : 'PENDIENTE'}
-                            </td>
-                        </tr>
+                    <tr>
+                    <td>${escapeHTML(validarCampo(p.id, 20))}</td>
+                    <td>
+                        ${escapeHTML(validarCampo(p.nombre_comprador || '-', 100))} 
+                        ${p.seccion_comprador ? `- (${escapeHTML(p.seccion_comprador)})` : ''}
+                    </td>
+                    <td>
+                        ${escapeHTML(validarCampo(p.nombre_receptor || '-', 100))} 
+                        ${p.seccion_receptor ? `- (${escapeHTML(p.seccion_receptor)})` : ''}
+                    </td>
+                        <td>${escapeHTML(validarCampo(p.producto || '-', 200))}</td>
+                        <td>${escapeHTML(validarCampo(p.detalles || '- Sin detalles', 500))}</td>
+                    <td style="font-weight:bold; color: ${p.pagado ? '#16a34a' : '#dc2626'}">
+                         ${p.pagado ? 'COMPLETO' : 'PENDIENTE'}
+                    </td>
+                    </tr>
                     `).join('')}
                 </tbody>
             </table>
 
             <div class="footer">
-    <div class="clausula-legal">
-        Este documento es una representación íntegra y oficial de los registros contenidos en la base de datos del 
-        <strong>Sistema de Control de Pedidos</strong>.<br> La información aquí presentada ha sido cifrada y validada al momento de su emisión.
-    </div>
-    <div class="advertencia-seguridad">
-        <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
-        mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
-        Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y en su totalidad
-        el documento.
-    </div>
-    <div class="info-emision">
-        NUMERO DE EMISION: ${folioUnico} | Validado por: Sistema Automatizado de Pedidos
-    </div>
-</div>
+                <div class="clausula-legal">
+                    Este documento es una representación íntegra y oficial de los registros contenidos en la base de datos del 
+                    <strong>Sistema de Control de Pedidos</strong>.<br> La información aquí presentada ha sido cifrada y validada al momento de su emisión.
+                </div>
+                <div class="advertencia-seguridad">
+                    <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
+                    mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
+                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y en su totalidad
+                    el documento.
+                </div>
+                <div class="info-emision">
+                    NÚMERO DE EMISIÓN: ${folioUnico} | Validado por: Sistema Automatizado de Pedidos
+                </div>
+            </div>
         </body>
         </html>
     `;

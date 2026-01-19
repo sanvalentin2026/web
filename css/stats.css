@@ -183,3 +183,84 @@ html:has(body.modo-oscuro) {
     opacity: 0 !important;
     visibility: hidden !important;
 }
+/* Contenedor Principal */
+.card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.card h4 {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+}
+
+/* Item del Ranking */
+#rankingUsuarios .ranking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 10px; /* Espacio entre el bloque de nombre y el contador */
+}
+
+/* Bloque Izquierdo (Nombre e Insignias) */
+.ranking-info {
+    display: flex;
+    flex-direction: column; /* Nombre arriba, insignias abajo en pantallas muy pequeñas */
+    gap: 4px;
+    flex: 1; /* Toma el espacio disponible */
+    min-width: 0; /* Evita que el texto largo rompa el flex */
+}
+
+.ranking-name-wrapper {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* <--- CLAVE: Si no caben las insignias, saltan de línea */
+    gap: 5px;
+}
+
+.ranking-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta el nombre con "..." si es demasiado largo */
+    max-width: 150px;
+}
+
+/* Insignias */
+.badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Bloque Derecho (Contador) */
+.ranking-count {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 0.85rem;
+    text-align: right;
+    min-width: 80px; /* Evita que se mueva mucho */
+}
+
+/* Ajustes específicos para móviles muy pequeños */
+@media (max-width: 2500px) {
+    .ranking-name {
+        max-width: 100px;
+    }
+    .ranking-count {
+        min-width: 70px;
+        font-size: 0.75rem;
+    }
+}

@@ -1,34 +1,24 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loader = document.getElementById('loader-global');
+(function() {
+    const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
+    document.documentElement.className = guardado;
+    const color = (guardado === 'modo-oscuro') ? '#1c1c1e' : '#ffffff';
+    document.documentElement.style.backgroundColor = color;
+})();
 
-    // Al entrar: Esperar 2 segundos y quitar loader
-    setTimeout(() => {
-        if (loader) {
-            loader.classList.add('loader-hidden');
-            // Lanzar la animación de entrada de la página
-        }
-    }, 200); 
-});
-//seguridad
- import { verificarSesion } from './auth.js'; 
+import { verificarSesion } from './auth.js'; 
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
 
-    const init = async () => {
-      try {
-        await verificarSesion();
-        document.body.style.display = 'block';
-      } catch (e) {
-        window.location.replace("login.html");
-      }
-    };
-    init();
+const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PRECIOS = {
     "Baile": 500, "Serenata": 300, "Kiss or Slap": 250, "Boda": 400,
-    "Alfajor": 500, "Fresas con chocolate": 1000, "Ramo de fresas": 5000,
-    "Bomba de chocolate": 800, "Brownie": 700, "Galleta": 400,
-    "Cakepop": 600, "Dona": 800, "Oblea": 1000, "Foto con camara e impresion": 1500, 
-    "Flor sola": 1000, "Ramo de 3 flores": 3000, "Globo": 500, "Pulsera": 500, 
-    "Buzon de confesiones": 150, "Foto con camara": 2500, "Foto con telefono y fondo": 200,
+    "Alfajor": 0, "Fresas con chocolate": 0, "Ramo de fresas": 0,
+    "Bomba de chocolate": 0, "Brownie": 0, "Galleta": 0,
+    "Cakepop": 0, "Dona": 0, "Oblea": 0, "Foto con camara e impresion": 1000, 
+    "Flor sola": 0, "Ramo de 3 flores": 0, "Globo": 0, "Pulsera": 0, 
+    "Buzon de confesiones": 150, "Foto con camara": 600, "Foto con telefono y fondo": 200,
 };
 
 let chartVentas = null;
@@ -40,35 +30,27 @@ const dom = {
     root: document.documentElement
 };
 
-function obtenerMultiplicador(detalles) {
-    if (!detalles) return 1;
-    const texto = detalles.toLowerCase().trim();
-    
-    // Detecta patrones como x2, x 3, *4
-    const patronNumero = texto.match(/(?:x|\*)\s*(\d+)/);
-    if (patronNumero) return parseInt(patronNumero[1]);
+const inicializarPagina = async () => {
+    try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+        aplicarTema();
+        await procesarEstadisticas();
+        
+        const loader = document.getElementById('loader-global');
+        if (loader) loader.classList.add('loader-hidden');
 
-    // Detecta palabras clave comunes
-    if (texto.includes("doble") || texto.includes(" dos ") || texto.startsWith("dos ") || texto.startsWith(" dos")) return 2;
-    if (texto.includes("triple") || texto.includes(" tres ") || texto.startsWith("tres ") || texto.startsWith(" tres")) return 3;
-    if (texto.includes("cuadruple") || texto.includes(" cuatro ") || texto.startsWith("cuatro ") || texto.startsWith(" cuatro")) return 4;
-    if (texto.includes("quintuple") || texto.includes(" cinco ") || texto.startsWith("cinco ") || texto.startsWith(" cinco")) return 5;
-    if (texto.includes("sextuple") || texto.includes(" seis ") || texto.startsWith("seis ") || texto.startsWith(" seis")) return 6;
-    if (texto.includes("septuple") || texto.includes(" siete ") || texto.startsWith("seite ") || texto.startsWith(" siete")) return 7;
-    if (texto.includes("octuple") || texto.includes(" ocho ") || texto.startsWith("ocho ") || texto.startsWith(" ocho")) return 8;
-    if (texto.includes("nonuple") || texto.includes(" nueve ") || texto.startsWith("nueve ") || texto.startsWith(" nueve")) return 9;
-    
-    // Detecta números al inicio del texto
-    const numeroInicio = texto.match(/^(\d+)\s/);
-    if (numeroInicio) return parseInt(numeroInicio[1]);
-
-    return 1;
-}
+        db.channel('live')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, realtimeUpdate)
+            .subscribe();
+    } catch (e) {
+        window.location.replace("login.html");
+    }
+};
 
 function aplicarTema() {
     const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
     const esOscuro = tema === 'modo-oscuro';
-    
     document.body.className = tema;
 
     if (esOscuro) {
@@ -87,7 +69,6 @@ function aplicarTema() {
     if (chartVentas) {
         const colorTexto = esOscuro ? '#a1a1a6' : '#666';
         const colorLineas = esOscuro ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-        
         chartVentas.options.scales.x.ticks.color = colorTexto;
         chartVentas.options.scales.y.ticks.color = colorTexto;
         chartVentas.options.scales.x.grid.color = colorLineas;
@@ -104,7 +85,7 @@ async function procesarEstadisticas() {
 
     if (error || !pedidos) return;
 
-    let totalAproximado = 0;
+    let totalRecaudado = 0;
     const productosFrecuencia = {};
     const rankingUsuarios = {}; 
     const ventasSemana = new Array(7).fill(0);
@@ -116,28 +97,29 @@ async function procesarEstadisticas() {
         preciosNormalizados[keyLimpia] = PRECIOS[key];
     }
 
-    for (let i = 0, len = pedidos.length; i < len; i++) {
+    for (let i = 0; i < pedidos.length; i++) {
         const p = pedidos[i];
         const nombreProductoLimpio = (p.producto || "").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const precioBase = preciosNormalizados[nombreProductoLimpio] || 0;
         const texto = (p.detalles || "").toLowerCase().trim();
         
         let multi = 1;
+        let deudaDetectada = false;
+        let montoDeuda = 0;
 
+        // Detectar multiplicador
         const patronSimbolo = texto.match(/(?:x|\*)\s*([2-9]|10)\b/);
         if (patronSimbolo) {
             multi = parseInt(patronSimbolo[1]);
         } else {
             const numeroSuelto = texto.match(/\b([2-9]|10)\b/);
-            const esDeuda = ["debe", "paga", "falta", "vuelto"].some(word => texto.includes(word));
+            const esPalabraDeuda = ["debe", "falta", "resta", "pago", "abono", "faltan"].some(word => texto.includes(word));
             
-            if (numeroSuelto && !esDeuda) {
+            if (numeroSuelto && !esPalabraDeuda) {
                 multi = parseInt(numeroSuelto[1]);
             } else {
                 const palabrasUnidades = {
-                    "dos": 2, "doble": 2, "tres": 3, "triple": 3, "cuatro": 4, 
-                    "cuadruple": 4, "cinco": 5, "quintuple": 5, "seis": 6, 
-                    "siete": 7, "ocho": 8, "nueve": 9, "diez": 10
+                    "dos": 2, "doble": 2, "tres": 3, "triple": 3, "cuatro": 4, "cinco": 5
                 };
                 for (const [palabra, valor] of Object.entries(palabrasUnidades)) {
                     if (new RegExp(`\\b${palabra}\\b`, 'i').test(texto)) {
@@ -148,28 +130,43 @@ async function procesarEstadisticas() {
             }
         }
 
-        const montoCalculado = precioBase * multi;
+        // Detectar Deuda
+        const patronDeuda = texto.match(/(?:debe|falta|resta|paga|solo|faltan)\s*(\d+)/);
+        if (patronDeuda) {
+            deudaDetectada = true;
+            montoDeuda = parseInt(patronDeuda[1]);
+        }
+
+        let montoCalculado = 0;
+        const totalTeorico = precioBase * multi;
+
+        if (p.pagado) {
+            montoCalculado = totalTeorico;
+        } else if (deudaDetectada) {
+            // Si no está pagado pero dice cuánto debe, sumamos la diferencia (el abono)
+            montoCalculado = Math.max(0, totalTeorico - montoDeuda);
+        } else {
+            // Si no está pagado y NO especifica deuda, se asume que no ha pagado nada (0)
+            montoCalculado = 0;
+        }
+
         const usuario = p.creado_por || "Anónimo";
-        
         rankingUsuarios[usuario] = (rankingUsuarios[usuario] || 0) + 1;
 
         const fecha = new Date(p.created_at);
         if (!isNaN(fecha)) {
             const dia = fecha.getDay();
-            
-            // LA CANTIDAD SE SUMA SIEMPRE (PAGADO O NO)
-            cantidadPedidosSemana[dia] += multi;
+            cantidadPedidosSemana[dia] += 1;
+            totalRecaudado += montoCalculado;
+            ventasSemana[dia] += montoCalculado;
 
-            // LAS GANANCIAS SOLO SI ESTÁ PAGADO
             if (p.pagado) {
-                totalAproximado += montoCalculado;
-                ventasSemana[dia] += montoCalculado;
                 productosFrecuencia[p.producto] = (productosFrecuencia[p.producto] || 0) + multi;
             }
         }
     }
 
-    if (dom.total) dom.total.textContent = `₡${totalAproximado.toLocaleString('es-CR')}`;
+    if (dom.total) dom.total.textContent = `₡${totalRecaudado.toLocaleString('es-CR')}`;
     if (dom.cantidad) dom.cantidad.textContent = pedidos.length;
     
     const entries = Object.entries(productosFrecuencia);
@@ -182,46 +179,50 @@ async function procesarEstadisticas() {
 
 function mostrarRanking(usuariosObj) {
     if (!dom.ranking) return;
-
     dom.ranking.innerHTML = "";
-
     const entries = Object.entries(usuariosObj);
 
     if (entries.length === 0) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.style = "text-align: left; color:#ff375f; font-weight: 800; font-size: 1.4rem;";
-        emptyDiv.textContent = "N/A";
-        dom.ranking.appendChild(emptyDiv);
+        dom.ranking.innerHTML = `<div style="color:var(--primary); font-weight:800; font-size:1.4rem; text-align:left;">N/A</div>`;
         return;
     }
 
     const fragment = document.createDocumentFragment();
-    const top3 = entries
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
+    const top3 = entries.sort((a, b) => b[1] - a[1]).slice(0, 3);
 
     top3.forEach(([nombre, cantidad], index) => {
         const div = document.createElement('div');
-        div.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;";
+        div.style = `
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 0; 
+            border-bottom: 1px solid rgba(128,128,128,0.1);
+            gap: 12px;
+        `;
         
-        let insignias = "";
-        if (nombre === "Alexei Chaves") {
-            insignias = `
-                <span style="background: #e3250c; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">DESARROLLADOR</span>
-                <span style="background: #007bff; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 3px; font-weight: bold; text-transform: uppercase;">Soporte</span>
-            `;
-        } else {
-            insignias = `
-                <span style="background: #28a745; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: bold; text-transform: uppercase;">VENDEDOR/A</span>
-            `;
-        }
+        const insignias = (nombre === "Alexei Chaves") 
+            ? `<span style="background: #e3250c; color: white; font-size: 9px; padding: 2px 7px; border-radius: 5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">DESARROLLADOR</span>
+               <span style="background: #007bff; color: white; font-size: 9px; padding: 2px 7px; border-radius: 5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">SOPORTE</span>`
+            : `<span style="background: #28a745; color: white; font-size: 9px; padding: 2px 7px; border-radius: 5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">VENDEDOR/A</span>`;
+
+        const textoPedido = cantidad === 1 ? 'pedido' : 'pedidos';
 
         div.innerHTML = `
-            <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                <span style="font-weight: 500;">${index + 1}. ${nombre} - </span>
-                <div style="display: flex; gap: 2px; align-items: center;">${insignias}</div>
+            <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;">
+                <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${index + 1}. ${nombre}
+                </span>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    ${insignias}
+                </div>
             </div>
-            <span style="font-weight: bold; color: var(--primary);">${cantidad} pedidos</span>
+            <div style="display: flex; align-items: baseline; gap: 4px; min-width: fit-content; padding-left: 10px;">
+                <span style="font-weight: 700; color: var(--primary); font-size: 1rem; line-height: 1;">${cantidad}</span>
+                <span style="font-size: 0.75rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                    ${textoPedido}
+                </span>
+            </div>
         `;
         fragment.appendChild(div);
     });
@@ -240,7 +241,7 @@ function renderizarGrafico(datosGanancias, datosPedidos) {
     if (chartVentas) {
         chartVentas.data.datasets[0].data = datosGanancias;
         chartVentas.data.datasets[1].data = datosPedidos;
-        chartVentas.update('active');
+        chartVentas.update();
         return;
     }
 
@@ -254,51 +255,39 @@ function renderizarGrafico(datosGanancias, datosPedidos) {
                     data: datosGanancias,
                     backgroundColor: '#ff375f',
                     borderRadius: 5,
-                    yAxisID: 'y' // Usa el eje izquierdo
+                    yAxisID: 'y'
                 },
                 {
                     label: 'Cant. Pedidos',
                     data: datosPedidos,
                     backgroundColor: '#007aff',
                     borderRadius: 5,
-                    yAxisID: 'y1' // Usa el eje derecho independiente
+                    yAxisID: 'y1'
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: colorTexto } }
-            },
+            plugins: { legend: { labels: { color: colorTexto } } },
             scales: {
-                y: { // EJE IZQUIERDO (COLONES)
+                y: {
                     type: 'linear',
                     display: true,
                     position: 'left',
                     beginAtZero: true,
-                    ticks: { 
-                        color: colorTexto,
-                        callback: v => '₡' + v.toLocaleString() 
-                    },
+                    ticks: { color: colorTexto, callback: v => '₡' + v.toLocaleString() },
                     grid: { color: colorLineas }
                 },
-                y1: { // EJE DERECHO (CANTIDADES)
+                y1: {
                     type: 'linear',
                     display: true,
                     position: 'right',
                     beginAtZero: true,
-                    // Esto evita que las líneas de cuadrícula se crucen y se vea feo
                     grid: { drawOnChartArea: false }, 
-                    ticks: { 
-                        color: '#007aff', // Color azul para identificarlo con su barra
-                        stepSize: 1 
-                    }
+                    ticks: { color: '#007aff', stepSize: 1 }
                 },
-                x: { 
-                    ticks: { color: colorTexto },
-                    grid: { display: false }
-                }
+                x: { ticks: { color: colorTexto }, grid: { display: false } }
             }
         }
     });
@@ -310,15 +299,8 @@ const realtimeUpdate = () => {
     debounceTimer = setTimeout(procesarEstadisticas, 500);
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-    aplicarTema();
-    procesarEstadisticas();
-});
-
 window.addEventListener('storage', (e) => {
     if (e.key === 'tema-usuario') aplicarTema();
 });
 
-db.channel('live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, realtimeUpdate)
-    .subscribe();
+inicializarPagina();

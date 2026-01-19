@@ -37,9 +37,8 @@
   <div class="container">
     <h1>Reportar un problema</h1>
     <div class="version-container">
-    Version actual: <span class="version-number">v1.4.0 | SAE-5</span>
+    Version actual: <span class="version-number">v1.4.0 | SAE-6</span>
     </div>
-    <p class="sub">Si algo no funciona bien repórtelo aquí.</p>
 
     <form id="formReporte">
       <label for="tipo">Tipo de reporte</label>
@@ -55,7 +54,7 @@
       <textarea id="descripcion" placeholder="Describa que paso" required></textarea>
 
       <label for="version">Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.4.0 | SAE-5 (Actual)" required>
+      <input id="version" placeholder="Ej: v1.4.0 | SAE-6 (Actual)" required>
 
       <label for="entorno">Dispositivo y navegador</label>
       <input id="entorno" placeholder="Ej: iPhone · Safari" required>
@@ -63,7 +62,11 @@
       <button type="submit" id="btnEnviar">Enviar reporte</button>
     </form>
   </div>
-
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p class="copyright">&copy; 2026 Todos los derechos reservados</p>
+        </div>
+    </footer>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>

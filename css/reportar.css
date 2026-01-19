@@ -1,145 +1,164 @@
-/* Extraído de reportar.html */
-html { background-color: #050505; } 
-* { box-sizing: border-box;
-margin: 0; }
+*{
+  box-sizing: border-box;
+}/* 1. CORRECCIÓN DE FONDO TOTAL */
+html { 
+    /* Cambiamos a min-height para que el fondo no se corte al scrollear */
+    min-height: 100%; 
+    background-color: #FFF0F6; /* Color para evitar el flash blanco */
+}
 
+/* Sincronización de fondo para barras de estado del móvil */
+html.modo-oscuro { background-color: #050505; }
+html.modo-claro { background-color: #FFF0F6; }
 .mi-borde-redondeado {
-  border-radius: 20px !important;
+    border-radius: 20px !important;
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #ffe4f1, #fff);
-  min-height: 100vh;
-  padding: 20px;
-  color: #333;
-  transition: background 0.3s ease;
-  display: none; 
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #FFF0F6;
+    
+    /* FIX: Usamos min-height 100svh para móviles (Small Viewport Height) */
+    min-height: 100svh; 
+    
+    /* FIX: Margen de seguridad para el notch y barra inferior */
+    padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px;
+    
+    color: #333;
+    transition: background 0.3s ease;
+    display: none; 
+    margin: 0;
 }
 
-.container { max-width: 600px; margin: 0 auto; }
+/* 2. CONTENEDORES */
+.container { 
+    max-width: 600px; 
+    margin: 0 auto; 
+    position: relative; 
+    padding-top: 40px; 
+}
+
 h1 { text-align: center; font-size: 32px; margin-bottom: 8px; color: #ff375f; }
 .sub { text-align: center; color: #666; margin-bottom: 24px; font-size: 15px; }
 
+/* 3. FORMULARIO */
 form {
-  background: #fff;
-  padding: 22px;
-  border-radius: 16px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
-  display: grid;
-  gap: 14px;
+  box-sizing: border-box;
+    background: #fff;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    display: grid;
+    gap: 14px;
 }
 
 label { font-weight: 600; font-size: 14px; color: #444; }
 input, textarea, select {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #F3C1D9;
-  font-size: 16px;
-  width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #F3C1D9;
+    font-size: 16px;
+    width: 100%;
+    /* Evita zoom automático en iPhone */
+    font-family: inherit; 
 }
 
 textarea { min-height: 120px; resize: vertical; }
+
 button {
-  margin-top: 10px;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  background: #ff375f;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s;
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: #ff375f;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
+
 .swal2-title {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  text-align: center !important;
-  font-size: 1.2rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    font-size: 1.2rem !important;
 }
+
 button:active { transform: scale(0.98); }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-volver {
-  background: none; border: none; color: #ff375f;
-  font-size: 15px; font-weight: 600; cursor: pointer;
-  margin-bottom: 14px;
+    background: none; 
+    border: none; 
+    color: #ff375f;
+    font-size: 15px; 
+    font-weight: 600; 
+    cursor: pointer;
+    margin-bottom: 14px;
 }
 
+/* 4. MODO OSCURO (CORREGIDO PARA MÓVIL) */
 body.modo-oscuro {
-  background: radial-gradient(circle at top, #050505 0%, #050505 100%) !important;
-  color: #f5f5f7;
+    /* Usamos color sólido en móviles para evitar saltos en las barras de estado */
+    background: #050505 !important;
+    color: #f5f5f7;
 }
+
 .modo-oscuro h1 { color: #ff375f; }
 .modo-oscuro .sub { color: #a1a1a6; }
 .modo-oscuro form {
-  background: rgba(28, 28, 30, 0.75);
-  backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.modo-oscuro label { color: #e5e5e7; }
-.modo-oscuro input, .modo-oscuro textarea, .modo-oscuro select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-option{
-  color: black;
+    background: rgba(28, 28, 30, 0.75);
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.modo-oscuro label { color: #e5e5e7; }
+.modo-oscuro input, .modo-oscuro textarea, .modo-oscuro select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+option { color: black; }
+
+/* 5. RESPONSIVE Y OTROS */
 @media (max-width: 600px) {
-  body { padding: 14px; }
-  h1 { font-size: 24px; }
+    body { padding: 14px; padding-top: calc(env(safe-area-inset-top) + 10px); }
+    h1 { font-size: 24px; }
 }
-.container {
-  position: relative; 
-  padding-top: 40px;
-}
+
 .version-container {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 11px;
-  opacity: 0.6;
-  font-weight: 500;
-  color: inherit;
+    position: absolute;
+    top: 5px; /* Ajustado para no chocar con el notch */
+    right: 20px;
+    font-size: 11px;
+    opacity: 0.6;
+    font-weight: 500;
+    color: inherit;
 }
-.version-number {
-  font-weight: bold;
-  margin-left: 3px;
-}
+
+/* PANTALLA DE CARGA */
 #pantalla-carga {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #08080a;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  transition: opacity 0.5s ease, visibility 0.5s;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #08080a;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 9999;
 }
+
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(255, 55, 95, 0.1);
-  border-top: 4px solid #ff375f;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+    width: 50px; height: 50px;
+    border: 4px solid rgba(255, 55, 95, 0.1);
+    border-top: 4px solid #ff375f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
 }
+
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-#pantalla-carga p {
-  color: #ff375f;
-  font-weight: 600;
-  letter-spacing: 1px;
-  animation: latido 1.5s ease-in-out infinite;
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

@@ -1,39 +1,18 @@
-// Extraído de stock.html
-//seguridad
- import { verificarSesion } from './auth.js'; 
-
-    const init = async () => {
-      try {
-        await verificarSesion();
-        document.body.style.display = 'block';
-      } catch (e) {
-        window.location.replace("login.html");
-      }
-    };
-    init();
-document.addEventListener('DOMContentLoaded', () => {
-    const loader = document.getElementById('loader-global');
-
-    // Al entrar: Esperar 2 segundos y quitar loader
-    setTimeout(() => {
-        if (loader) {
-            loader.classList.add('loader-hidden');
-            // Lanzar la animación de entrada de la página
-        }
-    }, 200); 
-});
+import { verificarSesion } from './auth.js';
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
 
+// 1. EJECUCIÓN INMEDIATA (Evita el flash blanco antes de cargar el resto)
+(function() {
+    const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
+    document.documentElement.className = guardado;
+    const color = (guardado === 'modo-oscuro') ? '#0a0a0a' : '#FFF0F6';
+    document.documentElement.style.backgroundColor = color;
+})();
+
+// 2. CONFIGURACIÓN DE SUPABASE
 const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-// Coloca esto al principio de tu script global
-(function() {
-  // Evita flash blanco
-    document.addEventListener('DOMContentLoaded', () => {
-        document.body.classList.add('apple-entrance');
-    });
-})();
 
 const nombresPlurales = {
     "Alfajor": "Alfajores",
@@ -52,6 +31,7 @@ const nombresPlurales = {
     "Foto con camara e impresion": "Fotos con cámara e impresión"
 };
 
+// 3. LÓGICA DE LA TABLA
 async function updateTable() {
     const tbody = document.getElementById('inventoryBody');
     if (!tbody) return;
@@ -86,21 +66,39 @@ async function updateTable() {
     });
 }
 
-function aplicarTema() {
-    const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
-    document.body.className = tema;
-}
+// 4. INICIALIZACIÓN Y SEGURIDAD
+const inicializarPagina = async () => {
+    try {
+        // Validar sesión con Supabase
+        await verificarSesion();
+        
+        // Aplicar tema al body
+        const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+        document.body.className = tema;
+        document.body.style.display = 'block';
+        document.body.classList.add('apple-entrance');
 
-function init() {
-    aplicarTema();
-    updateTable();
-    supabase.channel('stock-realtime')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, updateTable)
-        .subscribe();
-}
+        // Cargar datos y suscribirse a Realtime
+        await updateTable();
+        
+        supabase.channel('stock-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, updateTable)
+            .subscribe();
 
+        // Quitar loader después de que todo cargó
+        const loader = document.getElementById('loader-global');
+        setTimeout(() => {
+            if (loader) loader.classList.add('loader-hidden');
+        }, 1000);
+
+    } catch (e) {
+        window.location.replace("login.html");
+    }
+};
+
+// Arrancar proceso
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', inicializarPagina);
 } else {
-    init();
+    inicializarPagina();
 }

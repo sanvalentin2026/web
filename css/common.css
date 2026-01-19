@@ -128,3 +128,61 @@ html.modo-claro .loader-overlay { background-color: #ffffff; }
   .table-responsive td[data-label="Cant."]{ justify-content:flex-end; }
   .table-responsive td .qty-box{ text-align:right; }
 }
+:root {
+    --footer-text: #666666;
+    --footer-highlight: #e63946;
+    --footer-line: rgba(0, 0, 0, 0.1);
+}
+
+body.modo-oscuro {
+    --footer-text: #a1a1a6;
+    --footer-highlight: #ff375f;
+    --footer-line: rgba(255, 255, 255, 0.1);
+}
+
+.main-footer {
+    margin-top: 50px;
+    padding: 30px 20px;
+    text-align: center;
+    border-top: 1px solid var(--footer-line);
+    transition: all 0.3s ease;
+}
+
+.footer-content p {
+    margin: 5px 0;
+    font-size: 13px;
+    color: var(--footer-text);
+    letter-spacing: 0.5px;
+}
+
+.footer-content .author {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--footer-highlight);
+    margin-bottom: 10px;
+}
+
+.footer-content .divider {
+    width: 300px;
+    height: 2px;
+    background: var(--footer-highlight);
+    margin: 15px auto;
+    border-radius: 2px;
+    opacity: 0.6;
+}
+
+.footer-content .copyright {
+    font-size: 12px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 600px) {
+    .main-footer {
+        margin-top: 30px;
+        padding: 20px 15px;
+    }
+}
