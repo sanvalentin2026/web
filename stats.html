@@ -11,11 +11,26 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
     <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
     <link rel="apple-touch-icon" href="https://fav.farm/❤️">
+        <script>
+    // Este código se ejecuta ANTES de que el body exista
+    (function() {
+        const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
+        document.documentElement.className = guardado;
+        
+        // Sincronizar el color de fondo del HTML de inmediato
+        const color = (guardado === 'modo-oscuro') ? '#1c1c1e' : '#ffffff';
+        document.documentElement.style.backgroundColor = color;
+    })();
+</script>
 </head>
-<body class="modo-oscuro"> <div class="container">
+<body> 
+    <div id="loader-global" class="loader-overlay">
+    <div class="apple-spinner"></div>
+    </div>
+    <div class="container">
     <header class="header">
         <button class="btn-volver" onclick="history.back()">
-        ← Volver atras
+        ← Volver atrás
         </button>
         <h1><i class="fas fa-chart-line"></i> Estadísticas</h1>
     </header>
@@ -27,7 +42,7 @@
         </section>
         
         <section class="card">
-            <h3>Pedidos TOTALES</h3>
+            <h3>Pedidos totales</h3>
             <p id="ventasPagadas">0</p>
         </section>
 
@@ -37,13 +52,13 @@
         </section>
 
         <section class="card">
-            <h4><i class="fas fa-trophy"></i> Top 3 Vendedores</h4>
+            <h4><i class="fas fa-trophy"></i> Top Vendedores</h4>
             <div id="rankingUsuarios"></div>
         </section>
     </main>
 
     <section class="chart-container">
-        <h3><i class="fas fa-chart-bar"></i> Estadisticas de ventas</h3>
+        <h3><i class="fas fa-chart-bar"></i> Gráficos de ventas</h3>
         <div style="height: 280px; position: relative;">
             <canvas id="graficoVentas"></canvas>
         </div>

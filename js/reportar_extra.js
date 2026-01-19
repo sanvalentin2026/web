@@ -1,8 +1,21 @@
+//seguridad
 // Extraído de reportar.html
 (function() {
   const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
   document.body.classList.add(tema);
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader-global');
+
+    // Al entrar: Esperar 2 segundos y quitar loader
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('loader-hidden');
+            // Lanzar la animación de entrada de la página
+        }
+    }, 1000); 
+});
 
 // Lógica de reporte y sonidos
 import { verificarSesion, obtenerTema } from './auth.js'; 

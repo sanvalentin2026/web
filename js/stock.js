@@ -1,9 +1,39 @@
 // Extraído de stock.html
+//seguridad
+ import { verificarSesion } from './auth.js'; 
+
+    const init = async () => {
+      try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    };
+    init();
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader-global');
+
+    // Al entrar: Esperar 2 segundos y quitar loader
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('loader-hidden');
+            // Lanzar la animación de entrada de la página
+        }
+    }, 200); 
+});
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
 
 const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Coloca esto al principio de tu script global
+(function() {
+  // Evita flash blanco
+    document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('apple-entrance');
+    });
+})();
 
 const nombresPlurales = {
     "Alfajor": "Alfajores",
@@ -46,7 +76,7 @@ async function updateTable() {
             <td title="${nombreAMostrar}">${nombreAMostrar}</td>
             <td>
                 <span class="status-dot ${isOut ? 'dot-crit' : (isLow ? 'dot-warn' : 'dot-ok')}"></span>
-                <span style="font-size: 0.8rem;">${isOut ? 'Agotado' : (isLow ? 'Poco inventario' : 'Disponible')}</span>
+                <span style="font-size: 0.8rem;">${isOut ? 'Agotado' : (isLow ? 'Pocas unidades' : 'Disponible')}</span>
             </td>
             <td class="col-qty">
                 <span class="qty-box ${isOut ? 'out-text' : ''}">${item.stock_disponible}</span>

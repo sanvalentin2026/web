@@ -23,6 +23,45 @@ table {
   margin-left: auto;
   margin-right: auto;
 }
+/* Pantalla completa del loader */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s var(--apple-out), visibility 0.5s;
+    background-color: inherit; /* Hereda el color del HTML que ya seteamos en el head */
+}
+
+/* Spinner estilo Apple */
+.apple-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(128, 128, 128, 0.2);
+    border-top: 3px solid #E11D48; /* Tu color rojo principal */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cuando el loader se oculta */
+.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Forzar colores en el loader según el tema */
+html.modo-oscuro .loader-overlay { background-color: #1c1c1e; }
+html.modo-claro .loader-overlay { background-color: #ffffff; }
 
 /* ===== Títulos ===== */
 h1 {
@@ -1732,7 +1771,4 @@ i.fa-solid {
     
     /* Evita variaciones extrañas al transformar/escalar */
     transform: translateZ(0);
-}
-.table-container {
-    min-height: 1000px; /* Ajusta según tu diseño */
 }

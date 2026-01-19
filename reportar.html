@@ -13,12 +13,22 @@
     <!-- Scripts moved to end of body for better performance -->
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/reportar.css">
+      <script>
+    // Este código se ejecuta ANTES de que el body exista
+    (function() {
+        const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
+        document.documentElement.className = guardado;
+        
+        // Sincronizar el color de fondo del HTML de inmediato
+        const color = (guardado === 'modo-oscuro') ? '#1c1c1e' : '#ffffff';
+        document.documentElement.style.backgroundColor = color;
+    })();
+</script>
 </head>
 <body>
-  <div id="pantalla-carga">
-    <div class="spinner"></div>
-    <p>Cargando...</p>
-</div>
+    <div id="loader-global" class="loader-overlay">
+    <div class="apple-spinner"></div>
+    </div>
 
   <!-- Scripts moved to end of body for better performance -->
 
@@ -27,7 +37,7 @@
   <div class="container">
     <h1>Reportar un problema</h1>
     <div class="version-container">
-    Version actual: <span class="version-number">v1.4.0 | SAE-4</span>
+    Version actual: <span class="version-number">v1.4.0 | SAE-5</span>
     </div>
     <p class="sub">Si algo no funciona bien repórtelo aquí.</p>
 
@@ -42,10 +52,10 @@
       </select>
 
       <label for="descripcion">¿Qué ocurrió?</label>
-      <textarea id="descripcion" placeholder="Describa lo que pasó aqui" required></textarea>
+      <textarea id="descripcion" placeholder="Describa que paso" required></textarea>
 
       <label for="version">Versión de la web</label>
-      <input id="version" placeholder="Ej: v1.4.0 | SAE-4 (Actual)" required>
+      <input id="version" placeholder="Ej: v1.4.0 | SAE-5 (Actual)" required>
 
       <label for="entorno">Dispositivo y navegador</label>
       <input id="entorno" placeholder="Ej: iPhone · Safari" required>
@@ -54,9 +64,9 @@
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="js/supabase-config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/reportar_extra.js" type="module"></script>
   <script type="module" src="js/prescense.js"></script>
 </body>

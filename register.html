@@ -13,11 +13,25 @@
     <link rel="stylesheet" href="css/verification.css">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script>
+    // Este código se ejecuta ANTES de que el body exista
+    (function() {
+        const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
+        document.documentElement.className = guardado;
+        
+        // Sincronizar el color de fondo del HTML de inmediato
+        const color = (guardado === 'modo-oscuro') ? '#1c1c1e' : '#ffffff';
+        document.documentElement.style.backgroundColor = color;
+    })();
+</script>
 </head>
 <body>
+    <div id="loader-global" class="loader-overlay">
+    <div class="apple-spinner"></div>
+    </div>
 
   <div class="auth-container">
-    <h2 class="h2-especial">Crear cuenta</h2>
+    <h2 class="h2-especial">Crear una cuenta</h2>
 
     <div class="input-group">
       <i class="fa fa-user"></i>
@@ -31,20 +45,20 @@
 
     <div class="input-group">
       <i class="fa fa-lock"></i>
-      <input type="password" id="password2" placeholder="Repita la contraseña">
+      <input type="password" id="password2" placeholder="Repetir contraseña">
     </div>
 
     <button onclick="register()">Crear cuenta</button>
 
     <p class="toggle">
       ¿Ya tiene una cuenta? | 
-      <a href="login.html">Iniciar sesión</a>
+      <a href="login.html">Inicie sesión</a>
     </p>
   </div>
 <!-- Scripts optimizados al final para mejor rendimiento -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="js/supabase-config.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/themes.js"></script>
 <script type="module" src="js/prescense.js"></script>

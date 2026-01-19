@@ -1,3 +1,14 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader-global');
+
+    // Al entrar: Esperar 2 segundos y quitar loader
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('loader-hidden');
+            // Lanzar la animación de entrada de la página
+        }
+    }, 200); 
+});
 //seguridad
  import { verificarSesion } from './auth.js'; 
 
@@ -178,7 +189,7 @@ function mostrarRanking(usuariosObj) {
 
     if (entries.length === 0) {
         const emptyDiv = document.createElement('div');
-        emptyDiv.style = "text-align: left; margin:8px; color:#ff375f; font-weight: 800; font-size: 1.4rem;";
+        emptyDiv.style = "text-align: left; color:#ff375f; font-weight: 800; font-size: 1.4rem;";
         emptyDiv.textContent = "N/A";
         dom.ranking.appendChild(emptyDiv);
         return;
@@ -239,7 +250,7 @@ function renderizarGrafico(datosGanancias, datosPedidos) {
             labels: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
             datasets: [
                 {
-                    label: 'Ganancias (₡)',
+                    label: 'Ingresos (₡)',
                     data: datosGanancias,
                     backgroundColor: '#ff375f',
                     borderRadius: 5,

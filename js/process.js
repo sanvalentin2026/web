@@ -1,3 +1,15 @@
+//seguridad
+ import { verificarSesion } from './auth.js'; 
+
+    const init = async () => {
+      try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    };
+    init();
 /* =========================
    📦 ESTADO GLOBAL Y DOM
 ========================= */
@@ -20,6 +32,17 @@ const dom = {
     producto: document.getElementById("producto"),
     detalles: document.getElementById("detalles")
 };
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader-global');
+
+    // Al entrar: Esperar 2 segundos y quitar loader
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('loader-hidden');
+            // Lanzar la animación de entrada de la página
+        }
+    }, 400); 
+});
 
 const ReproductorSonidos = {
     buffer: {},
@@ -100,7 +123,7 @@ function iniciarTutorial() {
                 element: '#header', 
                 popover: { 
                     title: '¡Hola! Un breve tutorial', 
-                    description: 'En esta sección encontrará botones con acciones importantes como reportar errores, descargar PDF, mirar estadisticas, cambiar el tema de pantalla y cerrar sesion, este se mantendra siempre en la parte de arriba de su pantalla.',
+                    description: 'En esta sección encontrará botones con acciones importantes como ver inventario disponible, descargar PDF, mirar estadisticas, y ver su perfil, este espacio se mantendra siempre en la parte de arriba de su pantalla.',
                     side: "bottom", align: 'center' 
                 } 
             },
@@ -108,7 +131,7 @@ function iniciarTutorial() {
                 element: '#pedidoForm', 
                 popover: { 
                     title: 'Registro de Pedidos', 
-                    description: 'Utilice este formulario rellenando todos los campos requeridos para registrar pedidos rapidamente.',
+                    description: 'Utilice este formulario rellenando todos los campos requeridos para registrar pedidos facilmente.',
                     side: "bottom", align: 'center' 
                 } 
             },
@@ -116,7 +139,7 @@ function iniciarTutorial() {
                 element: '.controls', 
                 popover: { 
                     title: 'Búsqueda y Filtros', 
-                    description: 'Su funcion es filtrar por secciones o buscar los pedidos por sus caracteristicas.',
+                    description: 'Su funcion es filtrar por secciones o buscar los pedidos por sus caracteristicas, ya se nombres, secciones, productos o detalles.',
                     side: "top", align: 'center' 
                 } 
             },
@@ -124,7 +147,7 @@ function iniciarTutorial() {
                 element: '#pedidosBody', 
                 popover: { 
                     title: 'Pedidos', 
-                    description: 'Aqui se mostraran todos los pedidos disponibles, todos cuentan con botones para interactuar, ademas cada 16 pedidos se creara una compaginacion en la parte de abajo para no generar listas largas.',
+                    description: 'Aqui se mostraran todos los pedidos disponibles, todos tienen botones para interactuar, ademas cada 16 pedidos se creara una compaginacion en la parte inferior para no generar listas largas.',
                     side: "top", align: 'center' 
                 } 
             }
@@ -439,8 +462,8 @@ dom.form.addEventListener("submit", async (e) => {
         ReproductorSonidos.play('error');
 Swal.fire({ 
     icon: 'warning', 
-    title: 'Sin Stock', 
-    html: `No queda stock de: <strong>${productoSeleccionado}.</strong>`, 
+    title: 'Sin disponibilidad', 
+    html: `Todas las unidades de: <strong>${productoSeleccionado}.</strong> fueron vendidas.`, 
     toast: true, 
     position: 'top', 
     showConfirmButton: false, 
@@ -497,7 +520,7 @@ Swal.fire({
 });
 
 //limpiador
-const VERSION_SISTEMA = '1.4.0 | Patch-21';
+const VERSION_SISTEMA = '1.4.0 | SAE-5';
 
 const limpiarLocalStorageAntiguo = () => {
     const versionGuardada = localStorage.getItem('seenChangelogVersion');
@@ -554,7 +577,7 @@ window.togglePagado = async (id, estadoActual) => {
         Swal.fire({
             toast:true,
             icon: 'success',
-            title: 'Pago actualizado',
+            title: 'Estado de pago cambiado',
             timer: 1500,
             showConfirmButton: false,
             background: tema.bg,
@@ -639,7 +662,7 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
         <select id="swal-producto" class="swal2-input">
             ${opcionesProductos} </select>
     
-        <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles...">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
+        <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Nuevos detalles...">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
     </div>
     `,
         showCancelButton: true,
@@ -690,7 +713,7 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
             ReproductorSonidos.play('exito');
             Swal.fire({
                 icon: 'success',
-                title: 'Cambios guardados',
+                title: 'Cambios aplicados',
                 toast: true,
                 position: 'top',
                 timer: 1500,
@@ -779,7 +802,7 @@ window.descargarPDF = function() {
         Swal.fire({
             toast:true,
             icon: 'error',
-            title: 'No hay pedidos',
+            title: 'Aun no hay pedidos',
             timer: 1500,
             showConfirmButton: false,
             background: tema.bg,
@@ -836,25 +859,25 @@ window.descargarPDF = function() {
         </head>
         <body>
             <div class="header">
-                <h1 style="margin:0; color:#E11D48;">REPORTE OFICIAL DE PEDIDOS</h1>
+                <h1 style="margin:0; color:#E11D48;">REPORTE DE PEDIDOS</h1>
                 <p style="margin:5px 0;">Folio: ${folioUnico} | Emitido el: ${ahora.toLocaleString()}</p>
             </div>
 
             <div class="stats-container">
-                <div class="card"><small>Total Pedidos</small><div style="color:#1e293b;">${total}</div></div>
-                <div class="card"><small>Pagados</small><div style="color:#22c55e;">${pagados}</div></div>
-                <div class="card"><small>Pendientes</small><div style="color:#e11d48;">${pendientes}</div></div>
+                <div class="card"><small>PEDIDOS TOTALES</small><div style="color:#1e293b;">${total}</div></div>
+                <div class="card"><small>PAGADOS</small><div style="color:#22c55e;">${pagados}</div></div>
+                <div class="card"><small>PENDIENTES</small><div style="color:#e11d48;">${pendientes}</div></div>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">ID</th>
-                        <th>DE</th>
-                        <th>PARA</th>
-                        <th>PRODUCTO</th>
-                        <th>DETALLES</th>
-                        <th style="width: 80px;">ESTADO</th>
+                        <th style="width: 40px;">ID:</th>
+                        <th>DE:</th>
+                        <th>PARA:</th>
+                        <th>PRODUCTO:</th>
+                        <th>DETALLES:</th>
+                        <th style="width: 80px;">PAGO:</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -866,7 +889,7 @@ window.descargarPDF = function() {
                             <td>${escapeHTML(validarCampo(p.producto || '-',200))}</td>
                             <td>${escapeHTML(validarCampo(p.detalles || '- Sin detalles',500))}</td>
                             <td style="font-weight:bold; color: ${p.pagado ? '#16a34a' : '#dc2626'}">
-                                ${p.pagado ? 'PAGADO' : 'PENDIENTE'}
+                                ${p.pagado ? 'COMPLETO' : 'PENDIENTE'}
                             </td>
                         </tr>
                     `).join('')}
@@ -881,11 +904,11 @@ window.descargarPDF = function() {
     <div class="advertencia-seguridad">
         <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
         mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
-        Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y podrán ser reportados 
-        conforme a las políticas de seguridad informática de la organización.
+        Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y en su totalidad
+        el documento.
     </div>
     <div class="info-emision">
-        ID de Transacción: ${folioUnico} | Verificado por: Sistema Automatizado de Seguridad
+        NUMERO DE EMISION: ${folioUnico} | Validado por: Sistema Automatizado de Pedidos
     </div>
 </div>
         </body>
@@ -924,7 +947,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showCancelButton: true,
                 confirmButtonColor: '#ff375f',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Generar PDF',
+                confirmButtonText: 'Confirmar',
                 cancelButtonText: 'Cancelar',
                 background: tema.bg,
                 color: tema.txt,

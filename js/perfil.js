@@ -1,3 +1,27 @@
+//seguridad
+ import { verificarSesion } from './auth.js'; 
+
+    const init = async () => {
+      try {
+        await verificarSesion();
+        document.body.style.display = 'block';
+      } catch (e) {
+        window.location.replace("login.html");
+      }
+    };
+    init();
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loader-global');
+
+    // Al entrar: Esperar 2 segundos y quitar loader
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('loader-hidden');
+            // Lanzar la animación de entrada de la página
+        }
+    }, 200); 
+});
+
 const FOTO_DEFAULT = "./imgs/usuario.png";
 const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
 const fotoPersistente = localStorage.getItem("foto-perfil");
@@ -26,6 +50,19 @@ const ReproductorSonidos = {
             });
         }
     }
+};
+
+window.navegarConAnimacion = function(url) {
+    if (!url || window.location.href.includes(url)) return;
+
+    // Feedback táctil visual (opcional si usas vibración en móviles)
+    document.body.classList.remove('apple-entrance');
+    document.body.classList.add('page-exit');
+
+    // El tiempo debe ser ligeramente menor a la transición CSS para fluidez
+    setTimeout(() => {
+        window.location.href = url;
+    }, 550);
 };
 ReproductorSonidos.init();
 

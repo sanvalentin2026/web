@@ -1,6 +1,7 @@
 /* Extraído de reportar.html */
 html { background-color: #050505; } 
-* { box-sizing: border-box; }
+* { box-sizing: border-box;
+margin: 0; }
 
 .mi-borde-redondeado {
   border-radius: 20px !important;

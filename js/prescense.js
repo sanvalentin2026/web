@@ -1,3 +1,4 @@
+
 const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
 const FOTO_DEFAULT = "./imgs/usuario.png";
 
@@ -98,7 +99,7 @@ function dibujarHTML(contenedor) {
     usuariosBuffer.forEach((info, nombre) => {
         const hora = info.conectado_el ? new Date(info.conectado_el).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
         const foto = info.foto || FOTO_DEFAULT;
-        const ubicacionActual = info.estado_web || 'En línea';
+        const ubicacionActual = info.estado_web || 'Conectado/a';
 
         const item = document.createElement('div');
         item.className = 'usuario-item';

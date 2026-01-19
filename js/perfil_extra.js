@@ -1,4 +1,4 @@
-        // Función rápida para el reloj del header
+
 setInterval(() => {
     const elReloj = document.getElementById('reloj');
     if (elReloj) {
@@ -49,7 +49,6 @@ function confirmarSalida() {
         document.body.classList.add('modo-oscuro');
     }
 }
-
 // 2. Función para el botón de cambiar tema
 if (typeof window !== 'undefined') {
   window.cambiarTema = function() {
