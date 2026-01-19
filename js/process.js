@@ -414,22 +414,31 @@ function renderizarPaginacion() {
 /* =========================
    📝 CREAR PEDIDO (NUEVO)
 ========================= */
-// Variable de control fuera del evento
 let estaProcesando = false;
 
 dom.form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // 1. BLOQUEO DE SEGURIDAD
-    if (estaProcesando) return; 
+    // 1. BLOQUEO LÓGICO: Evita ejecuciones paralelas
+    if (estaProcesando) return;
     estaProcesando = true;
+
+    // 2. BLOQUEO FÍSICO: Deshabilitar botón con ID "create"
+    const btnSubmit = document.getElementById("create");
+    if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.style.opacity = "0.6";
+        btnSubmit.style.cursor = "not-allowed";
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+    }
 
     const tema = obtenerTema();
     
+    // Alerta inicial de procesamiento
     Swal.fire({ 
         title: 'Procesando...', 
-        background: tema.bg, 
-        color: tema.txt, 
+        background: tema.background, 
+        color: tema.color, 
         toast: true, 
         showConfirmButton: false, 
         didOpen: () => Swal.showLoading(), 
@@ -437,71 +446,55 @@ dom.form.addEventListener("submit", async (e) => {
         customClass: { popup: 'mi-borde-redondeado' }, 
     });
 
-    const nombreVal = validarCampo(dom.nombre.value, 100);
-    const receptorVal = validarCampo(dom.receptor.value, 100);
-    const productoSeleccionado = validarCampo(dom.producto.value, 200);
-    const detallesVal = validarCampo(dom.detalles.value, 500);
+    try {
+        // Sanitizar y validar campos
+        const nombreVal = validarCampo(dom.nombre.value, 100);
+        const receptorVal = validarCampo(dom.receptor.value, 100);
+        const productoSeleccionado = validarCampo(dom.producto.value, 200);
+        const detallesVal = validarCampo(dom.detalles.value, 500);
 
-    if (!nombreVal || !receptorVal || !productoSeleccionado) {
-        ReproductorSonidos.play('notificacion');
-        Swal.fire({ icon: 'warning', text: 'Complete los campos requeridos', toast:true, position:'top', showConfirmButton:false, timer:2000, background: tema.bg, color: tema.txt, customClass: { popup: 'mi-borde-redondeado' } });
-        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
-        return;
-    }
+        if (!nombreVal || !receptorVal || !productoSeleccionado) {
+            throw new Error("Complete los campos requeridos");
+        }
 
-    const sesion = JSON.parse(localStorage.getItem("usuario") || 'null');
-    const usuario = sesion ? sesion.username : "Desconocido";
+        const sesion = JSON.parse(localStorage.getItem("usuario") || 'null');
+        const usuario = sesion ? sesion.username : "Desconocido";
 
-    const { data: prodInfo, error: errorStock } = await db
-        .from("productos")
-        .select("*")
-        .eq("nombre", productoSeleccionado)
-        .single();
+        // 1. Verificar Stock en Supabase
+        const { data: prodInfo, error: errorStock } = await db
+            .from("productos")
+            .select("*")
+            .eq("nombre", productoSeleccionado)
+            .single();
 
-    if (errorStock || !prodInfo) {
-        ReproductorSonidos.play('error');
-        Swal.fire({ icon: 'error', text: 'Producto no encontrado en inventario', toast: true, position: 'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
-        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
-        return;
-    }
+        if (errorStock || !prodInfo) {
+            throw new Error("Producto no encontrado en inventario");
+        }
 
-    if (prodInfo.tipo === 'fisico' && prodInfo.stock_disponible <= 0) {
-        ReproductorSonidos.play('error');
-        Swal.fire({ 
-            icon: 'warning', 
-            title: 'Sin disponibilidad', 
-            html: `Todas las unidades de: <strong>${productoSeleccionado}.</strong> fueron vendidas.`, 
-            toast: true, 
-            position: 'top', 
-            showConfirmButton: false, 
-            timer: 3000, 
-            background: tema.bg, 
-            color: tema.txt,
-            customClass: { popup: 'mi-borde-redondeado' } 
-        });
-        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
-        return;
-    }
+        // 2. Validar disponibilidad
+        if (prodInfo.tipo === 'fisico' && prodInfo.stock_disponible <= 0) {
+            throw new Error(`Sin disponibilidad: ${productoSeleccionado} agotado.`);
+        }
 
-    const nuevoPedido = {
-        nombre_comprador: nombreVal,
-        seccion_comprador: dom.seccion.value,
-        nombre_receptor: receptorVal,
-        seccion_receptor: dom.seccion_receptor.value,
-        producto: productoSeleccionado,
-        detalles: detallesVal,
-        pagado: false,
-        creado_por: usuario,
-        ultima_edicion_por: usuario
-    };
+        // 3. Preparar el pedido
+        const nuevoPedido = {
+            nombre_comprador: nombreVal,
+            seccion_comprador: dom.seccion.value,
+            nombre_receptor: receptorVal,
+            seccion_receptor: dom.seccion_receptor.value,
+            producto: productoSeleccionado,
+            detalles: detallesVal,
+            pagado: false,
+            creado_por: usuario,
+            ultima_edicion_por: usuario
+        };
 
-    const { error: errorInsert } = await db.from("pedidos").insert([nuevoPedido]);
+        // 4. Insertar pedido
+        const { error: errorInsert } = await db.from("pedidos").insert([nuevoPedido]);
 
-    if (errorInsert) {
-        ReproductorSonidos.play('error');
-        Swal.fire({ icon: 'error', text: errorInsert.message, position: 'top', toast: true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
-        estaProcesando = false; // <--- LIBERAR SI HAY ERROR
-    } else {
+        if (errorInsert) throw errorInsert;
+
+        // 5. Actualizar stock si es físico
         if (prodInfo.tipo === 'fisico') {
             await db
                 .from("productos")
@@ -509,6 +502,7 @@ dom.form.addEventListener("submit", async (e) => {
                 .eq("nombre", productoSeleccionado);
         }
 
+        // ÉXITO
         ReproductorSonidos.play('exito');
         dom.form.reset();
         await Swal.fire({ 
@@ -517,16 +511,37 @@ dom.form.addEventListener("submit", async (e) => {
             timer: 1500, 
             showConfirmButton: false, 
             toast: true, 
-            background: tema.bg, 
-            color: tema.txt, 
+            background: tema.background, 
+            color: tema.color, 
             position: 'top', 
             customClass: { popup: 'mi-borde-redondeado' }, 
         });
-        
-        estaProcesando = false; // <--- LIBERAR AL FINALIZAR ÉXITO
+
+    } catch (err) {
+        // MANEJO DE ERRORES
+        ReproductorSonidos.play('error');
+        Swal.fire({ 
+            icon: err.message.includes("disponibilidad") ? 'warning' : 'error', 
+            text: err.message, 
+            position: 'top', 
+            toast: true, 
+            showConfirmButton: false, 
+            timer: 3000, 
+            background: tema.background, 
+            color: tema.color,
+            customClass: { popup: 'mi-borde-redondeado' } 
+        });
+    } finally {
+        // 3. LIBERACIÓN ABSOLUTA: Siempre se ejecuta al final
+        estaProcesando = false;
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.style.opacity = "1";
+            btnSubmit.style.cursor = "pointer";
+            btnSubmit.innerHTML = 'Registrar Pedido';
+        }
     }
 });
-
 
 
 /* =========================
