@@ -1,8 +1,16 @@
-
 setInterval(() => {
     const elReloj = document.getElementById('reloj');
     if (elReloj) {
-        elReloj.textContent = new Date().toLocaleTimeString();
+        const ahora = new Date();
+        let horas = ahora.getHours();
+        const minutos = ahora.getMinutes().toString().padStart(2, '0');
+        const segundos = ahora.getSeconds().toString().padStart(2, '0');
+
+        // Convertir formato: si es 0 (medianoche) pasa a 12, 
+        // si es mayor a 12 (tarde) resta 12.
+        horas = horas % 12 || 12;
+
+        elReloj.textContent = `${horas}:${minutos}:${segundos}`;
     }
 }, 1000);
         // Lógica de Cerrar Sesión con SweetAlert
