@@ -19,9 +19,15 @@ async function reportarPresencia() {
     if (!sesion.username) return;
     const fotoParaTrack = localStorage.getItem("foto-perfil") || sesion.foto || FOTO_DEFAULT;
     
-    // Mejor detección de página actual
-    const path = window.location.pathname.toLowerCase();
-    const page = path.replace(/^\/+|\/+$/g, ''); // quita / inicial/final
+    // 1. Obtener el path y normalizarlo
+    let path = window.location.pathname.toLowerCase();
+    
+    // 2. PARCHE PARA GITHUB PAGES: Elimina la carpeta "web" si está en la URL
+    path = path.replace(/^\/web\//, '/'); 
+
+    // 3. Limpiar barras iniciales y finales
+    const page = path.replace(/^\/+|\/+$/g, ''); 
+    
     let paginaActual = 'Navegando';
     if (page === '' || page === 'index.html') {
         paginaActual = 'En Inicio';
@@ -40,7 +46,6 @@ async function reportarPresencia() {
     } else if (page === 'mantenimiento.html') {
         paginaActual = 'En Mantenimiento';
     } else if (page.endsWith('.html')) {
-        // Si es otra página html, muestra el nombre base
         paginaActual = 'En ' + page.replace('.html','').replace(/\b\w/g, l => l.toUpperCase());
     }
 

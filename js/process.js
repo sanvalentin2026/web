@@ -453,7 +453,7 @@ dom.form.addEventListener("submit", async (e) => {
                 toast: true, 
                 position: 'top', 
                 showConfirmButton: false, 
-                timer: 2000, 
+                timer: 2500, 
                 background: tema.bg, 
                 color: tema.txt, 
                 customClass: { popup: 'mi-borde-redondeado' } 
@@ -481,7 +481,7 @@ dom.form.addEventListener("submit", async (e) => {
             Swal.fire({ 
                 icon: 'warning', 
                 title: 'Sin disponibilidad', 
-                html: `Todas las unidades de: <strong>${productoSeleccionado}.</strong> estan vendidas.`, 
+                html: `Todas las unidades de <strong>${productoSeleccionado}.</strong> estan vendidas.`, 
                 toast: true, 
                 position: 'top', 
                 showConfirmButton: false, 
@@ -546,7 +546,7 @@ dom.form.addEventListener("submit", async (e) => {
 });
 
 //limpiador
-const VERSION_SISTEMA = '1.4.0 | SAE-5';
+const VERSION_SISTEMA = '1.4.0 | RC-1';
 
 const limpiarLocalStorageAntiguo = () => {
     const versionGuardada = localStorage.getItem('seenChangelogVersion');
@@ -603,7 +603,7 @@ window.togglePagado = async (id, estadoActual) => {
         Swal.fire({
             toast:true,
             icon: 'success',
-            title: 'Estado de pago cambiado',
+            title: 'Estado de pago actualizado',
             timer: 1500,
             showConfirmButton: false,
             background: tema.bg,
@@ -617,7 +617,7 @@ window.togglePagado = async (id, estadoActual) => {
             toast:true,
             icon: 'error',
             title: 'Error',
-            text: 'No se pudo actualizar el pago',
+            text: 'No se pudo actualizar el pago, intentelo de nuevo.',
             showConfirmButton:false,
             timer:2500,
             position: 'top',

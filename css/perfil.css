@@ -228,7 +228,6 @@ h2{
     background: var(--glass);
     color: var(--text-main);
     text-decoration: none;
-    transition: all 0.3s ease;
     border: 1px solid var(--glass-border);
     cursor: pointer;
     font-size: 0.95rem;
