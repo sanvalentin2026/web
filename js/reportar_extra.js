@@ -81,10 +81,10 @@ if (form && btn) {
       Swal.fire({
         toast:true,
         showConfirmButton:false,
-        timer:1500,
+        timer:2000,
         icon: 'error',
         title: 'Error',
-        text: 'No se pudo enviar el reporte',
+        text: 'No se pudo enviar su reporte',
         position: 'top',
         customClass: {
           popup: 'mi-borde-redondeado'

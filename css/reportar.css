@@ -80,9 +80,9 @@ button {
 
 .swal2-title {
     display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    text-align: center !important;
+    justify-content: left !important;
+    align-items: left !important;
+    text-align: left !important;
     font-size: 1.2rem !important;
 }
 

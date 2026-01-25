@@ -414,31 +414,24 @@ function renderizarPaginacion() {
 /* =========================
    📝 CREAR PEDIDO (NUEVO)
 ========================= */
-let estaProcesando = false;
-
 dom.form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const tema = obtenerTema();
+    const botonEnvio = e.submitter || dom.form.querySelector('button[type="submit"]');
 
-    // 1. BLOQUEO LÓGICO: Evita ejecuciones paralelas
-    if (estaProcesando) return;
-    estaProcesando = true;
-
-    // 2. BLOQUEO FÍSICO: Deshabilitar botón con ID "create"
-    const btnSubmit = document.getElementById("create");
-    if (btnSubmit) {
-        btnSubmit.disabled = true;
-        btnSubmit.style.opacity = "0.6";
-        btnSubmit.style.cursor = "not-allowed";
-        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+    // Bloqueo de seguridad contra doble clic
+    if (dom.form.dataset.procesando === "true") return;
+    dom.form.dataset.procesando = "true";
+    if (botonEnvio) {
+        botonEnvio.disabled = true;
+        botonEnvio.dataset.oldText = botonEnvio.textContent;
+        botonEnvio.textContent = 'Creando...';
     }
 
-    const tema = obtenerTema();
-    
-    // Alerta inicial de procesamiento
     Swal.fire({ 
         title: 'Procesando...', 
-        background: tema.background, 
-        color: tema.color, 
+        background: tema.bg, 
+        color: tema.txt, 
         toast: true, 
         showConfirmButton: false, 
         didOpen: () => Swal.showLoading(), 
@@ -447,20 +440,30 @@ dom.form.addEventListener("submit", async (e) => {
     });
 
     try {
-        // Sanitizar y validar campos
         const nombreVal = validarCampo(dom.nombre.value, 100);
         const receptorVal = validarCampo(dom.receptor.value, 100);
         const productoSeleccionado = validarCampo(dom.producto.value, 200);
         const detallesVal = validarCampo(dom.detalles.value, 500);
 
         if (!nombreVal || !receptorVal || !productoSeleccionado) {
-            throw new Error("Complete los campos requeridos");
+            ReproductorSonidos.play('notificacion');
+            Swal.fire({ 
+                icon: 'warning', 
+                text: 'Complete los campos requeridos', 
+                toast: true, 
+                position: 'top', 
+                showConfirmButton: false, 
+                timer: 2000, 
+                background: tema.bg, 
+                color: tema.txt, 
+                customClass: { popup: 'mi-borde-redondeado' } 
+            });
+            return; // Salta al finally
         }
 
         const sesion = JSON.parse(localStorage.getItem("usuario") || 'null');
         const usuario = sesion ? sesion.username : "Desconocido";
 
-        // 1. Verificar Stock en Supabase
         const { data: prodInfo, error: errorStock } = await db
             .from("productos")
             .select("*")
@@ -468,15 +471,28 @@ dom.form.addEventListener("submit", async (e) => {
             .single();
 
         if (errorStock || !prodInfo) {
-            throw new Error("Producto no encontrado en inventario");
+            ReproductorSonidos.play('error');
+            Swal.fire({ icon: 'error', text: 'Producto no encontrado en inventario', toast: true, position: 'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
+            return;
         }
 
-        // 2. Validar disponibilidad
         if (prodInfo.tipo === 'fisico' && prodInfo.stock_disponible <= 0) {
-            throw new Error(`Sin disponibilidad: ${productoSeleccionado} agotado.`);
+            ReproductorSonidos.play('error');
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Sin disponibilidad', 
+                html: `Todas las unidades de: <strong>${productoSeleccionado}.</strong> estan vendidas.`, 
+                toast: true, 
+                position: 'top', 
+                showConfirmButton: false, 
+                timer: 3000, 
+                background: tema.bg, 
+                color: tema.txt,
+                customClass: { popup: 'mi-borde-redondeado' } 
+            });
+            return;
         }
 
-        // 3. Preparar el pedido
         const nuevoPedido = {
             nombre_comprador: nombreVal,
             seccion_comprador: dom.seccion.value,
@@ -489,59 +505,71 @@ dom.form.addEventListener("submit", async (e) => {
             ultima_edicion_por: usuario
         };
 
-        // 4. Insertar pedido
         const { error: errorInsert } = await db.from("pedidos").insert([nuevoPedido]);
 
-        if (errorInsert) throw errorInsert;
+        if (errorInsert) {
+            ReproductorSonidos.play('error');
+            Swal.fire({ icon: 'error', text: errorInsert.message, position: 'top', toast: true, showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
+        } else {
+            if (prodInfo.tipo === 'fisico') {
+                await db
+                    .from("productos")
+                    .update({ stock_disponible: prodInfo.stock_disponible - 1 })
+                    .eq("nombre", productoSeleccionado);
+            }
 
-        // 5. Actualizar stock si es físico
-        if (prodInfo.tipo === 'fisico') {
-            await db
-                .from("productos")
-                .update({ stock_disponible: prodInfo.stock_disponible - 1 })
-                .eq("nombre", productoSeleccionado);
+            ReproductorSonidos.play('exito');
+            dom.form.reset();
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'Pedido Creado', 
+                timer: 1500, 
+                showConfirmButton: false, 
+                toast: true, 
+                background: tema.bg, 
+                color: tema.txt, 
+                position: 'top', 
+                customClass: { popup: 'mi-borde-redondeado' }, 
+            });
         }
-
-        // ÉXITO
-        ReproductorSonidos.play('exito');
-        dom.form.reset();
-        await Swal.fire({ 
-            icon: 'success', 
-            title: 'Pedido Creado', 
-            timer: 1500, 
-            showConfirmButton: false, 
-            toast: true, 
-            background: tema.background, 
-            color: tema.color, 
-            position: 'top', 
-            customClass: { popup: 'mi-borde-redondeado' }, 
-        });
-
-    } catch (err) {
-        // MANEJO DE ERRORES
-        ReproductorSonidos.play('error');
-        Swal.fire({ 
-            icon: err.message.includes("disponibilidad") ? 'warning' : 'error', 
-            text: err.message, 
-            position: 'top', 
-            toast: true, 
-            showConfirmButton: false, 
-            timer: 3000, 
-            background: tema.background, 
-            color: tema.color,
-            customClass: { popup: 'mi-borde-redondeado' } 
-        });
+    } catch (error) {
+        console.error("Error en el proceso:", error);
+        Swal.fire({ icon: 'error', text: 'Error inesperado al procesar el pedido', ...tema });
     } finally {
-        // 3. LIBERACIÓN ABSOLUTA: Siempre se ejecuta al final
-        estaProcesando = false;
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.style.opacity = "1";
-            btnSubmit.style.cursor = "pointer";
-            btnSubmit.innerHTML = 'Registrar Pedido';
+        // Restaurar estado del botón y permitir nuevos envíos
+        dom.form.dataset.procesando = "false";
+        if (botonEnvio) {
+            botonEnvio.disabled = false;
+            botonEnvio.textContent = botonEnvio.dataset.oldText || 'Crear Pedido';
         }
     }
 });
+
+//limpiador
+const VERSION_SISTEMA = '1.4.0 | SAE-5';
+
+const limpiarLocalStorageAntiguo = () => {
+    const versionGuardada = localStorage.getItem('seenChangelogVersion');
+
+    if (versionGuardada !== VERSION_SISTEMA) {
+        // Solo estos 4 se salvan de la eliminación
+        const camposAKeep = ['usuario', 'tutorialVisto', 'tema-usuario', 'foto-perfil'];
+        const llavesActuales = Object.keys(localStorage);
+
+        llavesActuales.forEach(llave => {
+            if (!camposAKeep.includes(llave)) {
+                localStorage.removeItem(llave);
+            }
+        });
+
+        localStorage.setItem('seenChangelogVersion', VERSION_SISTEMA);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', limpiarLocalStorageAntiguo);
+
+
+
 
 
 /* =========================
@@ -621,16 +649,48 @@ window.editarPedidoCompleto = async (pedidoId) => {
         `<option value="${s}" ${p.seccion_receptor === s ? 'selected' : ''}>${s}</option>`
     ).join('');
 
-    const categorias = {
-    "Principales": ["Baile", "Serenata", "Kiss or Slap", "Boda"],
-    "Comida": ["Alfajor", "Fresas con chocolate", "Ramo de fresas", "Bomba de chocolate", "Brownie", "Galleta", "Cakepop", "Dona", "Oblea"],
-    "Flores": ["Flor sola", "Ramo de 3"],
-    "Otros": ["Globo", "Pulsera", "Buzon de confesiones", "Foto con camara e impresion", "Foto con camara", "Foto con telefono y fondo"]
+const categorias = {
+    "Servicios": [
+        "Baile",
+        "Boda",
+        "Kiss or Slap",
+        "Serenata"
+    ],
+
+    "Comida": [
+        "Alfajor",
+        "Bomba de chocolate",
+        "Brownie",
+        "Cakepop",
+        "Dona",
+        "Fresas con chocolate",
+        "Galleta",
+        "Oblea",
+        "Ramo de fresas"
+    ],
+
+    "Flores": [
+        "Flor sola",
+        "Ramo de 3 flores"
+    ],
+
+    "Fotos": [
+        "Foto con camara",
+        "Foto con camara e impresion",
+        "Foto con telefono y fondo"
+    ],
+
+    "Otros": [
+        "Buzon de confesiones",
+        "Globo",
+        "Pulsera"
+    ]
 };
+
 
 // Generamos el HTML dinámico
 const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) => `
-    <optgroup label="---- ${grupo} ----">
+    <optgroup label="- ${grupo} -">
         ${productos.map(prod => `
             <option value="${prod}" ${prod === p.producto ? 'selected' : ''}>${prod}</option>
         `).join('')}
@@ -909,11 +969,10 @@ window.descargarPDF = function() {
                 <div class="advertencia-seguridad">
                     <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
                     mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
-                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y el documento en su
-                    totalidad.
+                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y el documento en su totalidad
                 </div>
                 <div class="info-emision">
-                    NÚMERO DE EMISIÓN: ${folioUnico} | VALIDADO POR: Sistema Automatizado de Pedidos.
+                    NÚMERO DE EMISIÓN: ${folioUnico} | Validado por: Sistema Automatizado de Pedidos
                 </div>
             </div>
         </body>

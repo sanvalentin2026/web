@@ -83,6 +83,7 @@ body {
     border: none !important;
     background: transparent;    
     color: #ff375f;
+    padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 15px;
