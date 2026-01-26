@@ -65,7 +65,7 @@ input, textarea, select {
 
 textarea { min-height: 120px; resize: vertical; }
 
-button {
+#btnEnviar, .btn-volver {
     margin-top: 10px;
     padding: 14px;
     border-radius: 12px;
@@ -78,13 +78,6 @@ button {
     transition: transform 0.2s;
 }
 
-.swal2-title {
-    display: flex !important;
-    justify-content: left !important;
-    align-items: left !important;
-    text-align: left !important;
-    font-size: 1.2rem !important;
-}
 
 button:active { transform: scale(0.98); }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -161,4 +154,50 @@ option { color: black; }
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Botones principales */
+#btnEnviarMsg {
+    background-color: #ff375f !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Tarjetas individuales */
+.ticket-card {
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--primary-red);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+
+/* Ajustes por Tema */
+.modo-oscuro .ticket-card { background: rgba(255, 255, 255, 0.05); }
+.modo-oscuro .ticket-card strong { color: #ffffff; }
+.modo-oscuro #chat-mensajes { background: #1c1c1e !important; border: 1px solid rgba(255, 255, 255, 0.1); }
+.modo-oscuro .msg-otro { background: #2c2c2e; color: white; }
+
+.modo-claro .ticket-card { background: rgba(0, 0, 0, 0.05); }
+.modo-claro .ticket-card strong { color: #1c1c1e; }
+.modo-claro #chat-mensajes { background: #f2f2f7 !important; border: 1px solid rgba(0, 0, 0, 0.05); }
+.modo-claro .msg-otro { background: #e5e5ea; color: #1c1c1e; }
+
+.msg-mio { background: #ff375f !important; color: white; }
+#chat-mensajes { height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 15px; border-radius: 12px; }
+
+.modo-claro #inputMensaje{
+   background-color: #ffffff;
+   color: #666;
+}
+.modo-oscuro #inputMensaje{
+    background-color: #1c1c1e;
+    color: #666;
 }
