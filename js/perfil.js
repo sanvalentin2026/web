@@ -51,7 +51,7 @@ const ModoNocturno = {
         inputFin?.addEventListener('change', actualizarHoras);
 
         this.aplicar();
-        setInterval(() => this.aplicar(), 30000);
+        setInterval(() => this.aplicar(), 1000);
     },
 
     aplicar() {
@@ -121,15 +121,15 @@ const ReproductorSonidos = {
         localStorage.setItem('sonidos-web', sonidosActivados ? 'enabled' : 'disabled');
         this.actualizarUI();
     },
-    actualizarUI() {
-        const icono = document.getElementById('iconoSonido');
-        const texto = document.getElementById('textoSonido');
-        if (icono && texto) {
-            icono.className = sonidosActivados ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
-            texto.textContent = sonidosActivados ? 'Sonido Activo' : 'Sonido Silenciado';
-            icono.style.color = sonidosActivados ? '#ff375f' : '#8e8e93';
-        }
+actualizarUI() {
+    const icono = document.getElementById('iconoSonido');
+    const texto = document.getElementById('textoSonido');
+    if (icono && texto) {
+        icono.className = sonidosActivados ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
+        texto.textContent = sonidosActivados ? 'Sonido Activado' : 'Sonido Desactivado';
+        // Ya no necesitamos poner el color aquí, el CSS se encarga solo
     }
+}
 };
 
 // 4. FUNCIONES DE PERFIL Y UTILIDADES

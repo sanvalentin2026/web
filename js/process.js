@@ -481,7 +481,7 @@ const ModoNocturno = {
         inputFin?.addEventListener('change', actualizarHoras);
 
         this.aplicar();
-        setInterval(() => this.aplicar(), 30000);
+        setInterval(() => this.aplicar(), 1000);
     },
 
     aplicar() {

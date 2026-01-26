@@ -23,6 +23,8 @@
 
 /* --- ESTILOS BASE --- */
 body {
+    margin: 0;
+    padding: 0;
     background-color: #FFF0F6;
     color: var(--text-main);
     margin: 0;
@@ -185,40 +187,127 @@ body {
     box-shadow: 0 0 10px #34c759;
 }
 
-/* --- HEADER --- */
+/* --- HEADER ALINEADO Y FIJO --- */
 .main-header {
     backdrop-filter: blur(5px);
-    position: sticky;
-    top: 0;
+    position: sticky; /* Corregido de 'top' a 'sticky' */
+    top: 0px;        /* Pequeño margen superior para estética */
     z-index: 1000;
+    
+    /* El truco para que nunca sobrepase al contenido: */
     width: 95%;
-    max-width: 1300px;
+    max-width: 1060px; /* Ajusta este valor al ancho de tu perfil-grid */
+    margin: 0 auto 20px auto; 
+    
     background: var(--glass);
     border: 1px solid var(--glass-border) !important;
-    border-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    box-sizing: border-box;
+    padding: 10px 0px;
 }
 
-/* --- RESPONSIVE --- */
+/* --- GRID DE CONTENIDO --- */
+.perfil-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 20px;
+    
+    /* Medidas idénticas al header para alineación total */
+    width: 95%;
+    max-width: 1100px; 
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+@media(max-width: 1175px){
+    .main-header{
+        width: 91%;
+    }
+}
+/* --- RESPONSIVE UNIFICADO --- */
 @media (max-width: 850px) {
-    .perfil-grid { grid-template-columns: 1fr; margin: 20px auto; }
-    .card-perfil { position: relative; top: 0; }
+    .perfil-grid { 
+        grid-template-columns: 1fr; 
+    }
+    .main-header{ 
+        width: 90%; /* Ambos se encogen igual aquí */
+    }
+    .card-perfil { position: relative; top: 0; padding: 20px; }
+}
+@media(max-width: 810px){
+    .main-header{
+        width: 89.8%;
+    }
+}
+@media(max-width: 780px){
+    .main-header{
+        width: 89.5%;
+    }
+}
+@media(max-width: 745px){
+    .main-header{
+        width: 89.4%;
+    }
+}
+@media(max-width: 710px){
+    .main-header{
+        width: 89.3%;
+    }
+}
+@media(max-width: 700px){
+    .main-header{
+        width: 89%;
+    }
+}
+@media(max-width: 675px){
+    .main-header{
+        width: 88.7%;
+    }
+}
+@media(max-width: 630px){
+    .main-header{
+        width: 88.4%;
+    }
+}
+@media(max-width: 600px){
+    .main-header{
+        width: 88%;
+    }
+}
+@media(max-width: 590px){
+    .main-header{
+        width: 87.7%;
+    }
+}
+@media(max-width: 550px){
+    .main-header{
+        width: 87.4%;
+    }
+}
+@media(max-width: 500px){
+    .main-header{
+        width: 86.9%;
+    }
+}
+@media(max-width: 475px){
+    .main-header{
+        width: 86.4%;
+    }
+}
+@media(max-width: 420px){
+    .main-header{
+        width: 85.4%;
+    }
 }
 
-@media (max-width: 400px){
-    .main-header { width: 89%; }
-    .card-perfil { padding: 20px; }
-}
-@media (max-width: 1170px){
-    .main-header { width: 96%; }
-    .card-perfil { padding: 20px; }
-}
-@media (max-width: 1050px){
-    .main-header { width: 95%; }
-    .card-perfil { padding: 20px; }
-}
-@media (min-width: 1050px){
-    .main-header { width: 97%; }
-    .card-perfil { padding: 20px; }
+
+
+@media (max-width: 400px) {
+    .main-header { 
+        width: 84.8%; /* Ambos mantienen el mismo ancho en móviles pequeños */
+    }
 }
 
 /* --- MENÚ DE ACCIONES (RESTABLECIDO) --- */
@@ -427,6 +516,18 @@ h2{
     margin-right: 8px;
     color: #ff375f;
 }
+.fa-volume-high {
+    color: #ffffff; /* Blanco por defecto (Modo Oscuro) */
+}
+
+.modo-claro .fa-volume-high {
+    color: #000000; /* Negro en Modo Claro */
+}
+
+/* Color cuando el sonido está DESACTIVADO (siempre gris) */
+.fa-volume-xmark {
+    color: #8e8e93 !important;
+}
 
 /* --- VARIABLES DE TEMA --- */
 :root {
@@ -449,7 +550,7 @@ body.modo-claro {
     border: 1px solid #d1d1d6;
     border-radius: 12px;
     padding: 14px 16px;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
 }
 .modo-claro .menu-btn-group{
     background: transparent;
@@ -467,10 +568,13 @@ body.modo-claro {
 }
 
 .menu-btn-row i {
-    color: #ff375f;
-    margin-right: 10px;
+    color: #000000;
+    margin-right: 14px;
     width: 20px;
     text-align: center;
+}
+.modo-oscuro .menu-btn-row i {
+    color: #ffffff;
 }
 
 .menu-btn-details {
@@ -601,6 +705,7 @@ body {
     outline: none;
     cursor: pointer;
     text-align: center;
+    justify-content: center;
     width: 100%;
     max-width: 120px; /* Evita que el formato AM/PM lo estire */
     padding: 0;
