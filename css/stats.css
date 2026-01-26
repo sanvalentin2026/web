@@ -1,58 +1,174 @@
-/* 1. FIX: Quitamos el margen y aseguramos que el fondo sea infinito */
-html {
-    background-color: #FFF0F6; /* Color rosa base para evitar el blanco */
-    height: 100%;
-}
-
-body {
-    margin: 0;
-    min-height: 100vh; /* Obliga al rosa a llegar hasta abajo */
-    background-color: #FFF0F6;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: var(--text-main);
-}
-
+/* 1. VARIABLES Y BASE */
 :root {
     --primary: #ff375f;
     --primary-light: rgba(214, 51, 132, 0.1);
+    --bg-sitio: #FFF0F6;
+    --bg-loader: #ffffff; /* Sólido para evitar transparencias al inicio */
     --card: #ffffff;
     --text-main: #333;
     --text-muted: #666;
     --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --apple-out: cubic-bezier(0.28, 0.11, 0.32, 1);
 }
 
-/* MODO OSCURO PROFESIONAL */
-body.modo-oscuro {
-    background: #050505;
-    background-color: #050505;
-    color: #f5f5f7;
+/* 2. MODO OSCURO (Aplicado al HTML) */
+html.modo-oscuro {
+    --bg-sitio: #050505;
+    --bg-loader: #1c1c1c;
     --card: rgba(28, 28, 30, 0.75);
     --text-main: #f5f5f7;
     --text-muted: #a1a1a6;
 }
 
-/* FIX: Sincroniza el fondo del navegador en modo oscuro */
-html:has(body.modo-oscuro) {
-    background-color: #050505;
+html {
+    background-color: var(--bg-sitio);
+    height: 100%;
+    transition: background-color 0.3s ease;
 }
 
-.modo-oscuro .card,
-.modo-oscuro .table-container,
-.modo-oscuro .chart-container {
-    background: var(--card) !important;
-    backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--bg-sitio);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--text-main);
 }
 
-.modo-oscuro h1, .modo-oscuro h3, .modo-oscuro h4 { color: #ff375f; }
-.modo-oscuro .card h3 { color: var(--text-muted); }
+/* 3. LOADER (Sincronizado con el tema) */
+.loader-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    background-color: var(--bg-loader) !important;
+    transition: opacity 0.5s var(--apple-out), visibility 0.5s;
+}
+
+.apple-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(128, 128, 128, 0.2);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* 4. LAYOUT Y CONTENEDORES */
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header h1 { 
+    padding-top: 5px;
+    font-size: 16px; 
+    color: var(--primary);
+    margin: 0;
+}
+
+/* 5. TARJETAS (CARDS) */
+.grid-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(25px) saturate(180%);
+}
+
+.card h3, .card h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card p {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* 6. GRÁFICO */
+.chart-container {
+    background: var(--card);
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    height: 350px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(25px) saturate(180%);
+}
+
+.chart-container h3 {
+    color: var(--primary);
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+/* 7. RANKING MINIMALISTA */
+.ranking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+.ranking-item:last-child {
+    border-bottom: none;
+}
+
+/* 8. BOTONES Y UTILIDADES */
+.btn-volver {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    gap: 8px;
+}
 
 .theme-toggle {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #ff375f;
+    background: var(--primary);
     color: white;
     border: none;
     width: 45px;
@@ -66,201 +182,9 @@ html:has(body.modo-oscuro) {
     justify-content: center;
 }
 
-.container {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px; /* Un poco de respiro en los bordes */
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
-
-.grid-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.card {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease;
-    will-change: transform;
-}
-
-.card:hover { transform: translateY(-3px); }
-
-.card h3, .card h4 {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.card p {
-    margin: 8px 0 0;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #ff375f;
-}
-
-#rankingUsuarios {
-    margin-top: 5px;
-    font-size: 0.9rem;
-}
-
-.chart-container {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    height: 350px;
-    color:  var(--primary);
-}
-
-.btn-volver {
-    background: none;
-    border: none;
-    color: #ff375f;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    font-size: 15px;
-    gap: 8px;
-    transition: background 0.2s;
-}
-
-.header h1 { font-size: 1.3rem; color: #ff375f;}
-.fas { width: 20px; text-align: center; }
-
+/* 9. RESPONSIVE */
 @media (max-width: 600px) {
-    .header h1 { font-size: 1.2rem; }
+    .header { gap: 15px; align-items: flex-start; }
     .grid-stats { grid-template-columns: 1fr; }
-}
-
-/* 2. LOADER (Ajustado a tu HTML con loader-overlay y apple-spinner) */
-.loader-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #08080a; /* Fondo oscuro igual que el login */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
-    transition: opacity 0.5s ease, visibility 0.5s;
-}
-
-.apple-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 55, 95, 0.1);
-    border-top: 4px solid #ff375f;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Clase para ocultar el loader desde JS */
-.loader-hidden {
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-/* Contenedor Principal */
-.card {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-}
-
-.card h4 {
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-muted);
-}
-
-/* Item del Ranking */
-#rankingUsuarios .ranking-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    gap: 10px; /* Espacio entre el bloque de nombre y el contador */
-}
-
-/* Bloque Izquierdo (Nombre e Insignias) */
-.ranking-info {
-    display: flex;
-    flex-direction: column; /* Nombre arriba, insignias abajo en pantallas muy pequeñas */
-    gap: 4px;
-    flex: 1; /* Toma el espacio disponible */
-    min-width: 0; /* Evita que el texto largo rompa el flex */
-}
-
-.ranking-name-wrapper {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap; /* <--- CLAVE: Si no caben las insignias, saltan de línea */
-    gap: 5px;
-}
-
-.ranking-name {
-    font-weight: 500;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Corta el nombre con "..." si es demasiado largo */
-    max-width: 150px;
-}
-
-/* Insignias */
-.badge {
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: bold;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-/* Bloque Derecho (Contador) */
-.ranking-count {
-    font-weight: bold;
-    color: var(--primary);
-    font-size: 0.85rem;
-    text-align: right;
-    min-width: 80px; /* Evita que se mueva mucho */
-}
-
-/* Ajustes específicos para móviles muy pequeños */
-@media (max-width: 2500px) {
-    .ranking-name {
-        max-width: 100px;
-    }
-    .ranking-count {
-        min-width: 70px;
-        font-size: 0.75rem;
-    }
+    .card p { font-size: 1.4rem; }
 }

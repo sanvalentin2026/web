@@ -1,72 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+    /* Este script DEBE ir justo aquí para ejecutarse antes de mostrar el body */
+    (function() {
+        const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+        document.documentElement.className = tema;
+    })();
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>San Valentin | Estadisticas</title>
     
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="css/stats.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
-    <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
-    <link rel="apple-touch-icon" href="https://fav.farm/❤️">
     <link rel="stylesheet" href="css/common.css">
 </head>
 <body> 
     <div id="loader-global" class="loader-overlay">
-    <div class="apple-spinner"></div>
+        <div class="apple-spinner"></div>
     </div>
+
     <div class="container">
-    <header class="header">
-        <button class="btn-volver" onclick="history.back()">
-        ← Volver atrás
-        </button>
-        <h1><i class="fas fa-chart-line"></i> Estadísticas</h1>
-    </header>
+        <header class="header">
+            <button class="btn-volver" onclick="history.back()">
+                ← Volver atrás
+            </button>
+            <h1><i class="fas fa-chart-line"></i> Estadísticas</h1>
+        </header>
 
-    <main class="grid-stats">
-        <section class="card">
-            <h3>Total Aproximado</h3>
-            <p id="totalRecaudado">₡0</p>
-        </section>
-        
-        <section class="card">
-            <h3>Pedidos totales</h3>
-            <p id="ventasPagadas">0</p>
-        </section>
+        <main class="grid-stats">
+            <section class="card">
+                <h3>Total Aproximado</h3>
+                <p id="totalRecaudado">₡0</p>
+            </section>
+            
+            <section class="card">
+                <h3>Pedidos totales</h3>
+                <p id="ventasPagadas">0</p>
+            </section>
 
-        <section class="card">
-            <h3>Producto más vendido</h3>
-            <p id="productoEstrella">...</p>
-        </section>
+            <section class="card">
+                <h3>Producto más vendido</h3>
+                <p id="productoEstrella">...</p>
+            </section>
 
-        <section class="card">
-            <h4><i class="fas fa-trophy"></i> Top Vendedores</h4>
-            <div id="rankingUsuarios"></div>
-        </section>
-    </main>
+            <section class="card">
+                <h4><i class="fas fa-trophy"></i> Top Vendedores</h4>
+                <div id="rankingUsuarios"></div>
+            </section>
+        </main>
 
-    <section class="chart-container">
-        <h3><i class="fas fa-chart-bar"></i> Grafico de ventas</h3>
-        <div style="height: 280px; position: relative;">
-            <canvas id="graficoVentas"></canvas>
-        </div>
-    </section>
-</div>
-        <footer class="main-footer">
+        <section class="chart-container">
+            <h3><i class="fas fa-chart-bar"></i> Gráfico de ventas</h3>
+            <div style="height: 280px; position: relative;">
+                <canvas id="graficoVentas"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer">
         <div class="footer-content">
             <p class="copyright">&copy; 2026 Todos los derechos reservados</p>
         </div>
     </footer>
-<!-- Scripts optimizados al final para mejor rendimiento -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js" defer></script>
-<script src="js/supabase-config.js"></script>
-<script type="module" src="js/estadisticas.js"></script>
-<script type="module" src="js/prescense.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script type="module" src="js/estadisticas.js"></script>
+    <script type="module" src="js/prescense.js"></script>
 </body>
 </html>

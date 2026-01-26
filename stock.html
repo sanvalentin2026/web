@@ -17,6 +17,18 @@
     <div id="loader-global" class="loader-overlay">
     <div class="apple-spinner"></div>
     </div>
+    <script>
+        // Seguridad y desbloqueo visual tras validación
+        const session = JSON.parse(localStorage.getItem("usuario") || "{}");
+        if (!session.permisos || session.permisos === "false") {
+            window.stop();
+            window.location.replace("login.html");
+        } else {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.style.display = "block";
+            });
+        }
+    </script>
 
     <div class="container">
         <header class="nav-header">

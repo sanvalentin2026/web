@@ -190,21 +190,23 @@ body {
 /* --- HEADER ALINEADO Y FIJO --- */
 .main-header {
     backdrop-filter: blur(5px);
-    position: sticky; /* Corregido de 'top' a 'sticky' */
-    top: 0px;        /* Pequeño margen superior para estética */
+    /* CAMBIO AQUÍ: Usamos relative para que se quede en su sitio original */
+    position: relative; 
     z-index: 1000;
     
-    /* El truco para que nunca sobrepase al contenido: */
     width: 95%;
-    max-width: 1060px; /* Ajusta este valor al ancho de tu perfil-grid */
+    max-width: 1060px; 
     margin: 0 auto 20px auto; 
     
     background: var(--glass);
     border: 1px solid var(--glass-border) !important;
+    
+    /* Tus bordes personalizados */
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
+    
     box-sizing: border-box;
     padding: 10px 0px;
 }
