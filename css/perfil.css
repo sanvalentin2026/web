@@ -40,7 +40,7 @@ body {
     margin: 40px auto;
     padding: 20px;
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 350px 1fr;
     gap: 25px;
 }
 
@@ -208,6 +208,19 @@ body {
     .main-header { width: 89%; }
     .card-perfil { padding: 20px; }
 }
+@media (max-width: 1170px){
+    .main-header { width: 96%; }
+    .card-perfil { padding: 20px; }
+}
+@media (max-width: 1050px){
+    .main-header { width: 95%; }
+    .card-perfil { padding: 20px; }
+}
+@media (min-width: 1050px){
+    .main-header { width: 97%; }
+    .card-perfil { padding: 20px; }
+}
+
 /* --- MENÚ DE ACCIONES (RESTABLECIDO) --- */
 .perfil-menu {
     margin-top: 25px;
@@ -256,8 +269,7 @@ h2{
     border: 1px solid var(--border-ranking);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     
-    /* ESTO ES LO NUEVO: */
-    height: 600px;           /* Altura fija para que no crezca más */
+    /* ESTO ES LO NUEVO: *//* Altura fija para que no crezca más */
     display: flex;           /* Usamos flex para organizar el header y la lista */
     flex-direction: column;  /* Uno arriba del otro */
 }
@@ -366,4 +378,261 @@ h2{
     border-bottom-right-radius: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;;
     border-top: none;
+}
+
+.btn-preferencias i {
+    width: 18px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+ .btn-preferencias {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 14px;
+    background: var(--glass);
+    color: var(--text-main);
+    text-decoration: none;
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    justify-content: flex-start;
+}
+.modo-claro .btn-preferencias {
+    background: #ffffff;
+    border: 1px solid #d1d1d6;
+}
+/* Estilo del grupo para que parezca un botón más largo */
+.menu-btn-group {
+    background: var(--bg-card, #2c2c2e);
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.menu-btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.menu-btn-row i {
+    width: 20px;
+    margin-right: 8px;
+    color: #ff375f;
+}
+
+/* --- VARIABLES DE TEMA --- */
+:root {
+    --bg-menu-item: #2c2c2e;
+    --text-menu-main: #ffffff;
+    --text-menu-dim: #8e8e93;
+    --border-menu: rgba(255, 255, 255, 0.05);
+}
+
+body.modo-claro {
+    --bg-menu-item: #f2f2f7;
+    --text-menu-main: #1c1c1e;
+    --text-menu-dim: #636366;
+    --border-menu: rgba(0, 0, 0, 0.05);
+}
+
+/* --- CONTENEDOR MODO NOCTURNO --- */
+.menu-btn-group {
+    background: var(--glass);
+    border: 1px solid #d1d1d6;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+}
+.modo-claro .menu-btn-group{
+    background: transparent;
+}
+.modo-oscuro .menu-btn-group{
+    border: 1px solid var(--glass-border);
+}
+
+.menu-btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-menu-main);
+    font-size: 0.95rem;
+}
+
+.menu-btn-row i {
+    color: #ff375f;
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.menu-btn-details {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(120, 120, 128, 0.2);
+}
+
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--text-menu-dim);
+    font-size: 0.75rem;
+}
+
+.horario-nota {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--text-menu-dim);
+    margin-top: 10px;
+    opacity: 0.8;
+}
+
+/* --- SWITCH ESTILO IOS --- */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider-round {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #48484a;
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.slider-round:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider-round { background-color: #34c759; }
+input:checked + .slider-round:before { transform: translateX(18px); }
+
+/* --- RANGE (SLIDER) --- */
+#rangeIntensidad {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--text-menu-dim);
+    opacity: 0.4;
+    border-radius: 10px;
+    outline: none;
+}
+
+#rangeIntensidad::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ff375f;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+
+/* --- FIX OVERFLOW --- */
+body {
+    overflow-x: hidden !important;
+}
+.horario-config {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 15px 10px;
+    background: rgba(120, 120, 128, 0.15);
+    border-radius: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hora-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.hora-item span {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+/* Contenedor del input para controlar el icono */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.hora-item input[type="time"] {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 1rem; /* Un poco más grande para que sea legible */
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+    max-width: 120px; /* Evita que el formato AM/PM lo estire */
+    padding: 0;
+    margin: 0;
+}
+
+/* Forzar que el icono del reloj nativo se vea centrado */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    opacity: 0.6;
+}
+
+.modo-oscuro input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.modo-claro .hora-item input[type="time"] {
+    color: #000000;
+}
+
+/* Alineación para el icono del reloj en Chrome/Edge */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    margin-left: -5px;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* --- EFECTO DE TRANSICIÓN GRADUAL --- */
+html {
+    /* Esto hará que cuando cambie el filtro en el JS, 
+       se aplique lentamente durante 3 segundos */
+    transition: filter 0.5s ease-in-out;
 }

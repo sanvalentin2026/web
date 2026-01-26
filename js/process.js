@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 400); 
 });
 
+let sonidosActivados = localStorage.getItem('sonidos-web') !== 'disabled';
+
 const ReproductorSonidos = {
     buffer: {},
     rutas: {
@@ -56,23 +58,47 @@ const ReproductorSonidos = {
     init() {
         for (const [nombre, ruta] of Object.entries(this.rutas)) {
             this.buffer[nombre] = new Audio(ruta);
-            this.buffer[nombre].preload = 'auto'; // Precarga en segundo plano
+            this.buffer[nombre].preload = 'auto';
             this.buffer[nombre].volume = 0.3;
         }
+        this.actualizarUI();
     },
 
     play(nombre) {
+        if (!sonidosActivados) return;
         const sonido = this.buffer[nombre];
         if (sonido) {
-            // requestAnimationFrame asegura que el audio no interrumpa la animación de la alerta
             requestAnimationFrame(() => {
                 sonido.currentTime = 0;
                 sonido.play().catch(() => {});
             });
         }
+    },
+
+    toggle() {
+        sonidosActivados = !sonidosActivados;
+        localStorage.setItem('sonidos-web', sonidosActivados ? 'enabled' : 'disabled');
+        this.actualizarUI();
+    },
+
+    actualizarUI() {
+        const icono = document.getElementById('iconoSonido');
+        const texto = document.getElementById('textoSonido');
+        if (icono && texto) {
+            icono.className = sonidosActivados ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
+            texto.textContent = sonidosActivados ? 'Sonido Activo' : 'Silenciado';
+            icono.style.color = sonidosActivados ? 'var(--primary-red)' : '#8e8e93';
+        }
     }
 };
+
 ReproductorSonidos.init();
+
+document.addEventListener('click', (e) => {
+    if (e.target.closest('#btnToggleSonido')) {
+        ReproductorSonidos.toggle();
+    }
+});
 
 /* =========================
    🔐 UTILIDADES DE SEGURIDAD
@@ -410,6 +436,86 @@ function renderizarPaginacion() {
         dom.paginacion.appendChild(btn);
     }
 }
+let nocturnoAuto = localStorage.getItem('nocturno-auto') === 'true';
+let intensidadCalida = localStorage.getItem('nocturno-intensidad') || 30;
+let horaInicio = localStorage.getItem('nocturno-inicio') || "19:00";
+let horaFin = localStorage.getItem('nocturno-fin') || "07:00";
+
+const ModoNocturno = {
+    init() {
+        const check = document.getElementById('checkModoNocturno');
+        const range = document.getElementById('rangeIntensidad');
+        const txtVal = document.getElementById('valIntensidad');
+        const inputInicio = document.getElementById('horaInicio');
+        const inputFin = document.getElementById('horaFin');
+
+        if (check) check.checked = nocturnoAuto;
+        if (range) range.value = intensidadCalida;
+        if (txtVal) txtVal.textContent = intensidadCalida + "%";
+        if (inputInicio) inputInicio.value = horaInicio;
+        if (inputFin) inputFin.value = horaFin;
+
+        // Listeners para cambios inmediatos sin recargar
+        check?.addEventListener('change', (e) => {
+            nocturnoAuto = e.target.checked;
+            localStorage.setItem('nocturno-auto', nocturnoAuto);
+            this.aplicar();
+        });
+
+        range?.addEventListener('input', (e) => {
+            intensidadCalida = e.target.value;
+            if (txtVal) txtVal.textContent = intensidadCalida + "%";
+            localStorage.setItem('nocturno-intensidad', intensidadCalida);
+            this.aplicar();
+        });
+
+        const actualizarHoras = () => {
+            horaInicio = inputInicio.value;
+            horaFin = inputFin.value;
+            localStorage.setItem('nocturno-inicio', horaInicio);
+            localStorage.setItem('nocturno-fin', horaFin);
+            this.aplicar();
+        };
+
+        inputInicio?.addEventListener('change', actualizarHoras);
+        inputFin?.addEventListener('change', actualizarHoras);
+
+        this.aplicar();
+        setInterval(() => this.aplicar(), 30000);
+    },
+
+    aplicar() {
+        const ahora = new Date();
+        const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+        const [hIn, mIn] = horaInicio.split(':').map(Number);
+        const [hFi, mFi] = horaFin.split(':').map(Number);
+        const inicioMinutos = hIn * 60 + mIn;
+        const finMinutos = hFi * 60 + mFi;
+
+        let esHoraNocturna = (inicioMinutos < finMinutos) 
+            ? (horaActual >= inicioMinutos && horaActual < finMinutos)
+            : (horaActual >= inicioMinutos || horaActual < finMinutos);
+
+        const root = document.documentElement;
+        const esClaro = document.body.classList.contains('modo-claro');
+
+        if (nocturnoAuto && esHoraNocturna) {
+            const factor = intensidadCalida / 100;
+            const sepia = esClaro ? factor * 0.75 : factor;
+            const brillo = esClaro ? 1 - (factor / 18) : 1 - (factor / 6);
+            
+            root.style.filter = `sepia(${sepia}) brightness(${brillo}) saturate(${esClaro ? 1.1 : 1})`;
+            root.style.backgroundColor = esClaro ? '#FFF0F6' : '#000000';
+            root.style.minHeight = "100vh";
+        } else {
+            root.style.filter = 'none';
+            root.style.backgroundColor = '';
+        }
+    }
+};
+
+// Se inicializa al cargar
+ModoNocturno.init();
 
 /* =========================
    📝 CREAR PEDIDO (NUEVO)
@@ -603,7 +709,7 @@ window.togglePagado = async (id, estadoActual) => {
         Swal.fire({
             toast:true,
             icon: 'success',
-            title: 'Estado de pago actualizado',
+            title: 'Pago actualizado',
             timer: 1500,
             showConfirmButton: false,
             background: tema.bg,

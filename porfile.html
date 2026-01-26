@@ -46,14 +46,62 @@
                 <div id="contenedorInsignias" class="badges-list"></div>
             </div>
 
-            <nav class="perfil-menu">
-                <p>• Preferencias</p>
-                                <button onclick="cambiarTema()" class="menu-btn"><i class="fa-solid fa-palette"></i> Cambiar Tema</button>
-                                <p>• Acciones</p>
-                <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
-                    <i class="fa-solid fa-headset"></i>Soporte</a>
-                <button onclick="confirmarSalida()" class="menu-btn logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
-            </nav>
+<nav class="perfil-menu">
+    <p>• Preferencias</p>
+    
+    <button onclick="cambiarTema()" class="menu-btn">
+        <i class="fa-solid fa-palette"></i> Cambiar Tema
+    </button>
+    
+    <button id="btnToggleSonido" class="menu-btn">
+        <i id="iconoSonido" class="fas fa-volume-high"></i> 
+        <span id="textoSonido">Sonido Activo</span>
+    </button>
+
+    <div class="menu-btn-group">
+        <div class="menu-btn-row">
+            <span><i class="fas fa-moon"></i> Modo Nocturno</span>
+            <label class="switch">
+                <input type="checkbox" id="checkModoNocturno">
+                <span class="slider-round"></span>
+            </label>
+        </div>
+        
+        <div class="menu-btn-details">
+            <div class="range-labels">
+                <small>Intensidad Cálida</small>
+                <small id="valIntensidad">30%</small>
+            </div>
+            
+            <input type="range" id="rangeIntensidad" min="0" max="60" value="30">
+
+<div class="horario-config">
+    <div class="hora-item">
+        <span>Inicio</span>
+        <div class="input-wrapper">
+            <input type="time" id="horaInicio" value="19:00">
+        </div>
+    </div>
+    <div class="hora-item">
+        <span>Fin</span>
+        <div class="input-wrapper">
+            <input type="time" id="horaFin" value="07:00">
+        </div>
+    </div>
+</div>
+        </div>
+    </div>
+
+    <p>• Ayuda y Acciones</p>
+    
+    <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
+        <i class="fa-solid fa-headset"></i> Soporte
+    </a>
+    
+    <button onclick="confirmarSalida()" class="menu-btn logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+    </button>
+</nav>
         </aside>
 
         <section class="card-usuarios">

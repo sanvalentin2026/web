@@ -23,7 +23,8 @@ export const obtenerTema = () => {
     };
 };
 
-// SONIDOS
+let sonidosActivados = localStorage.getItem('sonidos-web') !== 'disabled';
+
 const ReproductorSonidos = {
     buffer: {},
     rutas: {
@@ -39,9 +40,11 @@ const ReproductorSonidos = {
             this.buffer[nombre].preload = 'auto';
             this.buffer[nombre].volume = 0.3;
         }
+        this.actualizarUI();
     },
 
     play(nombre) {
+        if (!sonidosActivados) return;
         const sonido = this.buffer[nombre];
         if (sonido) {
             requestAnimationFrame(() => {
@@ -49,9 +52,32 @@ const ReproductorSonidos = {
                 sonido.play().catch(() => {});
             });
         }
+    },
+
+    toggle() {
+        sonidosActivados = !sonidosActivados;
+        localStorage.setItem('sonidos-web', sonidosActivados ? 'enabled' : 'disabled');
+        this.actualizarUI();
+    },
+
+    actualizarUI() {
+        const icono = document.getElementById('iconoSonido');
+        const texto = document.getElementById('textoSonido');
+        if (icono && texto) {
+            icono.className = sonidosActivados ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
+            texto.textContent = sonidosActivados ? 'Sonido Activo' : 'Silenciado';
+            icono.style.color = sonidosActivados ? 'var(--primary-red)' : '#8e8e93';
+        }
     }
 };
+
 ReproductorSonidos.init();
+
+document.addEventListener('click', (e) => {
+    if (e.target.closest('#btnToggleSonido')) {
+        ReproductorSonidos.toggle();
+    }
+});
 
 /* ======================================================
     🛡️ PARCHE DE SEGURIDAD: VALIDACIÓN ANTI-CONSOLA
