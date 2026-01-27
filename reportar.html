@@ -32,15 +32,13 @@
 
   <!-- Scripts moved to end of body for better performance -->
 
-  <button class="btn-volver" onclick="history.back()">← Volver atrás</button>
+    <button class="btn-volver" onclick="history.back()">← Volver atrás</button>
   
 <div class="container">
     <h1>Soporte - Reportes</h1>
 
     <div id="seccion-reporte">
-        <div class="version-container">
-            Version actual: <span class="version-number">v1.4.0 | RC-7</span>
-        </div>
+
 
         <form id="formReporte">
             <label for="tipo">Tipo de ticket</label>
@@ -53,10 +51,10 @@
             </select>
 
             <label for="descripcion">¿Qué ocurrió?</label>
-            <textarea id="descripcion" placeholder="Describa que paso" required></textarea>
+            <textarea id="descripcion" placeholder="Describa lo que paso..." required></textarea>
 
             <label for="entorno">Dispositivo y navegador</label>
-            <input id="entorno" placeholder="Ej: iPhone · Safari" required>
+            <input id="entorno" placeholder="Ej: iPhone · Safari  |  Android · Google" required>
 
             <button type="submit" id="btnEnviar">Crear Ticket</button>
         </form>

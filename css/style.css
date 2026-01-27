@@ -66,7 +66,7 @@ html.modo-claro .loader-overlay { background-color: #ffffff; }
 /* ===== Títulos ===== */
 h1 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: #E11D48;
   font-size: 45px;
   font-family: 'Dancing Script', cursive;
@@ -77,7 +77,7 @@ h1 {
 form {
   background: #ffffff;
   padding: 20px;
-  border-radius: 14px;
+  border-radius: 24px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   display: grid;
   grid-template-columns: 1fr;
@@ -89,7 +89,7 @@ form input[type="text"],
 form select,
 form textarea {
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 13px;
   border: 1px solid #F3C1D9;
   font-size: 16px;
 }
@@ -135,7 +135,7 @@ form button {
 #filtroSeccion,
 #btn-reportar{
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 13px;
   border: 1px solid #F3C1D9;
   color: black;
   font-size: 16px;
@@ -1206,8 +1206,8 @@ h1 {
     box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;;
     border-bottom: none;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
 }
@@ -1215,8 +1215,8 @@ h1 {
 .main-header.scrolled {
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;;
     border-top: none;
 }

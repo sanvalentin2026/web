@@ -97,7 +97,7 @@ body {
 .card {
     background: var(--card);
     padding: 20px;
-    border-radius: 16px;
+    border-radius: 18px;
     box-shadow: var(--shadow);
     transition: transform 0.2s ease;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -123,7 +123,7 @@ body {
 .chart-container {
     background: var(--card);
     padding: 10px;
-    border-radius: 20px;
+    border-radius: 24px;
     box-shadow: var(--shadow);
     height: 350px;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -187,4 +187,65 @@ body {
     .header { gap: 15px; align-items: flex-start; }
     .grid-stats { grid-template-columns: 1fr; }
     .card p { font-size: 1.4rem; }
+}
+:root {
+    --footer-text: #666666;
+    --footer-highlight: #e63946;
+    --footer-line: rgba(0, 0, 0, 0.1);
+}
+
+body.modo-oscuro {
+    --footer-text: #a1a1a6;
+    --footer-highlight: #ff375f;
+    --footer-line: rgba(255, 255, 255, 0.1);
+}
+
+.main-footer {
+    margin-top: 50px;
+    padding: 30px 20px;
+    text-align: center;
+    border-top: 1px solid var(--footer-line);
+    transition: all 0.3s ease;
+}
+
+.footer-content p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: var(--footer-text);
+    letter-spacing: 0.5px;
+}
+
+.footer-content .author {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--footer-highlight);
+    margin-bottom: 10px;
+}
+
+.footer-content .divider {
+    width: 300px;
+    height: 2px;
+    background: var(--footer-highlight);
+    margin: 15px auto;
+    border-radius: 2px;
+    opacity: 0.6;
+}
+
+.footer-content .copyright {
+    font-size: 12px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 600px) {
+    .main-footer {
+        margin-top: 30px;
+        padding: 20px 15px;
+    }
+}
+.footer-content{
+    border-top: 1px solid #ffffff1a;
 }
