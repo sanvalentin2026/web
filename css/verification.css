@@ -41,7 +41,7 @@ body.modo-claro {
   box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
 }
 
-/* ===== MODO OSCURO (Glassmorphism Premium) ===== */
+/* ===== MODO OSCURO ===== */
 body.modo-oscuro {
   background-color: #000000;
 }

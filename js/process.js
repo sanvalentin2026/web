@@ -242,8 +242,8 @@ function inicializarSecciones() {
         while (select.firstChild) select.removeChild(select.firstChild);
         const placeholder = document.createElement('option');
         placeholder.value = '';
-        placeholder.textContent = select.id === 'filtroSeccion' ? 'Filtrar busqueda por una seccion' : 'Seleccione una seccion';
-        select.appendChild(placeholder);
+ placeholder.textContent = select.id === 'filtroSeccion' ? 'Filtrar búsqueda por una sección' : 'Seleccione una sección';
+select.appendChild(placeholder);
 
         for (let i = 7; i <= 11; i++) {
             for (let j = 1; j <= 4; j++) {
