@@ -257,7 +257,7 @@ function aplicarTema() {
         '--text-muted': '#a1a1a6'
     } : {
         '--bg': '#f8f9fa',
-        '--card': '#ffffff',
+        '--card': 'hsl(0, 0%, 100%, 0.2)',
         '--text-main': '#333',
         '--text-muted': '#666'
     };

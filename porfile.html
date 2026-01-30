@@ -2,8 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>San Valentin | Perfil</title>
+
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -11,28 +13,27 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="apple-touch-icon" href="https://fav.farm/❤️">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E">
-    <link rel="mask-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='80'%3E❤️%3C/text%3E%3C/svg%3E" color="#ff375f">
     <link rel="stylesheet" href="css/perfil.css">
 </head>
 <body>
     <div id="loader-global" class="loader-overlay">
-    <div class="apple-spinner"></div>
+        <div class="apple-spinner"></div>
     </div>
 
-<header class="main-header">
+    <header class="main-header">
         <div class="header-container">
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="index.html" style="color: #969696; font-size: 1.2rem;"><i class="fa-solid fa-chevron-left"></i></a>
+                <a href="index.html" style="padding-bottom: 2.5px;   font-size: 1.2rem;"><i class="fa-solid fa-chevron-left"></i></a>
                 <h2 class="title">Perfil</h2>
             </div>
             <div class="header-right">
-               <span style="font-weight: 400; opacity: 0.8;">CRC - </span> <span id="reloj" style="font-weight: 400; opacity: 0.8;">Cargando...</span>
+                <span style="font-weight: 400; opacity: 0.8;">CRC - </span> <span id="reloj" style="font-weight: 400; opacity: 0.8;">Cargando...</span>
             </div>
         </div>
-    </header>
+    </header> 
 
     <main class="perfil-grid">
-        <aside class="card-perfil">
+        <aside class="card-perfil apple-entry delay-1">
             <div class="avatar-edit">
                 <img id="imgPerfil" src="imgs/usuario.png" alt="Avatar">
                 <label for="inputFoto" class="btn-foto">
@@ -46,78 +47,78 @@
                 <div id="contenedorInsignias" class="badges-list"></div>
             </div>
 
-<nav class="perfil-menu">
-    <p>• Preferencias</p>
-    
-    <button onclick="cambiarTema()" class="menu-btn">
-        <i class="fa-solid fa-palette"></i> Cambiar Tema
-    </button>
-    
-    <button id="btnToggleSonido" class="menu-btn">
-        <i id="iconoSonido" class="fas fa-volume-high"></i> 
-        <span id="textoSonido">Sonido Activo</span>
-    </button>
+            <nav class="perfil-menu">
+                <p>• Preferencias</p>
+                
+                <button onclick="cambiarTema()" class="menu-btn">
+                    <i class="fa-solid fa-palette"></i> Cambiar Tema
+                </button>
+                
+                <button id="btnToggleSonido" class="menu-btn">
+                    <i id="iconoSonido" class="fas fa-volume-high"></i> 
+                    <span id="textoSonido">Sonido Activo</span>
+                </button>
 
-    <div class="menu-btn-group">
-        <div class="menu-btn-row">
-            <span><i class="fas fa-moon"></i> Modo Nocturno</span>
-            <label class="switch">
-                <input type="checkbox" id="checkModoNocturno">
-                <span class="slider-round"></span>
-            </label>
-        </div>
-        
-        <div class="menu-btn-details">
-            <div class="range-labels">
-                <small>- Intensidad cálida de la pantalla</small>
-                <small id="valIntensidad">30%</small>
-            </div>
-            
-            <input type="range" id="rangeIntensidad" min="0" max="60" value="30">
+                <div class="menu-btn-group">
+                    <div class="menu-btn-row">
+                        <span><i class="fas fa-moon"></i> Modo Nocturno</span>
+                        <label class="switch">
+                            <input type="checkbox" id="checkModoNocturno">
+                            <span class="slider-round"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="menu-btn-details">
+                        <div class="range-labels">
+                            <small>- Intensidad cálida de la pantalla</small>
+                            <small id="valIntensidad">30%</small>
+                        </div>
+                        
+                        <input type="range" id="rangeIntensidad" min="0" max="60" value="30">
 
-<div class="horario-config">
-    <div class="hora-item">
-        <span>Inicio</span>
-        <div class="input-wrapper">
-            <input type="time" id="horaInicio" value="19:00">
-        </div>
-    </div>
-    <div class="hora-item">
-        <span>Fin</span>
-        <div class="input-wrapper">
-            <input type="time" id="horaFin" value="07:00">
-        </div>
-    </div>
-</div>
-        </div>
-    </div>
+                        <div class="horario-config">
+                            <div class="hora-item">
+                                <span>Inicio</span>
+                                <div class="input-wrapper">
+                                    <input type="time" id="horaInicio" value="19:00">
+                                </div>
+                            </div>
+                            <div class="hora-item">
+                                <span>Fin</span>
+                                <div class="input-wrapper">
+                                    <input type="time" id="horaFin" value="07:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <p>• Soporte y Acciones</p>
-    
-    <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
-        <i class="fa-solid fa-headset"></i> Soporte
-    </a>
-    
-    <button onclick="confirmarSalida()" class="menu-btn logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
-    </button>
-</nav>
+                <p>• Soporte y Acciones</p>
+                
+                <a href="reportar.html" class="menu-btn report-btn" title="Reportar un error">
+                    <i class="fa-solid fa-headset"></i> Soporte
+                </a>
+                
+                <button onclick="confirmarSalida()" class="menu-btn logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                </button>
+            </nav>
         </aside>
 
-        <section class="card-usuarios">
+        <section class="card-usuarios apple-entry delay-2">
             <div class="section-header">
-                <h3><i class="fa-solid fa-circle-dot" style="color: #34c759;"></i>  Usuarios en linea</h3>
+                <h3><i class="fa-solid fa-circle-dot" style="color: #34c759;"></i> Usuarios en línea</h3>
             </div>
-
-            <div id="listaUsuarios" class="lista-presencia">
-                </div>
+            <div id="listaUsuarios" class="lista-presencia"></div>
         </section>
     </main>
-        <footer class="main-footer">
+
+    <footer class="main-footer">
         <div class="footer-content">
             <p class="copyright">&copy; 2026 Todos los derechos reservados</p>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/perfil_extra.js"></script>

@@ -1,11 +1,11 @@
-/* 1. CONFIGURACIÓN DE FONDO INFINITO */
+/* 1. CONFIGURACIÓN CRÍTICA (Evita el Flash Blanco) */
 html {
     height: 100%;
-    background-color: #FFF0F6;
+    background-color: #0a0a0a; 
 }
 
-html.modo-oscuro { background-color: #0a0a0a; }
-html.modo-claro { background-color: #FFF0F6; }
+html.modo-oscuro { background-color: #0a0a0a !important; }
+html.modo-claro { background-color: #FFF0F6 !important; }
 
 :root {
     --status-ok: #10b981;
@@ -27,25 +27,54 @@ body.modo-oscuro {
 body.modo-claro {
     --bg: #FFF0F6;
     --border: #e5e5e5;
-    --card: #f9f9f9;
+    --card: #fff;
     --text-main: #1a1a1a;
-    --text-muted: #ffffff;
+    --text-muted: #636366;
     --header-bg: #ff375f;
 }
 
 /* 3. ESTILOS BASE DEL BODY */
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg);
     color: var(--text-main);
     margin: 0;
     padding: 15px;
     min-height: 100vh;
-    transition: background 0.2s ease;
-    display: none;
+    display: block !important; 
 }
 
-/* 4. COMPONENTES */
+/* 4. LOADER (Fix de salida suave) */
+#loader-global {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+}
+
+.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.apple-spinner {
+    width: 35px;
+    height: 35px;
+    border: 3px solid rgba(128, 128, 128, 0.2);
+    border-top: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 5. COMPONENTES DE LA INTERFAZ (Tu diseño original) */
 .container { 
     max-width: 800px; 
     margin: 0 auto; 
@@ -60,42 +89,44 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-/* NUEVOS ESTILOS PARA EL ICONO Y EL TÍTULO */
 .header-info {
     display: flex;
     align-items: center;
-    gap: 10px; /* Espacio entre el icono y el texto */
+    gap: 12px;
 }
 
 .header-info i {
-    color: #ff375f;
-    font-size: 1.2rem;
+    color: var(--accent);
+    font-size: 1.3rem;
 }
 
 .header-info h1 { 
-    font-size: 1.1rem; 
+    font-size: 1.2rem; 
     margin: 0; 
     font-weight: 700; 
-    color: #ff375f; 
+    color: var(--accent); 
 }
 
 .btn-back {
     border: none !important;
     background: transparent;    
-    color: #ff375f;
-    padding: 8px 14px;
-    border-radius: 6px;
+    color: var(--accent);
+    padding: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
+    transition: opacity 0.2s;
 }
 
+/* 6. TABLA DE INVENTARIO (Tu diseño original) */
 .table-container {
     width: 100%;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 .inventory-table { 
@@ -106,48 +137,50 @@ body {
 
 th {
     background: var(--header-bg);
-    padding: 12px;
-    font-size: 0.7rem;
+    padding: 14px 12px;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    color: #ffffff;
     border-bottom: 1px solid var(--border);
     text-align: left;
 }
 
 td {
-    padding: 14px 12px;
+    padding: 16px 12px;
     border-bottom: 1px solid var(--border);
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.95rem;
     color: var(--text-main);
+    vertical-align: middle;
 }
 
 .status-dot { 
-    height: 7px; 
-    width: 7px; 
+    height: 8px; 
+    width: 8px; 
     border-radius: 50%; 
     display: inline-block; 
-    margin-right: 6px; 
+    margin-right: 8px; 
 }
 
-.dot-ok { background: var(--status-ok); }
-.dot-warn { background: var(--status-warn); }
-.dot-crit { background: var(--status-crit); }
+.dot-ok { background: var(--status-ok); box-shadow: 0 0 8px var(--status-ok); }
+.dot-warn { background: var(--status-warn); box-shadow: 0 0 8px var(--status-warn); }
+.dot-crit { background: var(--status-crit); box-shadow: 0 0 8px var(--status-crit); }
 
 .qty-box { 
-    font-family: monospace; 
+    font-family: 'SF Mono', 'Roboto Mono', monospace; 
     font-weight: 700; 
     text-align: right; 
-    display: block; 
+    padding: 4px 8px;
+    background: rgba(128, 128, 128, 0.1);
+    border-radius: 4px;
 }
 
 .out-text { 
     color: var(--status-crit); 
-    font-weight: 800; 
+    background: rgba(239, 68, 68, 0.15);
 }
 
-.col-name { width: 50%; }
-.col-status { width: 30%; }
+/* Columnas */
+.col-name { width: 45%; }
+.col-status { width: 35%; }
 .col-qty { width: 20%; text-align: right; }

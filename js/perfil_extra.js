@@ -1,20 +1,44 @@
-setInterval(() => {
+(function() {
+    const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+    document.documentElement.className = tema;
+    document.documentElement.style.backgroundColor = tema === 'modo-oscuro' ? '#000000' : '#FFF0F6';
+})();
+
+(function() {
     const elReloj = document.getElementById('reloj');
-    if (elReloj) {
+    if (!elReloj) return;
+
+    const actualizarReloj = () => {
         const ahora = new Date();
         let horas = ahora.getHours();
         const minutos = ahora.getMinutes().toString().padStart(2, '0');
         const segundos = ahora.getSeconds().toString().padStart(2, '0');
 
-        // Convertir formato: si es 0 (medianoche) pasa a 12, 
-        // si es mayor a 12 (tarde) resta 12.
         horas = horas % 12 || 12;
-
         elReloj.textContent = `${horas}:${minutos}:${segundos}`;
-    }
-}, 1000);
-        // Lógica de Cerrar Sesión con SweetAlert
-function confirmarSalida() {
+    };
+
+    actualizarReloj();
+    setInterval(actualizarReloj, 1000);
+})();
+
+window.aplicarTemaGuardado = function() {
+    const tema = localStorage.getItem('tema-usuario') || 'modo-oscuro';
+    document.documentElement.className = tema;
+    document.body.className = tema;
+};
+
+window.cambiarTema = function() {
+    const esClaro = document.body.classList.contains('modo-claro');
+    const nuevoTema = esClaro ? 'modo-oscuro' : 'modo-claro';
+    
+    document.documentElement.className = nuevoTema;
+    document.body.className = nuevoTema;
+    document.documentElement.style.backgroundColor = nuevoTema === 'modo-oscuro' ? '#000000' : '#FFF0F6';
+    localStorage.setItem('tema-usuario', nuevoTema);
+};
+
+window.confirmarSalida = function() {
     const esClaro = localStorage.getItem('tema-usuario') === 'modo-claro';
 
     Swal.fire({
@@ -25,18 +49,11 @@ function confirmarSalida() {
         cancelButtonColor: esClaro ? '#d1d1d6' : '#3a3a3c',
         confirmButtonText: 'Confirmar',
         cancelButtonText: 'Cancelar',
-        // --- ADAPTACIÓN DE TEMA ---
         background: esClaro ? '#ffffff' : '#1c1c1e',
         color: esClaro ? '#1c1c1e' : '#ffffff',
+        backdrop: `rgba(0,0,0,0.4)`,
         didOpen: (popup) => {
-            // Aplicamos los bordes redondeados de 20px
             popup.style.borderRadius = '20px';
-            
-            // Opcional: Si quieres que el título también esté alineado a la izquierda
-            const title = popup.querySelector('.swal2-title');
-            if (title) {
-                title.style.textAlign = 'center'; // En diálogos grandes suele verse mejor centrado, pero puedes cambiarlo a 'left'
-            }
         }
     }).then((result) => {
         if (result.isConfirmed) {
@@ -44,34 +61,6 @@ function confirmarSalida() {
             window.location.href = "login.html";
         }
     });
-}
-        function aplicarTemaGuardado() {
-    const tema = localStorage.getItem('tema-usuario');
-    
-    if (tema === 'modo-claro') {
-        document.body.classList.remove('modo-oscuro');
-        document.body.classList.add('modo-claro');
-    } else {
-        // Por defecto o si es modo-oscuro
-        document.body.classList.remove('modo-claro');
-        document.body.classList.add('modo-oscuro');
-    }
-}
-// 2. Función para el botón de cambiar tema
-if (typeof window !== 'undefined') {
-  window.cambiarTema = function() {
-      const esClaro = document.body.classList.contains('modo-claro');
-      if (esClaro) {
-          document.body.classList.replace('modo-claro', 'modo-oscuro');
-          localStorage.setItem('tema-usuario', 'modo-oscuro');
-      } else {
-          document.body.classList.replace('modo-oscuro', 'modo-claro');
-          localStorage.setItem('tema-usuario', 'modo-claro');
-      }
-  }
-}
+};
 
-// Asegúrate de llamar a aplicarTemaGuardado al inicio
-document.addEventListener('DOMContentLoaded', () => {
-    aplicarTemaGuardado();
-});
+aplicarTemaGuardado();

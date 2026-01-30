@@ -230,10 +230,17 @@ document.head.appendChild(styleSwal);
 /* =========================
    🛠️ UTILIDADES Y SECCIONES
 ========================= */
-const obtenerTema = () => ({
-    bg: document.body.classList.contains('modo-oscuro') ? '#1c1c1e' : '#fff',
-    txt: document.body.classList.contains('modo-oscuro') ? '#f5f5f7' : '#374151'
-});
+const obtenerTema = () => {
+    const esOscuro = document.body.classList.contains('modo-oscuro');
+    
+    return {
+        // Modo oscuro: Gris profundo sólido | Modo claro: Blanco ultra translúcido
+        bg: esOscuro ? '#1c1c1e' : '#fff',
+        txt: esOscuro ? '#f5f5f7' : '#1c1c1e',
+        // El blur solo existe aquí para ser usado en el modo claro
+        blurEfecto: 'blur(6px) saturate(160%)' 
+    };
+};
 function inicializarSecciones() {
     const selects = [dom.seccion, dom.seccion_receptor, dom.filtroSeccion];
     selects.forEach(select => {
@@ -373,7 +380,7 @@ function renderizarTabla() {
         // Pagado
         const tdPag = document.createElement('td');
         tdPag.setAttribute('data-label', 'Estado de pago:');
-        tdPag.textContent = p.pagado ? '✅' : '❌';
+        tdPag.textContent = p.pagado ? '🟢' : '🔴';
         row.appendChild(tdPag);
 
         // Acciones
@@ -850,18 +857,25 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
     });
 
     if (camposNuevos) {
-        // Usar SweetAlert para la carga (Estilo solicitado en instrucciones)
-        Swal.fire({
-            toast: true,
-            title: 'Procesando...',
-            showConfirmButton:false,
-            background: tema.bg,
-            color: tema.txt,
-            didOpen: () => Swal.showLoading(),
-            position: 'top',
-            customClass: { popup: 'mi-borde-redondeado' },
-        });
+const config = obtenerTema();
 
+Swal.fire({
+    toast: true,
+    position: 'top',
+    title: 'Procesando...',
+    showConfirmButton: false,
+    background: tema.bg,
+    color: tema.txt,
+    // --- NUEVA ANIMACIÓN DE DESPLIEGUE ---
+    didOpen: (popup) => {
+        Swal.showLoading();
+        popup.style.borderRadius = '20px';        
+        if (!document.body.classList.contains('modo-oscuro')) {
+            popup.style.backdropFilter = config.blurEfecto;
+            popup.style.webkitBackdropFilter = config.blurEfecto;
+        }
+    }
+});
         const sesion = JSON.parse(localStorage.getItem("usuario"));
         const usuarioNombre = sesion ? sesion.username : "Desconocido";
 

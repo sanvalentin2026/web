@@ -19,7 +19,6 @@
         const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
         document.documentElement.className = guardado;
         
-        // Sincronizar el color de fondo del HTML de inmediato
         const color = (guardado === 'modo-oscuro') ? '#1c1c1e' : '#ffffff';
         document.documentElement.style.backgroundColor = color;
     })();
@@ -89,7 +88,7 @@
             <select id="seccion_receptor" required></select>
             
             <select id="producto" required>
-                <option value="" disabled selected>Producto</option>
+                <option value="" disabled selected>Seleccione un producto</option>
                 
 <optgroup label="- Servicios -">
     <option value="Baile" data-precio="0">Baile</option>

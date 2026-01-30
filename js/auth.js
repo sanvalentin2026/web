@@ -1,15 +1,13 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
 
-// ==========================================
-// 🔑 CONFIGURACIÓN DE BASE DE DATOS
-// ==========================================
+// 1. CONFIGURACIÓN ÚNICA DE SUPABASE (Exportada para que todos usen la misma)
 const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ==========================================
-// 🎨 UTILIDAD DE TEMAS Y ESTILOS
-// ==========================================
+// Exportamos 'db' para que stock.js y otros lo importen desde aquí
+export const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 2. UTILIDADES DE INTERFAZ
 export const obtenerTema = () => {
     const esOscuro = document.documentElement.classList.contains('modo-oscuro');
     return {
@@ -20,9 +18,7 @@ export const obtenerTema = () => {
     };
 };
 
-// ==========================================
-// 🔊 GESTIÓN DE SONIDOS
-// ==========================================
+// 3. GESTIÓN DE SONIDOS
 let sonidosActivados = localStorage.getItem('sonidos-web') !== 'disabled';
 export const ReproductorSonidos = {
     buffer: {},
@@ -48,12 +44,9 @@ export const ReproductorSonidos = {
 };
 ReproductorSonidos.init();
 
-// ==========================================
-// 🛡️ GUARDIA DE SEGURIDAD (CORREGIDO PARA REGISTRO)
-// ==========================================
+// 4. GUARDIA DE SEGURIDAD
 export const verificarSesion = async function() {
     const path = window.location.pathname;
-    // CLAVE: Lista de páginas donde el guardia NO debe trabajar
     const paginasLibres = ["login.html", "register.html", "registro.html"]; 
     const esPaginaLibre = paginasLibres.some(p => path.includes(p));
 
@@ -85,9 +78,7 @@ export const verificarSesion = async function() {
     }
 };
 
-// ==========================================
-// 🔵 ACCIÓN: LOGIN
-// ==========================================
+// 5. ACCIÓN: LOGIN
 window.login = async function() {
     const userInput = document.getElementById("username")?.value.trim();
     const passInput = document.getElementById("password")?.value;
@@ -128,16 +119,15 @@ window.login = async function() {
     }
 };
 
-// ==========================================
-// 🟢 ACCIÓN: REGISTRO
-// ==========================================
+// 6. ACCIÓN: REGISTRO (Actualizado con campo Email)
 window.register = async function() {
     const user = document.getElementById("username")?.value.trim();
+    const email = document.getElementById("email")?.value.trim(); // Campo crítico para recuperación
     const pass = document.getElementById("password")?.value.trim();
     const pass2 = document.getElementById("password2")?.value.trim();
     const tema = obtenerTema();
 
-    if (!user || !pass || !pass2) {
+    if (!user || !email || !pass || !pass2) {
         ReproductorSonidos.play('notificacion');
         Swal.fire({ text: "Campos incompletos", icon: "warning", toast: true, position: 'top', timer: 1500, showConfirmButton: false, ...tema });
         return;
@@ -151,11 +141,17 @@ window.register = async function() {
 
     Swal.fire({ title: 'Procesando...', toast: true, position: 'top', showConfirmButton: false, didOpen: () => Swal.showLoading(), ...tema });
 
-    const { error } = await db.from("usuarios").insert({ username: user, password: pass, permisos: false });
+    // Inserción incluyendo el email solicitado para seguridad
+    const { error } = await db.from("usuarios").insert({ 
+        username: user, 
+        email: email, 
+        password: pass, 
+        permisos: false 
+    });
 
     if (error) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "El usuario ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "Error: El usuario o email ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
     } else {
         ReproductorSonidos.play('exito');
         await Swal.fire({ title: "Cuenta creada", text: "Espere validación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
@@ -163,13 +159,15 @@ window.register = async function() {
     }
 };
 
-// ==========================================
-// 🕵️ INICIALIZACIÓN
-// ==========================================
+// 7. INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loader-global');
-    if (loader) setTimeout(() => loader.classList.add('loader-hidden'), 300);
-
+    if (loader) {
+        setTimeout(() => {
+            loader.classList.add('loader-hidden');
+            loader.addEventListener('transitionend', () => loader.style.display = 'none', { once: true });
+        }, 400);
+    }
     verificarSesion();
 });
 
