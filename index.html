@@ -14,7 +14,6 @@
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script>
-    // Este código se ejecuta ANTES de que el body exista
     (function() {
         const guardado = localStorage.getItem('tema-usuario') || 'modo-claro';
         document.documentElement.className = guardado;
@@ -32,7 +31,6 @@
     <div class="apple-spinner"></div>
     </div>
     <script>
-        // Seguridad y desbloqueo visual tras validación
         const session = JSON.parse(localStorage.getItem("usuario") || "{}");
         if (!session.permisos || session.permisos === "false") {
             window.stop();
@@ -162,19 +160,18 @@
         </div>
 
         <div id="paginacion" class="paginacion">
-            <button id="prevPage">⬅ Anterior</button>
+            <button id="prevPage"> Anterior </button>
             <span id="infoPagina"></span>
-            <button id="nextPage">Siguiente ➡</button>
+            <button id="nextPage"> Siguiente </button>
         </div>
     </main>
 
         <footer class="main-footer">
         <div class="footer-content">
-            <p class="copyright">&copy; 2026 Todos los derechos reservados</p>
+            <p class="copyright">&copy; 2026 Todos los derechos reservados.</p>
         </div>
     </footer>
 
-    <!-- Scripts optimizados al final para mejor rendimiento -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>

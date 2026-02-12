@@ -86,7 +86,7 @@ window.login = async function() {
 
     if (!userInput || !passInput) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Ingrese sus datos", icon: "warning", toast: true, position: 'top', showConfirmButton: false, timer: 1500, ...tema });
+        Swal.fire({ text: "Ingrese los datos", icon: "warning", toast: true, position: 'top', showConfirmButton: false, timer: 1500, ...tema });
         return;
     }
 
@@ -121,27 +121,25 @@ window.login = async function() {
 
 // 6. ACCIÓN: REGISTRO (Actualizado con campo Email)
 window.register = async function() {
-    const user = document.getElementById("username")?.value.trim();
-    const email = document.getElementById("email")?.value.trim(); // Campo crítico para recuperación
+    const user = document.getElementById("username")?.value.trim(); // Campo crítico para recuperación
     const pass = document.getElementById("password")?.value.trim();
     const pass2 = document.getElementById("password2")?.value.trim();
     const tema = obtenerTema();
 
-    if (!user || !email || !pass || !pass2) {
+    if (!user || !pass || !pass2) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Campos incompletos", icon: "warning", toast: true, position: 'top', timer: 1500, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "Campos incompletos", icon: "warning", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
         return;
     }
 
     if (pass !== pass2) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Contraseñas no coinciden", icon: "error", toast: true, position: 'top', timer: 1500, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "Contraseñas no coinciden", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
         return;
     }
 
     Swal.fire({ title: 'Procesando...', toast: true, position: 'top', showConfirmButton: false, didOpen: () => Swal.showLoading(), ...tema });
 
-    // Inserción incluyendo el email solicitado para seguridad
     const { error } = await db.from("usuarios").insert({ 
         username: user, 
         email: email, 
@@ -151,10 +149,10 @@ window.register = async function() {
 
     if (error) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Error: El usuario o email ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "El usuario o email ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
     } else {
         ReproductorSonidos.play('exito');
-        await Swal.fire({ title: "Cuenta creada", text: "Espere validación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
+        await Swal.fire({ title: "La cuenta fue creada", text: "Espere verificación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
         window.location.replace("login.html");
     }
 };
