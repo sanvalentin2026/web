@@ -142,14 +142,13 @@ window.register = async function() {
 
     const { error } = await db.from("usuarios").insert({ 
         username: user, 
-        email: email, 
         password: pass, 
         permisos: false 
     });
 
     if (error) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "El usuario o email ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "El usuario ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
     } else {
         ReproductorSonidos.play('exito');
         await Swal.fire({ title: "La cuenta fue creada", text: "Espere verificación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
