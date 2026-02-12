@@ -1,10 +1,9 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/+esm";
 
-// 1. CONFIGURACIÓN ÚNICA DE SUPABASE (Exportada para que todos usen la misma)
+// 1. CONFIGURACIÓN ÚNICA DE SUPABASE
 const SUPABASE_URL = "https://yujwifmejokfbxndhtnf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6IDYbrnJ3X4Z-mTsZ1TXQA_nwUTiFno";
 
-// Exportamos 'db' para que stock.js y otros lo importen desde aquí
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 2. UTILIDADES DE INTERFAZ
@@ -119,9 +118,9 @@ window.login = async function() {
     }
 };
 
-// 6. ACCIÓN: REGISTRO (Actualizado con campo Email)
+// 6. ACCIÓN: REGISTRO (Corregido sin email)
 window.register = async function() {
-    const user = document.getElementById("username")?.value.trim(); // Campo crítico para recuperación
+    const user = document.getElementById("username")?.value.trim();
     const pass = document.getElementById("password")?.value.trim();
     const pass2 = document.getElementById("password2")?.value.trim();
     const tema = obtenerTema();
@@ -140,6 +139,7 @@ window.register = async function() {
 
     Swal.fire({ title: 'Procesando...', toast: true, position: 'top', showConfirmButton: false, didOpen: () => Swal.showLoading(), ...tema });
 
+    // Eliminada la referencia a la variable 'email'
     const { error } = await db.from("usuarios").insert({ 
         username: user, 
         password: pass, 
@@ -151,7 +151,7 @@ window.register = async function() {
         Swal.fire({ text: "El usuario ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
     } else {
         ReproductorSonidos.play('exito');
-        await Swal.fire({ title: "La cuenta fue creada", text: "Espere verificación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
+        await Swal.fire({ title: "La cuenta fue creada", text: "Espere su verificación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
         window.location.replace("login.html");
     }
 };
