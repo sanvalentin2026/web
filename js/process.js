@@ -380,9 +380,18 @@ function renderizarTabla() {
         // Pagado
         const tdPag = document.createElement('td');
         tdPag.setAttribute('data-label', 'Estado de pago:');
-        tdPag.textContent = p.pagado ? '🟢' : '🔴';
-        row.appendChild(tdPag);
 
+        // Creamos un contenedor tipo "Badge"
+        const statusBadge = document.createElement('span');
+        statusBadge.className = `status-badge ${p.pagado ? 'badge-success' : 'badge-error'}`;
+
+        // Añadimos el icono y el texto
+        statusBadge.innerHTML = p.pagado 
+        ? '<i class="fa-solid fa-circle-check"></i> Pagado' 
+        : '<i class="fa-solid fa-circle-xmark"></i> Pendiente';
+
+        tdPag.appendChild(statusBadge);
+        row.appendChild(tdPag);
         // Acciones
         const tdAcc = document.createElement('td');
         tdAcc.setAttribute('data-label', 'Acciones:');
@@ -594,7 +603,7 @@ dom.form.addEventListener("submit", async (e) => {
             Swal.fire({ 
                 icon: 'warning', 
                 title: 'Sin disponibilidad', 
-                html: `Todas las unidades de <strong>${productoSeleccionado}.</strong> estan vendidas.`, 
+                html: `Unidades de <strong>${productoSeleccionado}</strong> agotadas.`, 
                 toast: true, 
                 position: 'top', 
                 showConfirmButton: false, 
@@ -811,7 +820,7 @@ const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) =>
 `).join('');
 
     const { value: camposNuevos } = await Swal.fire({
-        title: `Editar Pedido id #${p.id}`,
+        title: `Editar pedido [${p.id}]`,
         background: tema.bg,
         color: tema.txt,
         html: `

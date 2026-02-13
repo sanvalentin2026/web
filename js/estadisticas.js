@@ -171,7 +171,7 @@ function mostrarRanking(usuariosObj) {
                 <span style="font-weight:700; color:var(--text-main); font-size:0.95rem;">${index + 1}. ${nombre}</span>
             </div>
             <div style="text-align:right;">
-                <span style="font-weight:700; color:var(--primary); font-size:1.1rem;">${cantidad} <span style="font-weight:700; color:var(--primary); font-size:16px;">Pedidos</span></span>
+                <span style="font-weight:700; color:var(--primary); font-size:16px;">${cantidad} <span style="font-weight:700; color:var(--primary); font-size:16px;">Pedidos</span></span>
             </div>`;
         dom.ranking.appendChild(div);
     });

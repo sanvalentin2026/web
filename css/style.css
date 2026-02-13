@@ -1772,3 +1772,35 @@ i.fa-solid {
     /* Evita variaciones extrañas al transformar/escalar */
     transform: translateZ(0);
 }
+
+/* Estilo general de las etiquetas de estado */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Estado: Pagado (Verde) */
+.badge-success {
+    background: rgba(16, 185, 129, 0.15); /* Verde esmeralda suave */
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Estado: Pendiente (Rojo) */
+.badge-error {
+    background: rgba(239, 68, 68, 0.15); /* Rojo suave */
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Iconos dentro de la etiqueta */
+.status-badge i {
+    font-size: 0.75rem;
+}
