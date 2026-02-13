@@ -80,7 +80,7 @@ async function updateTable() {
 const ModoNocturno = {
     config: {
         get auto() { return localStorage.getItem('nocturno-auto') === 'true'; },
-        get intensidad() { return localStorage.getItem('nocturno-intensidad') || 30; },
+        get intensidad() { return localStorage.getItem('nocturno-intensidad') || 40; },
         get inicio() { return localStorage.getItem('nocturno-inicio') || "19:00"; },
         get fin() { return localStorage.getItem('nocturno-fin') || "07:00"; }
     },

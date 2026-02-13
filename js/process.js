@@ -1127,7 +1127,7 @@ document.addEventListener("DOMContentLoaded", () => {
             Swal.fire({
                 title: '¿Generar PDF?',
                 text: "Se generara un reporte de pedidos",
-                icon: 'info',
+                icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#ff375f',
                 cancelButtonColor: '#6b7280',
