@@ -752,10 +752,10 @@ window.togglePagado = async (id, estadoActual) => {
 window.editarPedidoCompleto = async (pedidoId) => {
     const tema = obtenerTema();
 
-    // 1. Traemos los datos del pedido y el inventario real al mismo tiempo
+    // 1. Obtener datos del pedido y stock actual
     const [resPedido, resStock] = await Promise.all([
         db.from("pedidos").select("*").eq("id", pedidoId).single(),
-        db.from("productos").select("nombre, stock_disponible").eq("tipo", "fisico")
+        db.from("productos").select("nombre, stock_disponible, tipo")
     ]);
 
     if (resPedido.error || !resPedido.data) return;
@@ -828,17 +828,17 @@ window.editarPedidoCompleto = async (pedidoId) => {
             const seccionR = document.getElementById('swal-seccion-r').value;
             const producto = document.getElementById('swal-producto').value;
 
-            // 1. Validación de campos obligatorios
+            // VALIDACIÓN DE CAMPOS COMPLETOS
             if (!nombreC || !seccionC || !nombreR || !seccionR || !producto) {
-                Swal.showValidationMessage('Rellene todos los campos obligatorios.');
+                Swal.showValidationMessage('Por favor rellene todos los campos obligatorios.');
                 return false;
             }
 
-            // 2. Validación de Stock contra exploit (Solo si el producto cambió)
+            // VALIDACIÓN DE STOCK AGOTADO (Solo si el producto cambió)
             if (producto !== p.producto) {
-                const stockInfo = inventarioActual.find(i => i.nombre === producto);
-                if (stockInfo && stockInfo.stock_disponible <= 0) {
-                    Swal.showValidationMessage(`Sin unidades de ${producto} disponibles.`);
+                const infoProd = inventarioActual.find(i => i.nombre === producto);
+                if (infoProd && infoProd.tipo === 'fisico' && infoProd.stock_disponible <= 0) {
+                    Swal.showValidationMessage(`No quedan unidades de ${producto}.`);
                     return false;
                 }
             }
@@ -876,6 +876,26 @@ window.editarPedidoCompleto = async (pedidoId) => {
         const sesion = JSON.parse(localStorage.getItem("usuario"));
         const usuarioNombre = sesion ? sesion.username : "Desconocido";
 
+        // --- LÓGICA DE RESTA Y SUMA EN LA DB ---
+        if (camposNuevos.producto !== p.producto) {
+            const prodViejo = inventarioActual.find(i => i.nombre === p.producto);
+            const prodNuevo = inventarioActual.find(i => i.nombre === camposNuevos.producto);
+
+            // 1. Devolver stock del producto anterior (Si era físico)
+            if (prodViejo && prodViejo.tipo === 'fisico') {
+                await db.from("productos")
+                    .update({ stock_disponible: prodViejo.stock_disponible + 1 })
+                    .eq("nombre", p.producto);
+            }
+
+            // 2. Restar stock del producto nuevo (Si es físico)
+            if (prodNuevo && prodNuevo.tipo === 'fisico') {
+                await db.from("productos")
+                    .update({ stock_disponible: prodNuevo.stock_disponible - 1 })
+                    .eq("nombre", camposNuevos.producto);
+            }
+        }
+
         const { error } = await db
             .from("pedidos")
             .update({ ...camposNuevos, ultima_edicion_por: usuarioNombre })
@@ -897,10 +917,23 @@ window.editarPedidoCompleto = async (pedidoId) => {
                 customClass: { popup: 'mi-borde-redondeado'},
             });
             if (window.cargarPedidos) window.cargarPedidos();
+        } else {
+            ReproductorSonidos.play('error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message,
+                background: tema.bg,
+                color: tema.txt,
+                timer: 2500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top',
+                customClass: { popup: 'mi-borde-redondeado'}
+            });
         }
     }
 };
-
 window.eliminarPedido = async (id) => {
     const tema = obtenerTema();
 
