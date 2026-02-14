@@ -302,7 +302,7 @@ function aplicarFiltros() {
             p.nombre_receptor,
             p.seccion_receptor,
             p.producto,
-            p.detalles
+            p.detalles,
         ].some(c => String(c || "").toLowerCase().includes(query));
         
         return cumpleSeccion && cumpleBusqueda;
@@ -379,7 +379,7 @@ function renderizarTabla() {
 
         // Pagado
         const tdPag = document.createElement('td');
-        tdPag.setAttribute('data-label', 'Estado de pago:');
+        tdPag.setAttribute('data-label', 'Estado:');
 
         // Creamos un contenedor tipo "Badge"
         const statusBadge = document.createElement('span');
@@ -401,7 +401,7 @@ function renderizarTabla() {
         bloqueFecha.className = 'bloque-fecha-card';
         const label = document.createElement('span');
         label.className = 'label-rojo';
-        label.textContent = 'Fecha y hora:';
+        label.textContent = 'Creado el:';
         const spanFecha = document.createElement('span');
         spanFecha.className = 'texto-fecha';
         spanFecha.textContent = fechaTexto;
@@ -752,15 +752,16 @@ window.togglePagado = async (id, estadoActual) => {
 window.editarPedidoCompleto = async (pedidoId) => {
     const tema = obtenerTema();
 
-    const { data: p, error: errFetch } = await db
-        .from("pedidos")
-        .select("*")
-        .eq("id", pedidoId)
-        .single();
+    // 1. Traemos los datos del pedido y el inventario real al mismo tiempo
+    const [resPedido, resStock] = await Promise.all([
+        db.from("pedidos").select("*").eq("id", pedidoId).single(),
+        db.from("productos").select("nombre, stock_disponible").eq("tipo", "fisico")
+    ]);
 
-    if (errFetch || !p) return;
+    if (resPedido.error || !resPedido.data) return;
+    const p = resPedido.data;
+    const inventarioActual = resStock.data || [];
 
-    // Lista de secciones
     const secciones = ["7-1", "7-2", "7-3", "7-4", "8-1", "8-2", "8-3", "8-4", "9-1", "9-2", "9-3", "9-4", "10-1", "10-2", "10-3", "10-4", "11-1", "11-2", "11-3", "11-4"];
     
     const opcionesSeccionC = secciones.map(s => 
@@ -771,120 +772,107 @@ window.editarPedidoCompleto = async (pedidoId) => {
         `<option value="${s}" ${p.seccion_receptor === s ? 'selected' : ''}>${s}</option>`
     ).join('');
 
-const categorias = {
-    "Servicios": [
-        "Baile",
-        "Boda",
-        "Kiss or Slap",
-        "Serenata"
-    ],
+    const categorias = {
+        "Servicios": ["Baile", "Boda", "Kiss or Slap", "Serenata"],
+        "Comida": ["Alfajor", "Bomba de chocolate", "Brownie", "Cakepop", "Dona", "Fresas con chocolate", "Galleta", "Oblea", "Ramo de fresas"],
+        "Flores": ["Flor sola", "Ramo de 3 flores"],
+        "Fotos": ["Foto con camara", "Foto con camara e impresion", "Foto con telefono y fondo"],
+        "Otros": ["Buzon de confesiones", "Globo", "Pulsera"]
+    };
 
-    "Comida": [
-        "Alfajor",
-        "Bomba de chocolate",
-        "Brownie",
-        "Cakepop",
-        "Dona",
-        "Fresas con chocolate",
-        "Galleta",
-        "Oblea",
-        "Ramo de fresas"
-    ],
-
-    "Flores": [
-        "Flor sola",
-        "Ramo de 3 flores"
-    ],
-
-    "Fotos": [
-        "Foto con camara",
-        "Foto con camara e impresion",
-        "Foto con telefono y fondo"
-    ],
-
-    "Otros": [
-        "Buzon de confesiones",
-        "Globo",
-        "Pulsera"
-    ]
-};
-
-
-// Generamos el HTML dinámico
-const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) => `
-    <optgroup label="- ${grupo} -">
-        ${productos.map(prod => `
-            <option value="${prod}" ${prod === p.producto ? 'selected' : ''}>${prod}</option>
-        `).join('')}
-    </optgroup>
-`).join('');
+    const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) => `
+        <optgroup label="- ${grupo} -">
+            ${productos.map(prod => `
+                <option value="${prod}" ${prod === p.producto ? 'selected' : ''}>${prod}</option>
+            `).join('')}
+        </optgroup>
+    `).join('');
 
     const { value: camposNuevos } = await Swal.fire({
         title: `Editar pedido [${p.id}]`,
         background: tema.bg,
         color: tema.txt,
         html: `
-    <div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
-    
-        <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
-        <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${escapeHTML(validarCampo(p.nombre_comprador || '',100))}">
-        <select id="swal-seccion-c" class="swal2-input">
-            ${opcionesSeccionC}
-        </select>
+        <div id="form-editar-pedido" style="text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 5px;">
+            <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-left: 5px;">COMPRADOR:</label>
+            <input id="swal-nombre-c" class="swal2-input" placeholder="Nombre" value="${escapeHTML(validarCampo(p.nombre_comprador || '',100))}">
+            <select id="swal-seccion-c" class="swal2-input">
+                ${opcionesSeccionC}
+            </select>
 
-        <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
-        <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${escapeHTML(validarCampo(p.nombre_receptor || '',100))}">
-        <select id="swal-seccion-r" class="swal2-input">
-            ${opcionesSeccionR}
-        </select>
+            <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">RECEPTOR:</label>
+            <input id="swal-nombre-r" class="swal2-input" placeholder="Nombre" value="${escapeHTML(validarCampo(p.nombre_receptor || '',100))}">
+            <select id="swal-seccion-r" class="swal2-input">
+                ${opcionesSeccionR}
+            </select>
 
-        <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y DETALLES:</label>
-        <select id="swal-producto" class="swal2-input">
-            ${opcionesProductos} </select>
-    
-        <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Nuevos detalles...">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
-    </div>
-    `,
+            <label style="font-size: 10px; color: #E11D48; font-weight: bold; margin-top: 10px; margin-left: 5px;">PRODUCTO Y DETALLES:</label>
+            <select id="swal-producto" class="swal2-input">
+                ${opcionesProductos} 
+            </select>
+        
+            <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Nuevos detalles (opcional)...">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
+        </div>
+        `,
         showCancelButton: true,
         confirmButtonColor: '#E11D48',
         confirmButtonText: 'Guardar',
         cancelButtonText: 'Cancelar',
         customClass: { 
-            popup: 'mi-borde-redondeado',
-            input: 'custom-swal-input' // Clase extra por si acaso
+            popup: 'mi-borde-redondeado'
         },
         preConfirm: () => {
+            const nombreC = document.getElementById('swal-nombre-c').value.trim();
+            const seccionC = document.getElementById('swal-seccion-c').value;
+            const nombreR = document.getElementById('swal-nombre-r').value.trim();
+            const seccionR = document.getElementById('swal-seccion-r').value;
+            const producto = document.getElementById('swal-producto').value;
+
+            // 1. Validación de campos obligatorios
+            if (!nombreC || !seccionC || !nombreR || !seccionR || !producto) {
+                Swal.showValidationMessage('Rellene todos los campos obligatorios.');
+                return false;
+            }
+
+            // 2. Validación de Stock contra exploit (Solo si el producto cambió)
+            if (producto !== p.producto) {
+                const stockInfo = inventarioActual.find(i => i.nombre === producto);
+                if (stockInfo && stockInfo.stock_disponible <= 0) {
+                    Swal.showValidationMessage(`Sin unidades de ${producto} disponibles.`);
+                    return false;
+                }
+            }
+
             return {
-                nombre_comprador: document.getElementById('swal-nombre-c').value.trim(),
-                seccion_comprador: document.getElementById('swal-seccion-c').value,
-                nombre_receptor: document.getElementById('swal-nombre-r').value.trim(),
-                seccion_receptor: document.getElementById('swal-seccion-r').value,
-                producto: document.getElementById('swal-producto').value.trim(),
+                nombre_comprador: nombreC,
+                seccion_comprador: seccionC,
+                nombre_receptor: nombreR,
+                seccion_receptor: seccionR,
+                producto: producto,
                 detalles: document.getElementById('swal-detalles').value.trim()
             }
         }
     });
 
     if (camposNuevos) {
-const config = obtenerTema();
+        const config = obtenerTema();
+        Swal.fire({
+            toast: true,
+            position: 'top',
+            title: 'Procesando...',
+            showConfirmButton: false,
+            background: tema.bg,
+            color: tema.txt,
+            didOpen: (popup) => {
+                Swal.showLoading();
+                popup.style.borderRadius = '20px';        
+                if (!document.body.classList.contains('modo-oscuro')) {
+                    popup.style.backdropFilter = config.blurEfecto;
+                    popup.style.webkitBackdropFilter = config.blurEfecto;
+                }
+            }
+        });
 
-Swal.fire({
-    toast: true,
-    position: 'top',
-    title: 'Procesando...',
-    showConfirmButton: false,
-    background: tema.bg,
-    color: tema.txt,
-    // --- NUEVA ANIMACIÓN DE DESPLIEGUE ---
-    didOpen: (popup) => {
-        Swal.showLoading();
-        popup.style.borderRadius = '20px';        
-        if (!document.body.classList.contains('modo-oscuro')) {
-            popup.style.backdropFilter = config.blurEfecto;
-            popup.style.webkitBackdropFilter = config.blurEfecto;
-        }
-    }
-});
         const sesion = JSON.parse(localStorage.getItem("usuario"));
         const usuarioNombre = sesion ? sesion.username : "Desconocido";
 
@@ -896,7 +884,6 @@ Swal.fire({
         Swal.close();
 
         if (!error) {
-            // Notificación tipo Toast (Superior y rápida)
             ReproductorSonidos.play('exito');
             Swal.fire({
                 icon: 'success',
@@ -1065,7 +1052,7 @@ window.descargarPDF = function() {
                         <th>PARA:</th>
                         <th>PRODUCTO:</th>
                         <th>DETALLES:</th>
-                        <th style="width: 80px;">PAGO:</th>
+                        <th style="width: 80px;">ESTADO:</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1083,7 +1070,7 @@ window.descargarPDF = function() {
                         <td>${escapeHTML(validarCampo(p.producto || '-', 200))}</td>
                         <td>${escapeHTML(validarCampo(p.detalles || '- Sin detalles', 500))}</td>
                     <td style="font-weight:bold; color: ${p.pagado ? '#16a34a' : '#dc2626'}">
-                         ${p.pagado ? 'COMPLETO' : 'PENDIENTE'}
+                         ${p.pagado ? 'PAGADO' : 'PENDIENTE'}
                     </td>
                     </tr>
                     `).join('')}

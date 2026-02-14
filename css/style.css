@@ -727,8 +727,8 @@ tr{
   td:nth-child(3)::before { content: "Para:"; }
   td:nth-child(4)::before { content: "Producto:"; }
   td:nth-child(5)::before { content: "Detalles:"; }
-  td:nth-child(6)::before { content: "Estado de pago:"; }
-  td:nth-child(7)::before { content: "Fecha y hora:"; }
+  td:nth-child(6)::before { content: "Estado:"; }
+  td:nth-child(7)::before { content: "Creado el:"; }
 
   td:last-child {
     width: 100%;
@@ -1803,4 +1803,31 @@ i.fa-solid {
 /* Iconos dentro de la etiqueta */
 .status-badge i {
     font-size: 0.75rem;
+}
+
+/* --- ESTILO PARA EL MENSAJE DE ERROR (VALIDACIÓN) --- */
+
+/* MODO OSCURO */
+body.modo-oscuro .swal2-validation-message {
+    background: rgba(28, 28, 30, 0.9) !important; /* Fondo negro/gris muy oscuro */
+    color: #ffffff !important;      /* Texto blanco */
+    border: 1px solid #E11D48 !important; /* Borde rojo para que resalte */
+    margin-top: 10px !important;
+    border-radius: 12px !important;
+}
+
+/* MODO CLARO */
+body.modo-claro .swal2-validation-message {
+    background: #ffffff !important; /* Fondo blanco */
+    color: #1a1a1a !important;      /* Texto negro */
+    border: 1px solid #E11D48 !important; /* Borde rojo */
+    margin-top: 10px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* Ajuste del icono de error pequeño que sale al lado del texto */
+.swal2-validation-message::before {
+    background-color: #E11D48 !important; /* El circulito del signo ! siempre rojo */
+    color: white !important;
 }
