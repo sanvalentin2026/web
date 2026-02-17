@@ -158,7 +158,7 @@ const iniciarChat = async (ticketId) => {
                 <p style="margin:0 0 5px 0;"><strong>Tipo:</strong> ${ticket.tipo.toUpperCase()}</p>
                 <p style="margin:0 0 5px 0;"><strong>Descripción:</strong> ${ticket.descripcion}</p>
                 <p style="margin:0 0 5px 0;"><strong>Entorno:</strong> ${ticket.entorno}</p>
-                <p style="margin:0; font-size:0.7rem; opacity:0.6;"><strong>UA:</strong> ${ticket.user_agent}</p>
+                <p style="margin:0; font-size:0.7rem; opacity:0.6;"><strong>Datos:</strong> ${ticket.user_agent}</p>
             </div>
             <button id="btnCerrarDef" style="background:#ff375f; color:white; border:none; padding:10px; border-radius:8px; margin-bottom:10px; cursor:pointer; width:100%; font-weight:bold;">Cerrar este ticket</button>
         `;
@@ -166,8 +166,8 @@ const iniciarChat = async (ticketId) => {
         
         document.getElementById('btnCerrarDef').onclick = async () => {
             const { isConfirmed } = await Swal.fire({
-                toast:true, position:'top', title: '¿Cerrar ticket?', icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#ff375f', confirmButtonText: 'Confirmar', ...obtenerTema()
+                toast:true, position:'top', title: '¿Cerrar este ticket?', icon: 'question',
+                showCancelButton: true, confirmButtonColor: '#ff375f', confirmButtonText: 'Confirmar', cancelButtonText:'Cancelar', ...obtenerTema()
             });
             if (isConfirmed) await db.from('reportes_web').delete().eq('id', ticketId);
         };
@@ -184,7 +184,7 @@ const iniciarChat = async (ticketId) => {
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reportes_web', filter: `id=eq.${ticketId}` }, async () => {
         await Swal.fire({
-            toast:true, position:'top', title: 'Ticket Cerrado', text: 'Ticket cerrado por soporte.',
+            toast:true, position:'top', title: 'Ticket solucionado', text: 'Ticket cerrado por soporte.',
             icon: 'info', showConfirmButton:false, timer:3000, ...obtenerTema()
         });
         window.location.href = "reportar.html";
@@ -235,7 +235,7 @@ if (form) {
             window.location.href = `reportar.html?ticket=${data[0].id}`;
         }
         btn.disabled = false;
-        btn.textContent = "Crear Ticket";
+        btn.textContent = "Crear un Ticket";
     });
 }
 document.addEventListener('DOMContentLoaded', init);

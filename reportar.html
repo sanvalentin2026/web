@@ -32,7 +32,7 @@
 
   <!-- Scripts moved to end of body for better performance -->
 
-    <button class="btn-volver" onclick="history.back()">← Volver atrás</button>
+    <a href="porfile.html"><button class="btn-volver">← Volver atrás</button></a>
   
 <div class="container">
     <h1>Soporte - Reportes</h1>
@@ -41,26 +41,26 @@
 
 
         <form id="formReporte">
-            <label for="tipo">Tipo de ticket</label>
+            <label for="tipo">¿Que tipo de soporte nesesita?</label>
             <select id="tipo" required>
-                <option value="soporte">Soporte</option>
-                <option value="error">Error / No funciona</option>
-                <option value="visual">Problema visual</option>
-                <option value="lento">Lentitud</option>
-                <option value="otro">Otro</option>
+                <option value="Ayuda">Ayuda</option>
+                <option value="Error">Error / No funciona</option>
+                <option value="Error visual">Problema visual</option>
+                <option value="Lentitud / rendimiento">Lentitud</option>
+                <option value="Otro">Otro motivo</option>
             </select>
 
-            <label for="descripcion">¿Qué ocurrió?</label>
-            <textarea id="descripcion" placeholder="Describa lo que paso..." required></textarea>
+            <label for="descripcion">¿Cual es su problema?</label>
+            <textarea id="descripcion" placeholder="Escriba aqui..." required></textarea>
 
             <label for="entorno">Dispositivo y navegador</label>
             <input id="entorno" placeholder="Ej: iPhone · Safari  |  Android · Google" required>
 
-            <button type="submit" id="btnEnviar">Crear Ticket</button>
+            <button type="submit" id="btnEnviar">Crear el Ticket</button>
         </form>
 
         <div id="misTicketsContenedor" style="margin-top: 30px;">
-            <h2 style="font-size: 1.1rem; margin-bottom: 15px; margin-left: 10px;">Mis Tickets Abiertos</h2>
+            <h2 style="font-size: 1.1rem; margin-bottom: 15px; margin-left: 10px;">Sus Tickets Abiertos</h2>
             <div id="listaMisTickets"></div>
         </div>
 
@@ -75,7 +75,7 @@
         </div>
         <div id="chat-mensajes" style="height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px;"><h3 style="display: flex; justify-content: center; text-align: center; color: #ff375f;">Chat de soporte</h3></div>
         <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <input type="text" id="inputMensaje" placeholder="Escriba su mensaje...">
+            <input type="text" id="inputMensaje" placeholder="Escriba aqui para enviar mensajes...">
             <button id="btnEnviarMsg" style="padding:10px 20px; background:#ff375f; color:white; border:none; border-radius:8px;">Enviar</button>
         </div>
     </div>

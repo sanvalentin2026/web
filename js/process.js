@@ -140,7 +140,7 @@ function iniciarTutorial() {
         showProgress: true,
         nextBtnText: 'Siguiente',
         prevBtnText: 'Anterior',
-        doneBtnText: 'Terminar',
+        doneBtnText: 'Cerrar',
         popoverClass: 'driverjs-theme', 
         // Esta opción es clave: permite que el tutorial espere a que los elementos existan
         allowClose: false,
@@ -148,7 +148,7 @@ function iniciarTutorial() {
             { 
                 element: '#header', 
                 popover: { 
-                    title: '¡Hola! Un breve tutorial', 
+                    title: 'Bienvenido(a) al tutorial', 
                     description: 'En esta sección encontrará botones con acciones importantes como ver inventario disponible, descargar PDF, mirar estadisticas, y ver su perfil, este espacio se mantendra siempre en la parte de arriba de su pantalla.',
                     side: "bottom", align: 'center' 
                 } 
@@ -401,7 +401,7 @@ function renderizarTabla() {
         bloqueFecha.className = 'bloque-fecha-card';
         const label = document.createElement('span');
         label.className = 'label-rojo';
-        label.textContent = 'Creado el:';
+        label.textContent = 'Creación:';
         const spanFecha = document.createElement('span');
         spanFecha.className = 'texto-fecha';
         spanFecha.textContent = fechaTexto;
@@ -413,7 +413,7 @@ function renderizarTabla() {
 
         const btnPago = document.createElement('button');
         btnPago.className = 'btn-pago';
-        btnPago.textContent = 'Pago';
+        btnPago.textContent = 'Estado';
         btnPago.addEventListener('click', () => { try { window.togglePagado(p.id, p.pagado); } catch (e) { console.error(e); } });
 
         const btnEdit = document.createElement('button');
@@ -547,7 +547,7 @@ dom.form.addEventListener("submit", async (e) => {
     if (botonEnvio) {
         botonEnvio.disabled = true;
         botonEnvio.dataset.oldText = botonEnvio.textContent;
-        botonEnvio.textContent = 'Creando...';
+        botonEnvio.textContent = 'Registrando...';
     }
 
     Swal.fire({ 
@@ -594,7 +594,7 @@ dom.form.addEventListener("submit", async (e) => {
 
         if (errorStock || !prodInfo) {
             ReproductorSonidos.play('error');
-            Swal.fire({ icon: 'error', text: 'Producto no encontrado en inventario', toast: true, position: 'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
+            Swal.fire({ icon: 'error', text: 'Producto no encontrado en inventario, porfavor reporte sobre este error si cree que es un error', toast: true, position: 'top', showConfirmButton: false, timer: 2500, customClass: { popup: 'mi-borde-redondeado' } });
             return;
         }
 
@@ -644,8 +644,8 @@ dom.form.addEventListener("submit", async (e) => {
             dom.form.reset();
             Swal.fire({ 
                 icon: 'success', 
-                title: 'Pedido Creado', 
-                timer: 1500, 
+                title: 'Pedido Registrado', 
+                timer: 2000, 
                 showConfirmButton: false, 
                 toast: true, 
                 background: tema.bg, 
@@ -656,7 +656,7 @@ dom.form.addEventListener("submit", async (e) => {
         }
     } catch (error) {
         console.error("Error en el proceso:", error);
-        Swal.fire({ icon: 'error', text: 'Error inesperado al procesar el pedido', ...tema });
+        Swal.fire({ icon: 'error', text: 'Error inesperado al procesar el pedido, porfavor reintentelo o reporte sobre el problema.', ...tema });
     } finally {
         // Restaurar estado del botón y permitir nuevos envíos
         dom.form.dataset.procesando = "false";
@@ -668,7 +668,7 @@ dom.form.addEventListener("submit", async (e) => {
 });
 
 //limpiador
-const VERSION_SISTEMA = '1.4.0 | RC-1';
+const VERSION_SISTEMA = 'RC-14';
 
 const limpiarLocalStorageAntiguo = () => {
     const versionGuardada = localStorage.getItem('seenChangelogVersion');
@@ -725,8 +725,8 @@ window.togglePagado = async (id, estadoActual) => {
         Swal.fire({
             toast:true,
             icon: 'success',
-            title: 'Pago actualizado',
-            timer: 1500,
+            title: 'Estado actualizado',
+            timer: 2000,
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
@@ -739,7 +739,7 @@ window.togglePagado = async (id, estadoActual) => {
             toast:true,
             icon: 'error',
             title: 'Error',
-            text: 'No se pudo actualizar el pago, intentelo de nuevo.',
+            text: 'No se pudo actualizar el pago, intentelo de nuevo, si cree que es un error porfavor reportelo.',
             showConfirmButton:false,
             timer:2500,
             position: 'top',
@@ -789,7 +789,7 @@ window.editarPedidoCompleto = async (pedidoId) => {
     `).join('');
 
     const { value: camposNuevos } = await Swal.fire({
-        title: `Editar pedido [${p.id}]`,
+        title: `Editar el pedido [${p.id}]`,
         background: tema.bg,
         color: tema.txt,
         html: `
@@ -811,7 +811,7 @@ window.editarPedidoCompleto = async (pedidoId) => {
                 ${opcionesProductos} 
             </select>
         
-            <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Nuevos detalles (opcional)...">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
+            <textarea id="swal-detalles" class="swal2-textarea" style="height: 70px;" placeholder="Detalles (opcional)">${escapeHTML(validarCampo(p.detalles || '',500))}</textarea>
         </div>
         `,
         showCancelButton: true,
@@ -907,10 +907,10 @@ window.editarPedidoCompleto = async (pedidoId) => {
             ReproductorSonidos.play('exito');
             Swal.fire({
                 icon: 'success',
-                title: 'Cambios aplicados',
+                title: 'Edicion aplicada',
                 toast: true,
                 position: 'top',
-                timer: 1500,
+                timer: 2000,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
@@ -973,7 +973,7 @@ window.eliminarPedido = async (id) => {
                 toast: true,
                 icon: 'success',
                 title: 'Pedido eliminado',
-                timer: 1500,
+                timer: 2000,
                 showConfirmButton: false,
                 background: tema.bg,
                 color: tema.txt,
@@ -1010,7 +1010,7 @@ window.descargarPDF = function() {
             toast: true,
             icon: 'error',
             title: 'Aun no hay pedidos',
-            timer: 1500,
+            timer: 2000,
             showConfirmButton: false,
             background: tema.bg,
             color: tema.txt,
@@ -1117,11 +1117,11 @@ window.descargarPDF = function() {
                 </div>
                 <div class="advertencia-seguridad">
                     <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
-                    mediante software externo o edición manual constituye una violación a la integridad de los datos del sistema.<br> 
-                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y el documento en su totalidad
+                    mediante software externo o edición manual no esta permitido en este documento.<br> 
+                    Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y el documento en su totalidad.
                 </div>
                 <div class="info-emision">
-                    NÚMERO DE EMISIÓN: ${folioUnico} | Validado por: Sistema Automatizado de Pedidos
+                    NÚMERO DE EMISIÓN: ${folioUnico} | Validado por: Sistema de Pedidos.
                 </div>
             </div>
         </body>
@@ -1155,7 +1155,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             Swal.fire({
                 title: '¿Generar PDF?',
-                text: "Se generara un reporte de pedidos",
+                text: "Se generara un respaldo del contenido",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#ff375f',

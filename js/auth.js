@@ -85,7 +85,7 @@ window.login = async function() {
 
     if (!userInput || !passInput) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Ingrese los datos", icon: "warning", toast: true, position: 'top', showConfirmButton: false, timer: 1500, ...tema });
+        Swal.fire({ text: "Ingrese los datos", icon: "warning", toast: true, position: 'top', showConfirmButton: false, timer: 2500, ...tema });
         return;
     }
 
@@ -127,13 +127,13 @@ window.register = async function() {
 
     if (!user || !pass || !pass2) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Campos incompletos", icon: "warning", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "Campos incompletos", icon: "warning", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
         return;
     }
 
     if (pass !== pass2) {
         ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "Contraseñas no coinciden", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
+        Swal.fire({ text: "Las contraseñas no coinciden", icon: "error", toast: true, position: 'top', timer: 3000, showConfirmButton: false, ...tema });
         return;
     }
 
@@ -151,7 +151,7 @@ window.register = async function() {
         Swal.fire({ text: "El usuario ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
     } else {
         ReproductorSonidos.play('exito');
-        await Swal.fire({ title: "La cuenta fue creada", text: "Espere su verificación", icon: "success", toast: true, position: 'top', timer: 2500, showConfirmButton: false, ...tema });
+        await Swal.fire({ title: "Cuenta creada con exito", text: "Espere su verificación", icon: "success", toast: true, position: 'top', timer: 3000, showConfirmButton: false, ...tema });
         window.location.replace("login.html");
     }
 };

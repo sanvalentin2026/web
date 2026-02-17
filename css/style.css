@@ -420,7 +420,7 @@ table {
 table {
   width: 100%;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 20px;
   overflow: hidden;
   border-collapse: collapse;
 }
@@ -697,9 +697,9 @@ tr{
 
   tbody tr {
     background: #fff !important;;
-    border-radius: 14px;
+    border-radius: 20px;
     padding: 12px 16px;
-    margin-bottom: 16px;
+    margin-bottom: 30px;
     border: 1px solid #F3C1D9;
   }
 
@@ -728,7 +728,7 @@ tr{
   td:nth-child(4)::before { content: "Producto:"; }
   td:nth-child(5)::before { content: "Detalles:"; }
   td:nth-child(6)::before { content: "Estado:"; }
-  td:nth-child(7)::before { content: "Creado el:"; }
+  td:nth-child(7)::before { content: "Creación:"; }
 
   td:last-child {
     width: 100%;

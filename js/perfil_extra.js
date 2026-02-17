@@ -43,11 +43,11 @@ window.confirmarSalida = function() {
 
     Swal.fire({
         title: '¿Cerrar sesión?',
-        icon: 'warning',
+        icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#ff375f',
         cancelButtonColor: esClaro ? '#d1d1d6' : '#3a3a3c',
-        confirmButtonText: 'Continuar',
+        confirmButtonText: 'Cerrarla',
         cancelButtonText: 'Cancelar',
         background: esClaro ? '#ffffff' : '#1c1c1e',
         color: esClaro ? '#1c1c1e' : '#ffffff',

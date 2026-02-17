@@ -30,17 +30,17 @@ async function reportarPresencia() {
     
     let paginaActual = 'Navegando';
     if (page === '' || page === 'index.html') {
-        paginaActual = 'En Inicio';
+        paginaActual = 'En el Inicio';
     } else if (page === 'login.html') {
-        paginaActual = 'En Login';
+        paginaActual = 'En el Login';
     } else if (page === 'register.html') {
-        paginaActual = 'En Registro';
+        paginaActual = 'En el Registro';
     } else if (page === 'porfile.html' || page === 'perfil.html' || page.includes('perfil') || page.includes('profile')) {
-        paginaActual = 'En Perfil';
+        paginaActual = 'En el Perfil';
     } else if (page === 'stats.html' || page.includes('estadistica') || page.includes('stats')) {
         paginaActual = 'En Estadísticas';
     } else if (page === 'stock.html') {
-        paginaActual = 'En Inventario';
+        paginaActual = 'En el Inventario';
     } else if (page === 'reportar.html' || page.includes('reportar')) {
         paginaActual = 'En Reportes';
     } else if (page === 'mantenimiento.html') {

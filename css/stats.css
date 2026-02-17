@@ -130,6 +130,10 @@ body {
     backdrop-filter: blur(25px) saturate(180%);
 }
 
+header{
+   border-bottom: 1px solid #e5e5e5; 
+}
+
 .chart-container h2 {
     color: var(--primary);
     margin-bottom: 15px;

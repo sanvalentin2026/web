@@ -118,7 +118,7 @@ const ReproductorSonidos = {
         const i = document.getElementById('iconoSonido'), t = document.getElementById('textoSonido');
         if (i && t) {
             i.className = sonidosActivados ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
-            t.textContent = sonidosActivados ? 'Sonidos Activos' : 'Sonidos Desactivados';
+            t.textContent = sonidosActivados ? 'Sonidos Activados' : 'Sonidos Desactivados';
         }
     }
 };
