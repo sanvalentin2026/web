@@ -242,6 +242,10 @@ body.modo-oscuro {
     font-weight: 500;
 }
 
+.modo-oscuro header{
+    border-color: #262626;
+}
+
 /* Ajuste para móviles */
 @media (max-width: 600px) {
     .main-footer {

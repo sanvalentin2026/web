@@ -149,7 +149,7 @@ function iniciarTutorial() {
                 element: '#header', 
                 popover: { 
                     title: 'Bienvenido(a) al tutorial', 
-                    description: 'En esta sección encontrará botones con acciones importantes como ver inventario disponible, descargar PDF, mirar estadisticas, y ver su perfil, este espacio se mantendra siempre en la parte de arriba de su pantalla.',
+                    description: 'En esta sección encontrará botones con acciones importantes como ver inventario disponible, mirar estadisticas, descargar PDF, y ver su perfil, este espacio se mantendra siempre en la parte de arriba de su pantalla.',
                     side: "bottom", align: 'center' 
                 } 
             },
@@ -173,7 +173,7 @@ function iniciarTutorial() {
                 element: '#pedidosBody', 
                 popover: { 
                     title: 'Pedidos', 
-                    description: 'Aqui se mostraran todos los pedidos disponibles, todos tienen botones para interactuar, ademas cada 16 pedidos se creara una compaginacion en la parte inferior para no generar listas largas.',
+                    description: 'Aqui se mostraran todos los pedidos disponibles, todos tienen botones para interactuar, ademas cada 15 pedidos se creara una compaginacion en la parte inferior para no generar listas largas.',
                     side: "top", align: 'center' 
                 } 
             }
@@ -668,7 +668,7 @@ dom.form.addEventListener("submit", async (e) => {
 });
 
 //limpiador
-const VERSION_SISTEMA = 'RC-14';
+const VERSION_SISTEMA = 'RC-Definitive_edition';
 
 const limpiarLocalStorageAntiguo = () => {
     const versionGuardada = localStorage.getItem('seenChangelogVersion');
