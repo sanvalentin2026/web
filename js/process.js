@@ -249,29 +249,31 @@ function inicializarSecciones() {
         if (!select) return;
         select.innerHTML = '';
 
-        // OPCIÓN NEUTRA (RESET)
+        // 1. Placeholder (Se mantiene igual)
         const placeholder = document.createElement('option');
-        placeholder.value = ''; // Valor vacío = Mostrar todos
+        placeholder.value = ''; 
         placeholder.textContent = select.id === 'filtroSeccion' 
-            ? 'Todos los pedidos disponibles' // Texto claro para el usuario
+            ? 'Todos los pedidos disponibles' 
             : 'Seleccione una sección';
         select.appendChild(placeholder);
 
-        // Opciones de Pago
-        estadosPago.forEach(estado => {
-            const opt = document.createElement('option');
-            opt.value = estado;
-            opt.textContent = `📌 ${estado}`;
-            select.appendChild(opt);
-        });
+        // 2. Opciones de Pago (SOLO si es el filtro de búsqueda)
+        if (select.id === 'filtroSeccion') {
+            estadosPago.forEach(estado => {
+                const opt = document.createElement('option');
+                opt.value = estado;
+                opt.textContent = `📌 ${estado}`;
+                select.appendChild(opt);
+            });
 
-        // Separador visual
-        const sep = document.createElement('option');
-        sep.disabled = true;
-        sep.textContent = "─────────";
-        select.appendChild(sep);
+            // Separador visual solo para el filtro
+            const sep = document.createElement('option');
+            sep.disabled = true;
+            sep.textContent = "───Secciones───";
+            select.appendChild(sep);
+        }
 
-        // Secciones (7-1 a 11-4)
+        // 3. Secciones escolares (7-1 a 11-4) - ESTO SE MANTIENE IGUAL PARA TODOS
         for (let i = 7; i <= 11; i++) {
             for (let j = 1; j <= 4; j++) {
                 let v = `${i}-${j}`;
