@@ -243,15 +243,35 @@ const obtenerTema = () => {
 };
 function inicializarSecciones() {
     const selects = [dom.seccion, dom.seccion_receptor, dom.filtroSeccion];
+    const estadosPago = ["Pendiente", "Pagado"];
+
     selects.forEach(select => {
         if (!select) return;
-        // Limpiar y crear opciones de forma segura
-        while (select.firstChild) select.removeChild(select.firstChild);
-        const placeholder = document.createElement('option');
-        placeholder.value = '';
- placeholder.textContent = select.id === 'filtroSeccion' ? 'Filtrar búsqueda por una sección' : 'Seleccione una sección';
-select.appendChild(placeholder);
+        select.innerHTML = '';
 
+        // OPCIÓN NEUTRA (RESET)
+        const placeholder = document.createElement('option');
+        placeholder.value = ''; // Valor vacío = Mostrar todos
+        placeholder.textContent = select.id === 'filtroSeccion' 
+            ? '🔍 Todos los pedidos' // Texto claro para el usuario
+            : 'Seleccione una sección';
+        select.appendChild(placeholder);
+
+        // Opciones de Pago
+        estadosPago.forEach(estado => {
+            const opt = document.createElement('option');
+            opt.value = estado;
+            opt.textContent = `📌 ${estado}`;
+            select.appendChild(opt);
+        });
+
+        // Separador visual
+        const sep = document.createElement('option');
+        sep.disabled = true;
+        sep.textContent = "─────────────";
+        select.appendChild(sep);
+
+        // Secciones (7-1 a 11-4)
         for (let i = 7; i <= 11; i++) {
             for (let j = 1; j <= 4; j++) {
                 let v = `${i}-${j}`;
@@ -291,10 +311,24 @@ async function cargarPedidos(silencioso = false) {
 
 function aplicarFiltros() {
     const query = dom.buscador.value.toLowerCase().trim();
-    const seccion = dom.filtroSeccion.value;
+    const filtroValor = dom.filtroSeccion.value; 
 
     pedidosFiltrados = pedidosCache.filter(p => {
-        const cumpleSeccion = !seccion || p.seccion_receptor === seccion;
+        // 1. Lógica de Secciones vs Estados de Pago
+        let cumpleFiltroEspecial = true;
+
+        if (filtroValor === "Pagado") {
+            // Si el valor del select es "Pagado", buscamos p.pagado === true
+            cumpleFiltroEspecial = (p.pagado === true);
+        } else if (filtroValor === "Pendiente") {
+            // Si el valor del select es "Pendiente", buscamos p.pagado === false
+            cumpleFiltroEspecial = (p.pagado === false);
+        } else if (filtroValor) {
+            // Si es una sección (7-1, etc.)
+            cumpleFiltroEspecial = p.seccion_receptor === filtroValor;
+        }
+
+        // 2. Lógica de búsqueda global (Añadí soporte para buscar "pagado" o "pendiente" en texto)
         const cumpleBusqueda = !query || [
             p.id,
             p.nombre_comprador,
@@ -303,9 +337,10 @@ function aplicarFiltros() {
             p.seccion_receptor,
             p.producto,
             p.detalles,
+            p.pagado ? "pagado" : "pendiente" // Esto permite escribir "pagado" en el buscador
         ].some(c => String(c || "").toLowerCase().includes(query));
         
-        return cumpleSeccion && cumpleBusqueda;
+        return cumpleFiltroEspecial && cumpleBusqueda;
     });
 
     renderizarTabla();
@@ -316,21 +351,20 @@ function renderizarTabla() {
     const thead = tabla ? tabla.querySelector("thead") : null;
     dom.body.innerHTML = "";
 
-    // CASO SIN PEDIDOS
+    // 1. MANEJO DE ESTADO VACÍO
     if (!pedidosFiltrados || pedidosFiltrados.length === 0) {
         if (thead) thead.style.display = "none";
         const rowVacia = document.createElement("tr");
         rowVacia.className = "fila-vacia-centrada";
-        const td = document.createElement('td');
-        td.setAttribute('colspan', '100%');
-        td.setAttribute('data-label', '');
-        const cont = document.createElement('div');
-        cont.className = 'contenedor-vacio-dinamico';
-        const h3 = document.createElement('h3');
-        h3.textContent = 'No se encontraron pedidos';
-        cont.appendChild(h3);
-        td.appendChild(cont);
-        rowVacia.appendChild(td);
+        rowVacia.innerHTML = `
+            <td colspan="100%">
+                <div class="contenedor-vacio-dinamico">
+                    <i class="fa-solid fa-box-open" style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px;"></i>
+                    <h3>No se encontraron pedidos</h3>
+                    <p style="font-size: 0.8rem; opacity: 0.6;">Intenta con otro filtro o término de búsqueda</p>
+                </div>
+            </td>
+        `;
         dom.body.appendChild(rowVacia);
         if (typeof renderizarPaginacion === "function") renderizarPaginacion();
         return;
@@ -338,104 +372,66 @@ function renderizarTabla() {
 
     if (thead) thead.style.display = "table-header-group";
 
+    // 2. PAGINACIÓN
     const inicio = (paginaActual - 1) * PEDIDOS_POR_PAGINA;
     const items = pedidosFiltrados.slice(inicio, inicio + PEDIDOS_POR_PAGINA);
 
     const fragment = document.createDocumentFragment();
+
     items.forEach(p => {
         const fechaTexto = p.created_at ? formatFechaMobile(p.created_at) : 'Sin fecha';
-
         const row = document.createElement("tr");
 
-        // ID
-        const tdId = document.createElement('td');
-        tdId.setAttribute('data-label', 'ID de pedido:');
-        tdId.textContent = p.id;
-        row.appendChild(tdId);
+        // Usamos una función auxiliar interna para ahorrar código repetitivo
+        const crearCelda = (label, contenido, className = "") => {
+            const td = document.createElement('td');
+            td.setAttribute('data-label', label);
+            if (className) td.className = className;
+            if (contenido instanceof HTMLElement) td.appendChild(contenido);
+            else td.textContent = contenido;
+            return td;
+        };
 
-        // De
-        const tdDe = document.createElement('td');
-        tdDe.setAttribute('data-label', 'De:');
-        tdDe.textContent = `${validarCampo(p.nombre_comprador,100)} - (${validarCampo(p.seccion_comprador,20)})`;
-        row.appendChild(tdDe);
+        // Columnas principales
+        row.appendChild(crearCelda('ID de pedido:', p.id));
+        row.appendChild(crearCelda('De:', `${validarCampo(p.nombre_comprador, 100)} - (${validarCampo(p.seccion_comprador, 20)})`));
+        row.appendChild(crearCelda('Para:', `${validarCampo(p.nombre_receptor, 100)} - (${validarCampo(p.seccion_receptor, 20)})`));
+        row.appendChild(crearCelda('Producto:', validarCampo(p.producto, 200)));
+        row.appendChild(crearCelda('Detalles:', validarCampo(p.detalles || ' - Sin detalles', 500)));
 
-        // Para
-        const tdPara = document.createElement('td');
-        tdPara.setAttribute('data-label', 'Para:');
-        tdPara.textContent = `${validarCampo(p.nombre_receptor,100)} - (${validarCampo(p.seccion_receptor,20)})`;
-        row.appendChild(tdPara);
-
-        // Producto
-        const tdProd = document.createElement('td');
-        tdProd.setAttribute('data-label', 'Producto:');
-        tdProd.textContent = validarCampo(p.producto,200);
-        row.appendChild(tdProd);
-
-        // Detalles (sanitize)
-        const tdDet = document.createElement('td');
-        tdDet.setAttribute('data-label', 'Detalles:');
-        tdDet.textContent = validarCampo(p.detalles || ' - Sin detalles', 500);
-        row.appendChild(tdDet);
-
-        // Pagado
-        const tdPag = document.createElement('td');
-        tdPag.setAttribute('data-label', 'Estado:');
-
-        // Creamos un contenedor tipo "Badge"
+        // Columna de Estado (Badge Dinámico)
         const statusBadge = document.createElement('span');
-        statusBadge.className = `status-badge ${p.pagado ? 'badge-success' : 'badge-error'}`;
+        // Soporta tanto booleano (p.pagado) como string (p.estado)
+        const estaPagado = p.pagado === true || p.estado === 'Pagado';
+        
+        statusBadge.className = `status-badge ${estaPagado ? 'badge-success' : 'badge-error'}`;
+        statusBadge.innerHTML = estaPagado 
+            ? '<i class="fa-solid fa-circle-check"></i> Pagado' 
+            : '<i class="fa-solid fa-circle-xmark"></i> Pendiente';
+        
+        row.appendChild(crearCelda('Estado:', statusBadge));
 
-        // Añadimos el icono y el texto
-        statusBadge.innerHTML = p.pagado 
-        ? '<i class="fa-solid fa-circle-check"></i> Pagado' 
-        : '<i class="fa-solid fa-circle-xmark"></i> Pendiente';
+        // Celda de Acciones
+        const tdAcciones = document.createElement('td');
+        tdAcciones.setAttribute('data-label', 'Acciones:');
+        tdAcciones.className = 'celda-acciones';
 
-        tdPag.appendChild(statusBadge);
-        row.appendChild(tdPag);
-        // Acciones
-        const tdAcc = document.createElement('td');
-        tdAcc.setAttribute('data-label', 'Acciones:');
-        tdAcc.className = 'celda-acciones';
+        tdAcciones.innerHTML = `
+            <div class="bloque-fecha-card">
+                <span class="label-rojo">Creación:</span>
+                <span class="texto-fecha">${fechaTexto}</span>
+            </div>
+            <div class="group-btns">
+                <button class="btn-pago" onclick="window.togglePagado('${p.id}', ${estaPagado})">Estado</button>
+                <button class="btn-edit" onclick="window.editarPedidoCompleto('${p.id}')">Editar</button>
+                <button class="btn-del" onclick="window.eliminarPedido('${p.id}')">Eliminar</button>
+            </div>
+        `;
 
-        const bloqueFecha = document.createElement('div');
-        bloqueFecha.className = 'bloque-fecha-card';
-        const label = document.createElement('span');
-        label.className = 'label-rojo';
-        label.textContent = 'Creación:';
-        const spanFecha = document.createElement('span');
-        spanFecha.className = 'texto-fecha';
-        spanFecha.textContent = fechaTexto;
-        bloqueFecha.appendChild(label);
-        bloqueFecha.appendChild(spanFecha);
-
-        const botones = document.createElement('div');
-        botones.className = 'group-btns';
-
-        const btnPago = document.createElement('button');
-        btnPago.className = 'btn-pago';
-        btnPago.textContent = 'Estado';
-        btnPago.addEventListener('click', () => { try { window.togglePagado(p.id, p.pagado); } catch (e) { console.error(e); } });
-
-        const btnEdit = document.createElement('button');
-        btnEdit.className = 'btn-edit';
-        btnEdit.textContent = 'Editar';
-        btnEdit.addEventListener('click', () => { try { window.editarPedidoCompleto(p.id); } catch (e) { console.error(e); } });
-
-        const btnDel = document.createElement('button');
-        btnDel.className = 'btn-del';
-        btnDel.textContent = 'Eliminar';
-        btnDel.addEventListener('click', () => { try { window.eliminarPedido(p.id); } catch (e) { console.error(e); } });
-
-        botones.appendChild(btnPago);
-        botones.appendChild(btnEdit);
-        botones.appendChild(btnDel);
-
-        tdAcc.appendChild(bloqueFecha);
-        tdAcc.appendChild(botones);
-        row.appendChild(tdAcc);
-
+        row.appendChild(tdAcciones);
         fragment.appendChild(row);
     });
+
     dom.body.appendChild(fragment);
     renderizarPaginacion();
 }
@@ -907,7 +903,7 @@ window.editarPedidoCompleto = async (pedidoId) => {
             ReproductorSonidos.play('exito');
             Swal.fire({
                 icon: 'success',
-                title: 'Edicion aplicada',
+                title: 'Cambios aplicados',
                 toast: true,
                 position: 'top',
                 timer: 2000,
@@ -987,7 +983,7 @@ window.eliminarPedido = async (id) => {
                 toast: true,
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo eliminar: ' + error.message,
+                text: 'No se pudo eliminar: ' + error.message + ' si cree que fue un error del sistema, porfavor reportelo.',
                 showConfirmButton: false,
                 timer: 2500,
                 position: 'top',
@@ -1067,8 +1063,8 @@ window.descargarPDF = function() {
         </head>
         <body>
             <div class="header">
-                <h1 style="margin:0; color:#E11D48;">REPORTE DE PEDIDOS</h1>
-                <p style="margin:5px 0;">Folio: ${folioUnico} | Emitido el: ${fechaEmision}</p>
+                <h1 style="margin:0; color:#E11D48;">RESPALDO DE PEDIDOS</h1>
+                <p style="margin:5px 0;">Folio: ${folioUnico} | Fecha: ${fechaEmision}</p>
             </div>
 
             <div class="stats-container">
@@ -1080,12 +1076,12 @@ window.descargarPDF = function() {
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">ID:</th>
-                        <th>DE:</th>
-                        <th>PARA:</th>
-                        <th>PRODUCTO:</th>
-                        <th>DETALLES:</th>
-                        <th style="width: 80px;">ESTADO:</th>
+                        <th style="width: 40px;">ID</th>
+                        <th>DE</th>
+                        <th>PARA</th>
+                        <th>PRODUCTO</th>
+                        <th>DETALLES</th>
+                        <th style="width: 80px;">ESTADO</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1113,15 +1109,15 @@ window.descargarPDF = function() {
             <div class="footer">
                 <div class="clausula-legal">
                     Este documento es una representación íntegra y oficial de los registros contenidos en la base de datos del 
-                    <strong>Sistema de Control de Pedidos</strong>.<br> La información aquí presentada ha sido cifrada y validada al momento de su emisión.
+                    <strong>Sistema de Pedidos</strong>.<br> La información aquí presentada ha sido cifrada y validada al momento de su emisión.
                 </div>
                 <div class="advertencia-seguridad">
-                    <strong>AVISO:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
+                    <strong>Aviso:</strong> Cualquier intento de alteración, edición parcial, manipulación de montos, nombres o estados 
                     mediante software externo o edición manual no esta permitido en este documento.<br> 
                     Dichos actos invalidan la legitimidad de este folio (<strong>${folioUnico}</strong>) y el documento en su totalidad.
                 </div>
                 <div class="info-emision">
-                    NÚMERO DE EMISIÓN: ${folioUnico} | Validado por: Sistema de Pedidos.
+                    Número de folio: ${folioUnico} | Validado por: Sistema de Pedidos.
                 </div>
             </div>
         </body>
@@ -1217,189 +1213,132 @@ document.addEventListener("DOMContentLoaded", () => {
     🚀 SISTEMA DE MANTENIMIENTO PROFESIONAL v4.0
    ================================================= */
 const USUARIO_ADMIN = "Alexei";
-const tema = obtenerTema();
 
-// Colores del tema para las alertas
+const MantisControl = {
+    sus: null,
+    vistoKey: "mantenimiento_visto",
 
-async function escucharMantenimiento() {
-    db
-        .channel('mantenimiento-realtime')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sistema_control' }, payload => {
-            procesarEstadoMantenimiento(payload.new.en_mantenimiento, payload.new.mensaje);
-        })
-        .subscribe();
-}
+    // Inicia el monitoreo en tiempo real
+    init: async function() {
+        if (this.sus) this.sus.unsubscribe();
+        
+        this.sus = db.channel('mantenimiento-realtime')
+            .on('postgres_changes', { 
+                event: 'UPDATE', 
+                schema: 'public', 
+                table: 'sistema_control' 
+            }, payload => {
+                this.procesar(payload.new.en_mantenimiento, payload.new.mensaje);
+            })
+            .subscribe();
 
-async function verificarBloqueoMantenimiento() {
-    const { data } = await db.from('sistema_control').select('en_mantenimiento, mensaje').eq('id', 1).maybeSingle();
-    if (data) procesarEstadoMantenimiento(data.en_mantenimiento, data.mensaje);
-}
+        this.verificarInicial();
+    },
 
-function procesarEstadoMantenimiento(estaActivo, mensajeDB) {
-    const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
-    const miUsuario = (sesion.username || "").trim().toLowerCase();
+    verificarInicial: async function() {
+        const { data } = await db.from('sistema_control').select('en_mantenimiento, mensaje').eq('id', 1).maybeSingle();
+        if (data) this.procesar(data.en_mantenimiento, data.mensaje);
+    },
 
-    if (estaActivo === true) {
-        if (miUsuario !== USUARIO_ADMIN.toLowerCase()) {
-            if (sessionStorage.getItem("mantenimiento_visto") === "true") {
-                aplicarPantallaMantenimiento(mensajeDB);
-            } else {
-                iniciarCuentaRegresiva(mensajeDB);
+    procesar: function(activo, mensaje) {
+        const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+        const isAdmin = (sesion.username || "").trim().toLowerCase() === USUARIO_ADMIN.toLowerCase();
+        const yaVisto = sessionStorage.getItem(this.vistoKey) === "true";
+
+        if (activo && !isAdmin) {
+            yaVisto ? this.bloquearPantalla(mensaje) : this.conteoRegresivo(mensaje);
+        } else if (!activo && yaVisto) {
+            this.liberarSistema();
+        }
+    },
+
+    conteoRegresivo: function(msg) {
+        const tema = obtenerTema();
+        sessionStorage.setItem(this.vistoKey, "true");
+        let timer = 10;
+
+        Swal.fire({
+            toast: true,
+            position: 'top',
+            icon: 'warning',
+            title: 'Actualización Inminente',
+            html: `El sistema se detendrá en: <b>${timer}</b>s`,
+            showConfirmButton: false,
+            background: tema.bg,
+            color: tema.txt,
+            customClass: { popup: 'mi-borde-redondeado' },
+            didOpen: () => {
+                ReproductorSonidos.play('notificacion');
+                const b = Swal.getHtmlContainer().querySelector('b');
+                const interval = setInterval(() => {
+                    timer--;
+                    if (b) b.textContent = timer;
+                    if (timer <= 0) {
+                        clearInterval(interval);
+                        this.bloquearPantalla(msg);
+                    }
+                }, 1000);
             }
-        }
-    } else {
-        if (sessionStorage.getItem("mantenimiento_visto") === "true") {
-            finalizarMantenimiento();
-        }
-    }
-}
+        });
+    },
 
-function iniciarCuentaRegresiva(mensajeDB) {
-    const tema = obtenerTema();
-    sessionStorage.setItem("mantenimiento_visto", "true");
-    let segundos = 10;
-    
-    Swal.fire({
-        toast: true,
-        title: 'Actualización en curso',
-        html: `Iniciando en: <b>${segundos}</b>s.`,
-        icon: 'warning',
-        position: 'top', // Alerta en la parte superior
-        showConfirmButton: false,
-        background: tema.bg,
-        color: tema.txt,
-        customClass: {
-            popup: 'mi-borde-redondeado'
-        },
-        didOpen: () => {
-            ReproductorSonidos.play('notificacion');
-            const b = Swal.getHtmlContainer().querySelector('b');
-            const int = setInterval(() => {
-                segundos--;
-                if (b) b.textContent = segundos;
-                if (segundos <= 0) {
-                    clearInterval(int);
-                    aplicarPantallaMantenimiento(mensajeDB);
-                }
-            }, 1000);
-        }
-    });
-}
+    bloquearPantalla: function(msg) {
+        window.stop();
+        const tema = obtenerTema();
+        const mensajeFinal = msg || "Optimizando la experiencia...";
 
-function aplicarPantallaMantenimiento(mensajeDB) {
-    const msg = mensajeDB || "Mejorando el sistema...";
-    window.stop();
-    const tema = obtenerTema();
-    
-    window.history.pushState(null, null, window.location.href);
-    window.onpopstate = () => window.history.go(1);
+        // Bloqueo de navegación
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = () => window.history.go(1);
 
-    document.documentElement.innerHTML = `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mantenimiento en curso</title>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
-        <style>
-            html, body { margin: 0; padding: 0; width: 100%; height: 100%; background:${tema.bg}; overflow: hidden; font-family: sans-serif; }
-            .main { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 10; text-align: center; color: white; }
-            h1 { color: ${tema.txt}; font-size: clamp(2.5rem, 10vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
-            .loader { border: 4px solid ${tema.txt}; border-left-color: #ff375f; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 25px auto; }
-            @keyframes spin { to { transform: rotate(360deg); } }
-            /* Asegurar que la alerta se vea perfecta sobre el fondo */
-            .swal2-container { z-index: 999999 !important; }
-            .borde-personalizado { border: 2px solid #ff375f !important; border-radius: 15px !important; }
-        </style>
-    </head>
-    <body>
-        <div class="main">
-            <div>
-                <h1>ACTUALIZANDO...</h1>
-                <p style="color: ${tema.txt}; font-size: 1.2rem; margin-top: 10px;">Instalando: <b style="color: ${tema.txt};">${msg}</b></p>
-                <div class="loader"></div>
-                <p style="opacity: 0.5; font-size: 0.9rem; color:${tema.txt};">La navegación se restaurará automáticamente.</p>
-                <p style="opacity: 0.5; font size: 0.9rem; color:${tema.txt};">¡Si recarga sera redirigido al login!</p>
+        document.documentElement.innerHTML = `
+        <div style="background:${tema.bg}; height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; font-family:'Segoe UI',Roboto,sans-serif; color:${tema.txt}; text-align:center;">
+            <div style="padding: 20px;">
+                <h1 style="font-size: clamp(2rem, 8vw, 3.5rem); margin:0; font-weight:800; letter-spacing:-1px; color:#E11D48;">MANTENIMIENTO</h1>
+                <p style="font-size:1.1rem; margin:15px 0; opacity:0.9;">${mensajeFinal}</p>
+                <div class="spinner"></div>
+                <p style="font-size:0.8rem; opacity:0.5; margin-top:30px;">La sesión se restaurará al finalizar los cambios.</p>
             </div>
-        </div>
-    </body>
-    </html>`;
-}
+            <style>
+                .spinner { width: 40px; height: 40px; border: 3px solid rgba(225,29,72,0.2); border-top-color: #E11D48; border-radius: 50%; animation: s 0.8s infinite linear; margin: auto; }
+                @keyframes s { to { transform: rotate(360deg); } }
+                body { overflow: hidden; }
+            </style>
+        </div>`;
+    },
 
-function finalizarMantenimiento() {
-    sessionStorage.removeItem("mantenimiento_visto");
-    
-    // 1. LECTOR DE TEMAS
-    const temaGuardado = localStorage.getItem('tema') || 'oscuro'; 
-    const esOscuro = temaGuardado === 'oscuro';
+    liberarSistema: function() {
+        sessionStorage.removeItem(this.vistoKey);
+        const tema = obtenerTema();
+        let timer = 5;
 
-    // Definición estricta de colores:
-    // Oscuro: Fondo casi negro, Texto blanco.
-    // Claro: Fondo blanco, Texto negro/gris oscuro.
-    const temaAplicado = {
-        bg: esOscuro ? '#1c1c1e' : '#ffffff',
-        txt: esOscuro ? '#ffffff' : '#1e293b'
-    };
-
-    let segundos = 10;
-
-    if (typeof Swal === 'undefined') {
-        window.location.reload();
-        return;
-    }
-
-    // 2. APLICADOR DE ESTILOS (Sin variables de acento)
-    const styleId = 'style-mantenimiento-fin';
-    if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.innerHTML = `
-            .mi-borde-redondeado { 
-                border-radius: 20px !important;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
-                border: 1px solid ${esOscuro ? '#333' : '#ddd'} !important;
+        Swal.fire({
+            toast: true,
+            position: 'top',
+            icon: 'success',
+            title: '¡Sistema Restaurado!',
+            html: `Reiniciando en <b>${timer}</b>s`,
+            background: tema.bg,
+            color: tema.txt,
+            showConfirmButton: false,
+            customClass: { popup: 'mi-borde-redondeado' },
+            didOpen: () => {
+                const b = Swal.getHtmlContainer().querySelector('b');
+                const interval = setInterval(() => {
+                    timer--;
+                    if (b) b.textContent = timer;
+                    if (timer <= 0) {
+                        clearInterval(interval);
+                        window.location.reload();
+                    }
+                }, 1000);
             }
-            .swal2-container { z-index: 9999999 !important; }
-            .swal2-title { font-weight: 800 !important; }
-        `;
-        document.head.appendChild(style);
+        });
     }
+};
 
-    // 3. LANZAMIENTO DE LA ALERTA
-    Swal.fire({
-        toast: true,
-        position: 'top',
-        icon: 'success',
-        title: 'Actualizacion terminada',
-        html: `Entrando en: <b>${segundos}</b>s`,
-        background: temaAplicado.bg,
-        color: temaAplicado.txt,
-        timer: 10000,
-        showConfirmButton: false,
-        customClass: {
-            popup: 'mi-borde-redondeado'
-        },
-        didOpen: () => {
-            const b = Swal.getHtmlContainer().querySelector('b');
-            const timerInterval = setInterval(() => {
-                segundos--;
-                if (b) b.textContent = segundos;
-                if (segundos <= 0) {
-                    clearInterval(timerInterval);
-                    window.location.reload();
-                }
-            }, 1000);
-
-            Swal.getPopup().addEventListener('click', () => clearInterval(timerInterval));
-        }
-    }).then((result) => {
-        if (result.dismiss === Swal.DismissReason.timer) {
-            window.location.reload();
-        }
-    });
-}
+// Iniciar monitoreo
+MantisControl.init();
 /* =================================================
     🔔 SISTEMA DE NOTIFICACIONES REALTIME
    ================================================= */
@@ -1454,7 +1393,7 @@ function mostrarAlertaVisual(nota) {
         background: tema.bg,
         color: tema.txt,    
         didOpen: (toast) => {
-            toast.style.borderRadius = '20px';
+            toast.style.borderRadius = '24px';
             
             
             toast.addEventListener('mouseenter', Swal.stopTimer);

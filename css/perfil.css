@@ -54,10 +54,10 @@ body {
     gap: 25px;
 }
 .modo-oscuro .header-container a{
-    color: ghostwhite;
+    color: var(--primary);
 }
 .modo-claro .header-container a{
-     color: rgba(0, 0, 0, 0.3);;
+     color: var(--primary);
 }
 
 .card-perfil, .card-usuarios {
