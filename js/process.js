@@ -262,7 +262,7 @@ function inicializarSecciones() {
             estadosPago.forEach(estado => {
                 const opt = document.createElement('option');
                 opt.value = estado;
-                opt.textContent = `📌 ${estado}`;
+                opt.textContent = `• ${estado}`;
                 select.appendChild(opt);
             });
 

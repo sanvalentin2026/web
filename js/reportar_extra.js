@@ -16,8 +16,8 @@ const ReproductorSonidos = {
 };
 
 let nocturnoAuto = localStorage.getItem('nocturno-auto') === 'true';
-let intensidadCalida = localStorage.getItem('nocturno-intensidad') || 30;
-let horaInicio = localStorage.getItem('nocturno-inicio') || "19:00";
+let intensidadCalida = localStorage.getItem('nocturno-intensidad') || 40;
+let horaInicio = localStorage.getItem('nocturno-inicio') || "20:00";
 let horaFin = localStorage.getItem('nocturno-fin') || "07:00";
 
 const ModoNocturno = {
