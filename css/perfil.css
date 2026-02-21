@@ -443,6 +443,10 @@ h2{
     align-items: center;
 }
 
+.modo-claro .perfil-menu p{
+    color: #000000;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 600px) {
     .volver {

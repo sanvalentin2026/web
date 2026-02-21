@@ -162,9 +162,9 @@ td {
     margin-right: 8px; 
 }
 
-.dot-ok { background: var(--status-ok); box-shadow: 0 0 8px var(--status-ok); }
-.dot-warn { background: var(--status-warn); box-shadow: 0 0 8px var(--status-warn); }
-.dot-crit { background: var(--status-crit); box-shadow: 0 0 8px var(--status-crit); }
+.dot-ok { background: var(--status-ok); }
+.dot-warn { background: var(--status-warn); }
+.dot-crit { background: var(--status-crit); }
 
 .qty-box { 
     font-family: 'SF Mono', 'Roboto Mono', monospace; 
@@ -179,6 +179,8 @@ td {
     color: var(--status-crit); 
     background: rgba(239, 68, 68, 0.15);
 }
+
+.out
 
 /* Columnas */
 .col-name { width: 45%; }

@@ -1831,3 +1831,44 @@ body.modo-claro .swal2-validation-message {
     background-color: #E11D48 !important; /* El circulito del signo ! siempre rojo */
     color: white !important;
 }
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center; /* Aseguramos que el contenedor tenga ancho */
+}
+
+/* Colocamos el icono */
+.search-box i {
+    position: absolute;
+    left: 12px;
+    color: #888;
+    pointer-events: none;
+    z-index: 10; /* Asegura que la lupa esté siempre "arriba" */
+    transition: color 0.3s ease;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 10px 10px 35px !important;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+/* SOLUCIÓN AL COLOR: Usamos focus-within en el contenedor */
+.search-box:focus-within i {
+    color: #E11D48;
+}
+
+/* MEDIA QUERY CORREGIDA */
+@media (max-width: 900px) {
+    /* Separamos bien con comas cada elemento */
+    #buscador, 
+    #filtroSeccion, 
+    #btnOrdenar, 
+    #btn-reportar, 
+    .search-box { 
+        width: 100% !important;
+    }
+}

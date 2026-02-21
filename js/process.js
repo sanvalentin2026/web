@@ -16,7 +16,7 @@
 window.pedidosCache = []; // Usamos window desde el inicio
 let pedidosFiltrados = [];
 let paginaActual = Number(sessionStorage.getItem("paginaActual")) || 1;
-const PEDIDOS_POR_PAGINA = 15;
+const PEDIDOS_POR_PAGINA = 10;
 
 const dom = {
     form: document.getElementById("pedidoForm"),
@@ -165,7 +165,7 @@ function iniciarTutorial() {
                 element: '.controls', 
                 popover: { 
                     title: 'Búsqueda y Filtros', 
-                    description: 'Su funcion es filtrar por secciones o buscar los pedidos por sus caracteristicas, ya sea nombres, secciones, productos o detalles.',
+                    description: 'En esta seccion encontrara botones para buscar pedidos por sus caracteristicas(ID, Comprador, Receptor, Secciones, Producto, Estado) o bien filtrarlos por los distintos filtros de busqueda existentes.',
                     side: "top", align: 'center' 
                 } 
             },
@@ -173,7 +173,7 @@ function iniciarTutorial() {
                 element: '#pedidosBody', 
                 popover: { 
                     title: 'Pedidos', 
-                    description: 'Aqui se mostraran todos los pedidos disponibles, todos tienen botones para interactuar, ademas cada 15 pedidos se creara una compaginacion en la parte inferior para no generar listas largas.',
+                    description: 'Aqui se mostraran todos los pedidos disponibles, todos cuentan con botones para interactuar, ademas cada 10 pedidos se creara una compaginacion en la parte inferior para no generar listas largas.',
                     side: "top", align: 'center' 
                 } 
             }
@@ -253,7 +253,7 @@ function inicializarSecciones() {
         const placeholder = document.createElement('option');
         placeholder.value = ''; // Valor vacío = Mostrar todos
         placeholder.textContent = select.id === 'filtroSeccion' 
-            ? '🔍 Todos los pedidos' // Texto claro para el usuario
+            ? 'Todos los pedidos disponibles' // Texto claro para el usuario
             : 'Seleccione una sección';
         select.appendChild(placeholder);
 
@@ -268,7 +268,7 @@ function inicializarSecciones() {
         // Separador visual
         const sep = document.createElement('option');
         sep.disabled = true;
-        sep.textContent = "─────────────";
+        sep.textContent = "─────────";
         select.appendChild(sep);
 
         // Secciones (7-1 a 11-4)
@@ -361,7 +361,6 @@ function renderizarTabla() {
                 <div class="contenedor-vacio-dinamico">
                     <i class="fa-solid fa-box-open" style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px;"></i>
                     <h3>No se encontraron pedidos</h3>
-                    <p style="font-size: 0.8rem; opacity: 0.6;">Intenta con otro filtro o término de búsqueda</p>
                 </div>
             </td>
         `;
