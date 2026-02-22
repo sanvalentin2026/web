@@ -149,7 +149,7 @@ function iniciarTutorial() {
                 element: '#header', 
                 popover: { 
                     title: 'Bienvenido(a) al tutorial', 
-                    description: 'En esta sección encontrará botones con acciones importantes como ver inventario disponible, mirar estadisticas, descargar PDF, y ver su perfil, este espacio se mantendra siempre en la parte de arriba de su pantalla.',
+                    description: 'En esta sección encontrará botones con acciones importantes como ver inventario disponible, mirar estadisticas, descargar PDF, y ver su perfil (donde encontrara configuraciones y interacciones importantes), este espacio se mantendra siempre en la parte de arriba de su pantalla.',
                     side: "bottom", align: 'center' 
                 } 
             },

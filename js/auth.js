@@ -101,7 +101,7 @@ window.login = async function() {
 
         if (error || !data) {
             ReproductorSonidos.play('notificacion');
-            Swal.fire({ title: "Datos incorrectos", icon: "error", toast: true, position: 'top', showConfirmButton: false, timer: 1500, ...tema });
+            Swal.fire({ title: "Datos incorrectos, o no encontrados", icon: "error", toast: true, position: 'top', showConfirmButton: false, timer: 1500, ...tema });
             return;
         }
 
