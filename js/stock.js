@@ -131,7 +131,6 @@ const inicializarPagina = async () => {
 
         // 5. CIERRE DEL LOADER (Efecto Seda)
         if (loader) {
-            // Forzamos la transición en JS por si el CSS no ha cargado del todo
             loader.style.transition = "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s";
             
             requestAnimationFrame(() => {
@@ -154,4 +153,45 @@ if (document.readyState === 'complete') {
     inicializarPagina();
 } else {
     window.addEventListener('load', inicializarPagina);
+}
+
+window.mostrarPrecios = function() {
+    Swal.fire({
+        title: 'Lista de Precios',
+        html: `
+            <div style="text-align: left; max-height: 400px; overflow-y: auto; font-size: 0.95rem; line-height: 1.8;">
+                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Servicios ----</p>
+                
+                <p><i class="fas fa-music" style="width: 25px; color: #9c27b0;"></i> <b>Bailes:</b> ₡500.</p>
+                <p><i class="fas fa-ring" style="width: 25px; color: #fdd835;"></i> <b>Boda:</b> ₡400.</p>
+                <p><i class="fas fa-hand-holding-heart" style="width: 25px; color: #ff5252;"></i> <b>Kiss or Slap:</b> ₡250.</p>
+                <p><i class="fas fa-envelope-open-text" style="width: 25px; color: #4fc3f7;"></i> <b>Buzón de confesiones:</b> ₡300.</p>
+                <p><i class="fas fa-guitar" style="width: 25px; color: #fb8c00;"></i> <b>Serenata:</b> ₡300.</p>
+                <p><i class="fas fa-camera" style="width: 25px; color: #607d8b;"></i> <b>Foto con cámara:</b> ₡600.</p>
+                <p><i class="fas fa-image" style="width: 25px; color: #4db6ac;"></i> <b>Foto con cámara e imprecion:</b> ₡1000.</p>
+                <p><i class="fas fa-mobile-retro" style="width: 25px; color: #477571;"></i> <b>Foto con telefono y fondo:</b> ₡200.</p>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Productos ----</p>
+                
+                <p><i class="fas fa-cookie" style="width: 25px; color: #795548;"></i> <b>Alfajores:</b> Precio indefinido</p>
+                <p><i class="fas fa-bomb" style="width: 25px; color: #424242;"></i> <b>Bombas de chocolate:</b> Precio indefinido</p>
+                <p><i class="fas fa-bread-slice" style="width: 25px; color: #a1887f;"></i> <b>Brownies:</b> Precio indefinido</p>
+                <p><i class="fas fa-ice-cream" style="width: 25px; color: #f48fb1;"></i> <b>Cakepops:</b> Precio indefinido</p>
+                <p><i class="fa-solid fa-utensils" style="width: 25px; color: #ffb74d;"></i> <b>Donas:</b> Precio indefinido</p>
+                <p><i class="fas fa-seedling" style="width: 25px; color: #8bc34a;"></i> <b>Flores solas:</b> Precio indefinido</p>
+                <p><i class="fas fa-apple-whole" style="width: 25px; color: #e91e63;"></i> <b>Fresas con chocolates:</b> Precio indefinido</p>
+                <p><i class="fas fa-cookie-bite" style="width: 25px; color: #8d6e63;"></i> <b>Galletas:</b> Precio indefinido</p>
+                <p><i class="fas fa-parachute-box" style="width: 25px; color: #03a9f4;"></i> <b>Globos:</b> Precio indefinido</p>
+                <p><i class="fas fa-stroopwafel" style="width: 25px; color: #ffcc80;"></i> <b>Obleas:</b> Precio indefinido</p>
+                <p><i class="fas fa-gem" style="width: 25px; color: #ba68c8;"></i> <b>Pulseras:</b> Precio indefinido</p>
+                <p><i class="fas fa-hand-holding-heart" style="width: 25px; color: #ff8a80;"></i> <b>Ramos de 3 flores:</b> Precio indefinido</p>
+                <p><i class="fas fa-leaf" style="width: 25px; color: #4caf50;"></i> <b>Ramo de fresas:</b> Precio indefinido</p>
+            </div>
+        `,
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#E11D48',
+        background: document.documentElement.classList.contains('modo-oscuro') ? '#1a1a1a' : '#fff',
+        color: document.documentElement.classList.contains('modo-oscuro') ? '#fff' : '#545454'
+    });
 }

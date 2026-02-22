@@ -42,6 +42,7 @@ body {
     padding: 15px;
     min-height: 100vh;
     display: block !important; 
+    transition: background-color 0.3s ease;
 }
 
 /* 4. LOADER (Fix de salida suave) */
@@ -74,7 +75,7 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* 5. COMPONENTES DE LA INTERFAZ (Tu diseño original) */
+/* 5. COMPONENTES DE LA INTERFAZ */
 .container { 
     max-width: 800px; 
     margin: 0 auto; 
@@ -116,10 +117,15 @@ body {
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
-/* 6. TABLA DE INVENTARIO (Tu diseño original) */
+.btn-back:hover {
+    opacity: 0.7;
+    transform: translateX(-3px);
+}
+
+/* 6. TABLA DE INVENTARIO */
 .table-container {
     width: 100%;
     background: var(--card);
@@ -127,6 +133,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    margin-bottom: 15px; /* Espacio para el botón debajo */
 }
 
 .inventory-table { 
@@ -169,10 +176,10 @@ td {
 .qty-box { 
     font-family: 'SF Mono', 'Roboto Mono', monospace; 
     font-weight: 700; 
-    text-align: right; 
     padding: 4px 8px;
     background: rgba(128, 128, 128, 0.1);
     border-radius: 4px;
+    display: inline-block;
 }
 
 .out-text { 
@@ -180,9 +187,30 @@ td {
     background: rgba(239, 68, 68, 0.15);
 }
 
-.out
-
 /* Columnas */
 .col-name { width: 45%; }
 .col-status { width: 35%; }
 .col-qty { width: 20%; text-align: right; }
+
+/* 7. BOTÓN DE PRECIOS (Corregido para PC y Móvil) */
+.btn-precios {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* BLOQUE CRÍTICO PARA EL ANCHO */
+    width: 100%;           /* Ocupa el 100% del contenedor */
+    box-sizing: border-box; /* Asegura que el padding no lo ensanche más de la cuenta */
+    margin: 15px 0;        /* 15px arriba/abajo, 0 a los lados */
+    
+}
