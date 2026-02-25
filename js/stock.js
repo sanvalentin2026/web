@@ -158,35 +158,43 @@ if (document.readyState === 'complete') {
 window.mostrarPrecios = function() {
     Swal.fire({
         title: 'Lista de Precios',
-        html: `
+html: `
             <div style="text-align: left; max-height: 400px; overflow-y: auto; font-size: 0.95rem; line-height: 1.8;">
                 <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Servicios ----</p>
-                
-                <p><i class="fas fa-music" style="width: 25px; color: #9c27b0;"></i> <b>Bailes:</b> ₡500.</p>
-                <p><i class="fas fa-ring" style="width: 25px; color: #fdd835;"></i> <b>Boda:</b> ₡400.</p>
-                <p><i class="fas fa-hand-holding-heart" style="width: 25px; color: #ff5252;"></i> <b>Kiss or Slap:</b> ₡250.</p>
-                <p><i class="fas fa-envelope-open-text" style="width: 25px; color: #4fc3f7;"></i> <b>Buzón de confesiones:</b> ₡300.</p>
-                <p><i class="fas fa-guitar" style="width: 25px; color: #fb8c00;"></i> <b>Serenata:</b> ₡300.</p>
-                <p><i class="fas fa-camera" style="width: 25px; color: #607d8b;"></i> <b>Foto con cámara:</b> ₡600.</p>
-                <p><i class="fas fa-image" style="width: 25px; color: #4db6ac;"></i> <b>Foto con cámara e imprecion:</b> ₡1000.</p>
-                <p><i class="fas fa-mobile-retro" style="width: 25px; color: #477571;"></i> <b>Foto con telefono y fondo:</b> ₡200.</p>
+                <p><i class="fas fa-music" style="width: 25px; color: #9c27b0;"></i> <b>Baile:</b> ₡600</p>
+                <p><i class="fas fa-ring" style="width: 25px; color: #fdd835;"></i> <b>Boda:</b> ₡500</p>
+                <p><i class="fas fa-hand-holding-heart" style="width: 25px; color: #ff5252;"></i> <b>Kiss or Slap:</b> ₡350</p>
+                <p><i class="fas fa-guitar" style="width: 25px; color: #fb8c00;"></i> <b>Serenata:</b> ₡400</p>
+                <p><i class="fas fa-heart" style="width: 25px; color: #e91e63;"></i> <b>Aprete:</b> ₡1000</p>
+                <p><i class="fas fa-kiss-wink-heart" style="width: 25px; color: #ff8a80;"></i> <b>Picos:</b> ₡500</p>
+                <p><i class="fas fa-calendar-alt" style="width: 25px; color: #4fc3f7;"></i> <b>Semana inglesa:</b> ₡300</p>
 
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Productos ----</p>
-                
-                <p><i class="fas fa-cookie" style="width: 25px; color: #795548;"></i> <b>Alfajores:</b> Precio indefinido</p>
-                <p><i class="fas fa-bomb" style="width: 25px; color: #424242;"></i> <b>Bombas de chocolate:</b> Precio indefinido</p>
-                <p><i class="fas fa-bread-slice" style="width: 25px; color: #a1887f;"></i> <b>Brownies:</b> Precio indefinido</p>
-                <p><i class="fas fa-ice-cream" style="width: 25px; color: #f48fb1;"></i> <b>Cakepops:</b> Precio indefinido</p>
-                <p><i class="fa-solid fa-utensils" style="width: 25px; color: #ffb74d;"></i> <b>Donas:</b> Precio indefinido</p>
-                <p><i class="fas fa-seedling" style="width: 25px; color: #8bc34a;"></i> <b>Flores solas:</b> Precio indefinido</p>
-                <p><i class="fas fa-apple-whole" style="width: 25px; color: #e91e63;"></i> <b>Fresas con chocolates:</b> Precio indefinido</p>
-                <p><i class="fas fa-cookie-bite" style="width: 25px; color: #8d6e63;"></i> <b>Galletas:</b> Precio indefinido</p>
-                <p><i class="fas fa-parachute-box" style="width: 25px; color: #03a9f4;"></i> <b>Globos:</b> Precio indefinido</p>
-                <p><i class="fas fa-stroopwafel" style="width: 25px; color: #ffcc80;"></i> <b>Obleas:</b> Precio indefinido</p>
-                <p><i class="fas fa-gem" style="width: 25px; color: #ba68c8;"></i> <b>Pulseras:</b> Precio indefinido</p>
-                <p><i class="fas fa-hand-holding-heart" style="width: 25px; color: #ff8a80;"></i> <b>Ramos de 3 flores:</b> Precio indefinido</p>
-                <p><i class="fas fa-leaf" style="width: 25px; color: #4caf50;"></i> <b>Ramo de fresas:</b> Precio indefinido</p>
+                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Comida ----</p>
+                <p><i class="fas fa-cookie" style="width: 25px; color: #795548;"></i> <b>Alfajor:</b> ₡600</p>
+                <p><i class="fas fa-cookie-bite" style="width: 25px; color: #5d4037;"></i> <b>Alfajor cubierto:</b> ₡1000</p>
+                <p><i class="fas fa-bread-slice" style="width: 25px; color: #a1887f;"></i> <b>Brownie:</b> ₡800</p>
+                <p><i class="fas fa-birthday-cake" style="width: 25px; color: #f48fb1;"></i> <b>Cupcakes:</b> ₡700</p>
+                <p><i class="fas fa-doughnut" style="width: 25px; color: #ffb74d;"></i> <b>Dona:</b> ₡600</p>
+                <p><i class="fas fa-candy-cane" style="width: 25px; color: #ce93d8;"></i> <b>Marshmellows:</b> ₡500</p>
+                <p><i class="fas fa-mitten" style="width: 25px; color: #fff176;"></i> <b>Palomitas:</b> ₡500</p>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Flores ----</p>
+                <p><i class="fas fa-seedling" style="width: 25px; color: #8bc34a;"></i> <b>Flor sola:</b> ₡1500</p>
+                <p><i class="fas fa-fan" style="width: 25px; color: #ff8a80;"></i> <b>Ramo de 2 flores:</b> ₡2500</p>
+                <p><i class="fas fa-hand-holding-heart" style="width: 25px; color: #f06292;"></i> <b>Ramo de 3 flores:</b> ₡3000</p>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Fotos ----</p>
+                <p><i class="fas fa-camera" style="width: 25px; color: #607d8b;"></i> <b>Foto con cámara:</b> ₡500</p>
+                <p><i class="fas fa-print" style="width: 25px; color: #4db6ac;"></i> <b>Foto con cámara e impresión:</b> ₡1000</p>
+                <p><i class="fas fa-mobile-alt" style="width: 25px; color: #477571;"></i> <b>Foto con teléfono y fondo:</b> ₡200</p>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                <p style="text-align: center; font-weight: bold; color: #888; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">---- Otros ----</p>
+                <p><i class="fas fa-envelope-open-text" style="width: 25px; color: #4fc3f7;"></i> <b>Buzón de confesiones:</b> ₡100</p>
+                <p><i class="fas fa-parachute-box" style="width: 25px; color: #03a9f4;"></i> <b>Globo:</b> ₡200</p>
             </div>
         `,
         confirmButtonText: 'Cerrar',

@@ -18,12 +18,37 @@ let horaFin = localStorage.getItem('nocturno-fin') || "07:00";
 let chartVentas = null;
 
 const PRECIOS = {
-    "Baile": 500, "Serenata": 300, "Kiss or Slap": 250, "Boda": 400,
-    "Alfajor": 0, "Fresas con chocolate": 0, "Ramo de fresas": 0,
-    "Bomba de chocolate": 0, "Brownie": 0, "Galleta": 0,
-    "Cakepop": 0, "Dona": 0, "Oblea": 0, "Foto con camara e impresion": 1000, 
-    "Flor sola": 0, "Ramo de 3 flores": 0, "Globo": 0, "Pulsera": 0, 
-    "Buzon de confesiones": 150, "Foto con camara": 600, "Foto con telefono y fondo": 200,
+    // ---- Servicios ----
+    "Baile": 600,
+    "Boda": 500,
+    "Kiss or Slap": 350,
+    "Serenata": 400,
+    "Aprete": 1000,
+    "Picos": 500,
+    "Semana inglesa": 300,
+
+    // ---- Comida ----
+    "Alfajor": 600,
+    "Alfajor cubierto": 1000,
+    "Brownie": 800,
+    "Cupcakes": 700,
+    "Dona": 600,
+    "Marshmellows": 500,
+    "Palomitas": 500,
+
+    // ---- Flores ----
+    "Flor sola": 1500,
+    "Ramo de 2 flores": 2500,
+    "Ramo de 3 flores": 3000,
+
+    // ---- Fotos ----
+    "Foto con camara": 500,
+    "Foto con camara e impresion": 1000,
+    "Foto con telefono y fondo": 200,
+
+    // ---- Otros ----
+    "Buzon de confesiones": 100,
+    "Globo": 200
 };
 
 const dom = {
@@ -134,7 +159,7 @@ async function procesarEstadisticas() {
             montoCalculado = Math.max(0, totalTeorico - parseInt(matchDeuda[1]));
         }
 
-        const usuario = p.creado_por || "Anónimo";
+        const usuario = p.creado_por || "No registrado";
         rankingUsuarios[usuario] = (rankingUsuarios[usuario] || 0) + 1;
 
         const fecha = new Date(p.created_at);

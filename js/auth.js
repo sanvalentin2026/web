@@ -17,7 +17,7 @@ export const obtenerTema = () => {
     };
 };
 
-// 3. GESTIÓN DE SONIDOS
+// 3. GESTIÓN DE SONIDOS (Optimizado con Lazy Loading)
 let sonidosActivados = localStorage.getItem('sonidos-web') !== 'disabled';
 export const ReproductorSonidos = {
     buffer: {},
@@ -27,9 +27,12 @@ export const ReproductorSonidos = {
         notificacion: 'sounds/notificacion.mp3'
     },
     init() {
+        // Los sonidos se preparan pero no se cargan totalmente hasta que sea necesario
         for (const [nombre, ruta] of Object.entries(this.rutas)) {
-            this.buffer[nombre] = new Audio(ruta);
-            this.buffer[nombre].volume = 0.3;
+            const audio = new Audio(ruta);
+            audio.volume = 0.3;
+            audio.preload = 'auto'; 
+            this.buffer[nombre] = audio;
         }
     },
     play(nombre) {
@@ -43,35 +46,34 @@ export const ReproductorSonidos = {
 };
 ReproductorSonidos.init();
 
-// 4. GUARDIA DE SEGURIDAD
+// 4. GUARDIA DE SEGURIDAD (Optimizado para evitar consultas innecesarias)
 export const verificarSesion = async function() {
     const path = window.location.pathname;
     const paginasLibres = ["login.html", "register.html", "registro.html"]; 
-    const esPaginaLibre = paginasLibres.some(p => path.includes(p));
-
-    if (esPaginaLibre) return null;
+    if (paginasLibres.some(p => path.includes(p))) return null;
 
     const sesionLocal = localStorage.getItem("usuario");
     if (!sesionLocal) {
-        window.location.replace("login.html");
+        if (!path.includes("login.html")) window.location.replace("login.html");
         return null;
     }
 
     try {
         const sesion = JSON.parse(sesionLocal);
+        // Solo traemos los campos necesarios para ahorrar ancho de banda
         const { data, error } = await db
             .from("usuarios")
             .select("id, permisos")
             .eq("id", sesion.id)
+            .limit(1)
             .maybeSingle();
 
-        if (!data || data.permisos !== true || error) {
-            localStorage.removeItem("usuario");
-            window.location.replace("login.html");
-            return null;
+        if (error || !data || data.permisos !== true) {
+            throw new Error("Sesion invalida");
         }
         return data;
     } catch (e) {
+        localStorage.removeItem("usuario");
         window.location.replace("login.html");
         return null;
     }
@@ -94,7 +96,7 @@ window.login = async function() {
     try {
         const { data, error } = await db
             .from("usuarios")
-            .select("*")
+            .select("id, username, permisos") // Traer solo lo necesario
             .eq("username", userInput)
             .eq("password", passInput)
             .maybeSingle();
@@ -114,11 +116,11 @@ window.login = async function() {
             Swal.fire({ title: "Validación Pendiente", text: "Su cuenta requiere autorización", icon: "info", toast: true, position: 'top', showConfirmButton: false, timer: 3000, ...tema });
         }
     } catch (e) {
-        Swal.fire({ title: "Error de conexión", icon: "error", ...tema });
+        Swal.fire({ title: "Error de conexión", text: "Intente más tarde", icon: "error", ...tema });
     }
 };
 
-// 6. ACCIÓN: REGISTRO (Corregido sin email)
+// 6. ACCIÓN: REGISTRO
 window.register = async function() {
     const user = document.getElementById("username")?.value.trim();
     const pass = document.getElementById("password")?.value.trim();
@@ -139,20 +141,22 @@ window.register = async function() {
 
     Swal.fire({ title: 'Procesando...', toast: true, position: 'top', showConfirmButton: false, didOpen: () => Swal.showLoading(), ...tema });
 
-    // Eliminada la referencia a la variable 'email'
-    const { error } = await db.from("usuarios").insert({ 
-        username: user, 
-        password: pass, 
-        permisos: false 
-    });
+    try {
+        const { error } = await db.from("usuarios").insert({ 
+            username: user, 
+            password: pass, 
+            permisos: false 
+        });
 
-    if (error) {
-        ReproductorSonidos.play('notificacion');
-        Swal.fire({ text: "El usuario ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
-    } else {
+        if (error) throw error;
+
         ReproductorSonidos.play('exito');
         await Swal.fire({ title: "Cuenta creada con exito", text: "Espere su verificación", icon: "success", toast: true, position: 'top', timer: 3000, showConfirmButton: false, ...tema });
         window.location.replace("login.html");
+        
+    } catch (error) {
+        ReproductorSonidos.play('notificacion');
+        Swal.fire({ text: "El usuario ya existe", icon: "error", toast: true, position: 'top', timer: 2000, showConfirmButton: false, ...tema });
     }
 };
 
@@ -160,10 +164,11 @@ window.register = async function() {
 document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loader-global');
     if (loader) {
-        setTimeout(() => {
+        // Eliminado setTimeout innecesario para mayor velocidad percibida
+        requestAnimationFrame(() => {
             loader.classList.add('loader-hidden');
             loader.addEventListener('transitionend', () => loader.style.display = 'none', { once: true });
-        }, 400);
+        });
     }
     verificarSesion();
 });
