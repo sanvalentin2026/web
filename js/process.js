@@ -274,15 +274,21 @@ function inicializarSecciones() {
         }
 
         // 3. Secciones escolares (7-1 a 11-4) - ESTO SE MANTIENE IGUAL PARA TODOS
-        for (let i = 7; i <= 11; i++) {
-            for (let j = 1; j <= 4; j++) {
-                let v = `${i}-${j}`;
-                const opt = document.createElement('option');
-                opt.value = v;
-                opt.textContent = v;
-                select.appendChild(opt);
-            }
-        }
+        const optProfe = document.createElement('option');
+optProfe.value = "Profes";
+optProfe.textContent = "Profes";
+select.appendChild(optProfe);
+
+// 2. Mantener tus bucles originales para los niveles
+for (let i = 7; i <= 11; i++) {
+    for (let j = 1; j <= 4; j++) {
+        let v = `${i}-${j}`;
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+    }
+}
     });
 }
 
@@ -759,7 +765,7 @@ window.editarPedidoCompleto = async (pedidoId) => {
     const p = resPedido.data;
     const inventarioActual = resStock.data || [];
 
-    const secciones = ["7-1", "7-2", "7-3", "7-4", "8-1", "8-2", "8-3", "8-4", "9-1", "9-2", "9-3", "9-4", "10-1", "10-2", "10-3", "10-4", "11-1", "11-2", "11-3", "11-4"];
+    const secciones = ["Profes", "7-1", "7-2", "7-3", "7-4", "8-1", "8-2", "8-3", "8-4", "9-1", "9-2", "9-3", "9-4", "10-1", "10-2", "10-3", "10-4", "11-1", "11-2", "11-3", "11-4"];
     
     const opcionesSeccionC = secciones.map(s => 
         `<option value="${s}" ${p.seccion_comprador === s ? 'selected' : ''}>${s}</option>`
@@ -769,13 +775,13 @@ window.editarPedidoCompleto = async (pedidoId) => {
         `<option value="${s}" ${p.seccion_receptor === s ? 'selected' : ''}>${s}</option>`
     ).join('');
 
-    const categorias = {
-        "Servicios": ["Baile", "Boda", "Kiss or Slap", "Serenata"],
-        "Comida": ["Alfajor", "Bomba de chocolate", "Brownie", "Cakepop", "Dona", "Fresas con chocolate", "Galleta", "Oblea", "Ramo de fresas"],
-        "Flores": ["Flor sola", "Ramo de 3 flores"],
-        "Fotos": ["Foto con camara", "Foto con camara e impresion", "Foto con telefono y fondo"],
-        "Otros": ["Buzon de confesiones", "Globo", "Pulsera"]
-    };
+const categorias = {
+    "Servicios": ["Baile", "Boda", "Kiss or Slap", "Serenata", "Aprete", "Picos", "Semana inglesa"],
+    "Comida": ["Alfajor", "Alfajor cubierto", "Brownie", "Cupcakes", "Dona", "Marshmellows", "Palomitas"],
+    "Flores": ["Flor sola", "Ramo de 2 flores", "Ramo de 3 flores"],
+    "Fotos": ["Foto con camara", "Foto con camara e impresion", "Foto con telefono y fondo"],
+    "Otros": ["Buzon de confesiones", "Globo"]
+};
 
     const opcionesProductos = Object.entries(categorias).map(([grupo, productos]) => `
         <optgroup label="- ${grupo} -">
