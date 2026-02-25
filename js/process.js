@@ -776,7 +776,7 @@ window.editarPedidoCompleto = async (pedidoId) => {
     ).join('');
 
 const categorias = {
-    "Servicios": ["Baile", "Boda", "Kiss or Slap", "Serenata", "Aprete", "Picos", "Semana inglesa"],
+    "Servicios": ["Baile", "Boda", "Kiss or Slap", "Serenata", "Aprete", "Pico", "Semana inglesa"],
     "Comida": ["Alfajor", "Alfajor cubierto", "Brownie", "Cupcakes", "Dona", "Marshmellows", "Palomitas"],
     "Flores": ["Flor sola", "Ramo de 2 flores", "Ramo de 3 flores"],
     "Fotos": ["Foto con camara", "Foto con camara e impresion", "Foto con telefono y fondo"],

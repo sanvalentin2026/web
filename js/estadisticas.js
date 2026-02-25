@@ -24,7 +24,7 @@ const PRECIOS = {
     "Kiss or Slap": 350,
     "Serenata": 400,
     "Aprete": 1000,
-    "Picos": 500,
+    "Pico": 500,
     "Semana inglesa": 300,
 
     // ---- Comida ----
